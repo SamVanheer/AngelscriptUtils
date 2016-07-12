@@ -43,14 +43,14 @@ class CASModuleDescriptor final
 public:
 	/**
 	*	Constructor.
-	*	@param pszTypeName Type name of the module descriptor.
+	*	@param pszName Name of the module descriptor.
 	*	@param accessMask Access mask.
 	*	@param priority Hook/function call execution priority.
 	*	@param descriptorID ID assigned to this descriptor.
 	*/
-	CASModuleDescriptor( const char* const pszTypeName, const asDWORD accessMask, const as::ModulePriority_t priority, const as::DescriptorID_t descriptorID );
+	CASModuleDescriptor( const char* const pszName, const asDWORD accessMask, const as::ModulePriority_t priority, const as::DescriptorID_t descriptorID );
 
-	const char* GetTypeName() const { return m_pszTypeName; }
+	const char* GetName() const { return m_pszName; }
 
 	asDWORD GetAccessMask() const { return m_AccessMask; }
 
@@ -59,7 +59,7 @@ public:
 	as::DescriptorID_t GetDescriptorID() const { return m_DescriptorID; }
 
 private:
-	const char* const m_pszTypeName;
+	const char* const m_pszName;
 
 	const asDWORD m_AccessMask;
 

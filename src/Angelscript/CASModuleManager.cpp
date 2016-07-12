@@ -16,54 +16,57 @@ CASModuleManager::CASModuleManager( CASManager& manager )
 {
 }
 
-const CASModuleDescriptor* CASModuleManager::FindDescriptorByName( const char* const pszTypeName ) const
+const CASModuleDescriptor* CASModuleManager::FindDescriptorByName( const char* const pszName ) const
 {
-	assert( pszTypeName );
+	assert( pszName );
 
-	if( !pszTypeName )
+	if( !pszName )
 		return nullptr;
 
-	auto it = m_Descriptors.find( pszTypeName );
+	auto it = m_Descriptors.find( pszName );
 
 	return it != m_Descriptors.end() ? it->second.get() : nullptr;
 }
 
-bool CASModuleManager::AddDescriptor( const char* const pszTypeName, const asDWORD accessMask, const as::ModulePriority_t priority )
+std::pair<const CASModuleDescriptor*, bool> CASModuleManager::AddDescriptor( const char* const pszName, const asDWORD accessMask, const as::ModulePriority_t priority )
 {
-	assert( pszTypeName );
+	assert( pszName );
 
-	if( !pszTypeName )
-		return false;
+	if( !pszName )
+		return std::make_pair( nullptr, false );
 
-	assert( *pszTypeName );
+	assert( *pszName );
 
-	if( !( *pszTypeName ) )
-		return false;
+	if( !( *pszName ) )
+		return std::make_pair( nullptr, false );
 
 	assert( accessMask != 0 );
 
 	if( accessMask == 0 )
-		return false;
+		return std::make_pair( nullptr, false );
 
 	//Out of free IDs. TODO: if needed, add ID reclamation.
 	if( m_NextDescriptorID >= as::LAST_DESCRIPTOR_ID )
-		return false;
+		return std::make_pair( nullptr, false );
 
-	if( FindDescriptorByName( pszTypeName ) )
-		return false;
+	if( auto pDescriptor = FindDescriptorByName( pszName ) )
+		return std::make_pair( pDescriptor, false );
 
-	auto descriptor = std::make_unique<CASModuleDescriptor>( pszTypeName, accessMask, priority, m_NextDescriptorID );
+	auto descriptor = std::make_unique<CASModuleDescriptor>( pszName, accessMask, priority, m_NextDescriptorID );
 
-	auto result = m_Descriptors.emplace( descriptor->GetTypeName(), std::move( descriptor ) );
+	auto result = m_Descriptors.emplace( descriptor->GetName(), std::move( descriptor ) );
 
 	if( !result.second )
-		return false;
+		return std::make_pair( nullptr, false );
 
 	++m_NextDescriptorID;
 
-	return true;
+	return std::make_pair( descriptor.get(), true );
 }
 
+/*
+*	Include callback for builders.
+*/
 static int CASModuleManager_IncludeCallback( const char* pszFileName, const char* pszFrom, CScriptBuilder* pBuilder, void* pUserParam )
 {
 	return reinterpret_cast<IASModuleBuilder*>( pUserParam )->IncludeScript( *pBuilder, pszFileName, pszFrom ) ? 0 : -1;
@@ -71,7 +74,7 @@ static int CASModuleManager_IncludeCallback( const char* pszFileName, const char
 
 CASModule* CASModuleManager::BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder )
 {
-	if( descriptor.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID || FindDescriptorByName( descriptor.GetTypeName() ) != &descriptor )
+	if( descriptor.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID || FindDescriptorByName( descriptor.GetName() ) != &descriptor )
 	{
 		return nullptr;
 	}
@@ -79,9 +82,9 @@ CASModule* CASModuleManager::BuildModule( const CASModuleDescriptor& descriptor,
 	return BuildModuleInternal( descriptor, pszModuleName, builder );
 }
 
-CASModule* CASModuleManager::BuildModule( const char* const pszTypeName, const char* const pszModuleName, IASModuleBuilder& builder )
+CASModule* CASModuleManager::BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder )
 {
-	auto pDescriptor = FindDescriptorByName( pszTypeName );
+	auto pDescriptor = FindDescriptorByName( pszName );
 
 	if( !pDescriptor )
 		return nullptr;
@@ -112,7 +115,11 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 		return nullptr;
 	}
 
-	struct CleanupModuleOnExit
+	auto pScriptModule = scriptBuilder.GetModule();
+
+	pScriptModule->SetAccessMask( descriptor.GetAccessMask() );
+
+	struct CleanupModuleOnExit final
 	{
 		asIScriptModule* pModule;
 
@@ -131,7 +138,7 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 		{
 			pModule = nullptr;
 		}
-	} cleanup( scriptBuilder.GetModule() );
+	} cleanup( pScriptModule );
 
 	if( !builder.DefineWords( scriptBuilder ) )
 	{

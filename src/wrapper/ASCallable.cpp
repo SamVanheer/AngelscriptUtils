@@ -6,6 +6,14 @@
 
 #include "ASCallable.h"
 
+/**
+*	Calls a function.
+*	@param callable Callable object.
+*	@param flags Call flags.
+*	@param list Pointer to a va_list that contains the arguments for the function.
+*	@tparam CALLABLE Type of the callable object.
+*	@return true on success, false otherwise.
+*/
 template<typename CALLABLE>
 bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list )
 {
@@ -25,7 +33,7 @@ bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list )
 		return false;
 	}
 
-	if( !callable.PreSetArguments() )
+	if( !callable.PreSetArguments( ) )
 		return false;
 
 	auto success = ctx::SetArguments( function, *pContext, list );
@@ -83,6 +91,13 @@ bool CASFunction::operator()( CallFlags_t flags, ... )
 	va_end( list );
 
 	return success;
+}
+
+CASMethod::CASMethod( asIScriptFunction& function, CASContext& context, void* pThis )
+	: CASCallable( function, context )
+	, m_pThis( pThis )
+{
+	assert( pThis );
 }
 
 bool CASMethod::IsValid() const

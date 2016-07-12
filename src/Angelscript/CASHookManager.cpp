@@ -32,24 +32,14 @@ static void ReleaseVarArg( asIScriptEngine& engine, void* pObject, const int iTy
 	}
 }
 
-void CASHookManager_HookFunction( asIScriptGeneric* pArguments )
-{
-	pArguments->SetReturnByte( reinterpret_cast<CASHookManager*>( pArguments->GetObject() )->HookFunction( 
-		pArguments->GetArgDWord( 0 ), pArguments->GetArgAddress( 1 ), pArguments->GetArgTypeId( 1 ) ) );
-
-	ReleaseVarArg( *pArguments->GetEngine(), pArguments->GetArgAddress( 1 ), pArguments->GetArgTypeId( 1 ) );
-}
-
-void CASHookManager_UnhookFunction( asIScriptGeneric* pArguments )
-{
-	reinterpret_cast<CASHookManager*>( pArguments->GetObject() )->UnhookFunction( pArguments->GetArgDWord( 0 ), pArguments );
-
-	ReleaseVarArg( *pArguments->GetEngine(), pArguments->GetArgAddress( 1 ), pArguments->GetArgTypeId( 1 ) );
-}
-
 CASHookManager::CASHookManager( CASManager& manager )
 	: m_Manager( manager )
 {
+}
+
+CASHookManager::~CASHookManager()
+{
+	UnhookAllFunctions();
 }
 
 CASHook* CASHookManager::FindHookByID( const as::HookID_t hookID ) const
@@ -136,7 +126,7 @@ void CASHookManager::RegisterHooks( asIScriptEngine& engine )
 
 	engine.RegisterObjectMethod( "CHookManager", "bool HookFunction(const uint32 hookID, ?& in)", asMETHOD( CASHookManager, HookFunction ), asCALL_THISCALL );
 
-	engine.RegisterObjectMethod( "CHookManager", "void UnhookFunction(const uint32 hookID, ?& in)", asFUNCTION( CASHookManager_UnhookFunction ), asCALL_GENERIC );
+	engine.RegisterObjectMethod( "CHookManager", "void UnhookFunction(const uint32 hookID, ?& in)", asMETHOD( CASHookManager, UnhookFunction ), asCALL_THISCALL );
 
 	engine.RegisterGlobalProperty( "CHookManager g_HookManager", this );
 }
@@ -167,11 +157,11 @@ bool CASHookManager::HookFunction( const as::HookID_t hookID, void* pValue, cons
 	return success;
 }
 
-void CASHookManager::UnhookFunction( const as::HookID_t hookID, asIScriptGeneric* pArguments )
+void CASHookManager::UnhookFunction( const as::HookID_t hookID, void* pValue, const int iTypeId )
 {
-	assert( pArguments );
+	assert( pValue );
 
-	if( !pArguments )
+	if( !pValue )
 		return;
 
 	auto pHook = FindHookByID( hookID );
@@ -183,9 +173,7 @@ void CASHookManager::UnhookFunction( const as::HookID_t hookID, asIScriptGeneric
 
 	asIScriptFunction* pFunction = nullptr;
 
-	const int iTypeId = pArguments->GetArgTypeId( 1 );
-
-	if( !ValidateHookFunction( pHook, pArguments->GetArgTypeId( 1 ), pArguments->GetArgAddress( 1 ), "UnhookFunction", pFunction ) )
+	if( !ValidateHookFunction( pHook, iTypeId, pValue, "UnhookFunction", pFunction ) )
 	{
 		return;
 	}
@@ -203,6 +191,14 @@ void CASHookManager::UnhookModuleFunctions( CASModule* pModule )
 	for( auto pHook : m_Hooks )
 	{
 		pHook->RemoveFunctionsOfModule( pModule );
+	}
+}
+
+void CASHookManager::UnhookAllFunctions()
+{
+	for( auto pHook : m_Hooks )
+	{
+		pHook->RemoveAllFunctions();
 	}
 }
 

@@ -171,6 +171,11 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 		return nullptr;
 	}
 
+	if( !bSuccess )
+	{
+		return nullptr;
+	}
+
 	if( !AddModule( pModule ) )
 	{
 		delete pModule;

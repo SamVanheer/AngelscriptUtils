@@ -12,12 +12,21 @@ typedef uint32_t CallFlags_t;
 
 namespace CallFlag
 {
+/**
+*	Flags to affect function calls.
+*/
 enum CallFlag : CallFlags_t
 {
+	/**
+	*	No flags.
+	*/
 	NONE = 0,
 };
 }
 
+/**
+*	Base class for callable types.
+*/
 class CASCallable
 {
 protected:
@@ -25,21 +34,57 @@ protected:
 	friend bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list );
 
 protected:
+	/**
+	*	Constructor.
+	*	@param function Function to call.
+	*	@param context Context to use for calls.
+	*/
 	CASCallable( asIScriptFunction& function, CASContext& context );
 
 public:
+	/**
+	*	@return The function.
+	*/
 	asIScriptFunction& GetFunction() { return m_Function; }
 
+	/**
+	*	@return The context.
+	*/
 	CASContext& GetContext() { return m_Context; }
 
+	/**
+	*	@return Whether this function is valid.
+	*/
 	bool IsValid() const;
 
+	/**
+	*	Gets the return value.
+	*	@param pReturnValue Pointer to the variable that will receive the return value. Must match the type being retrieved.
+	*	@return true if the value was successfully retrieved, false otherwise.
+	*/
 	bool GetReturnValue( void* pReturnValue );
 
 protected:
+	/**
+	*	Called before the arguments are set. Lets the callable type evaluate itself.
+	*	Non-virtual, uses templates to invoke the correct type.
+	*	@return true if the call should continue, false otherwise.
+	*/
 	bool PreSetArguments() { return true; }
+
+	/**
+	*	Called after arguments are set, before the function is executed. Lets the callable type evaluate itself.
+	*	Non-virtual, uses templates to invoke the correct type.
+	*	@return true if the call should continue, false otherwise.
+	*/
 	bool PreExecute() { return true; }
 
+	/**
+	*	Called after the function is executed. Lets the callable type evaluate itself.
+	*	Non-virtual, uses templates to invoke the correct type.
+	*	@param iResult Result of the asIScriptContext::Execute call.
+	*	@return true if the call should continue, false otherwise.
+	*/
 	bool PostExecute( const int iResult ) { return true; }
 
 private:
@@ -51,7 +96,10 @@ private:
 	CASCallable& operator=( const CASCallable& ) = delete;
 };
 
-class CASFunction : public CASCallable
+/**
+*	A regular function.
+*/
+class CASFunction final : public CASCallable
 {
 public:
 	CASFunction( asIScriptFunction& function, CASContext& context )
@@ -59,28 +107,55 @@ public:
 	{
 	}
 
+	/**
+	*	Calls the function.
+	*	@param flags Call flags.
+	*	@param list Pointer to a va_list that contains the arguments for the function.
+	*	@return true on success, false otherwise.
+	*/
 	bool VCall( CallFlags_t flags, va_list list );
 
+	/**
+	*	Calls the function.
+	*	@param flags Call flags.
+	*	@param ... The arguments for the function.
+	*	@return true on success, false otherwise.
+	*/
 	bool operator()( CallFlags_t flags, ... );
 };
 
-class CASMethod : public CASCallable
+/**
+*	An object method.
+*/
+class CASMethod final : public CASCallable
 {
 protected:
 	template<typename CALLABLE>
 	friend bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list );
 
 public:
-	CASMethod( asIScriptFunction& function, CASContext& context, void* pThis )
-		: CASCallable( function, context )
-		, m_pThis( pThis )
-	{
-	}
+	/**
+	*	@copydoc CASCallable::CASCallable( asIScriptFunction& function, CASContext& context )
+	*	@param pThis Pointer to the object instance.
+	*/
+	CASMethod( asIScriptFunction& function, CASContext& context, void* pThis );
 
 	bool IsValid() const;
 
+	/**
+	*	Calls the function.
+	*	@param flags Call flags.
+	*	@param list Pointer to a va_list that contains the arguments for the function.
+	*	@return true on success, false otherwise.
+	*/
 	bool VCall( CallFlags_t flags, va_list list );
 
+	/**
+	*	Calls the function.
+	*	@param flags Call flags.
+	*	@param ... The arguments for the function.
+	*	@return true on success, false otherwise.
+	*/
 	bool operator()( CallFlags_t flags, ... );
 
 protected:

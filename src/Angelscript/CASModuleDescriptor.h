@@ -72,6 +72,35 @@ private:
 	CASModuleDescriptor& operator=( const CASModuleDescriptor& ) = delete;
 };
 
+/**
+*	Equality operator for descriptors.
+*	@param lhs Left hand descriptor.
+*	@param rhs Right hand descriptor.
+*	@return true if they are equal, false otherwise.
+*/
+inline constexpr bool operator==( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs )
+{
+	//Since each descriptor has a unique name, they can only be equal if they are the same object.
+	return &lhs == &rhs;
+}
+
+/**
+*	Inequality operator for descriptors.
+*	@param lhs Left hand descriptor.
+*	@param rhs Right hand descriptor.
+*	@return true if they are not equal, false otherwise.
+*/
+inline constexpr bool operator!=( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs )
+{
+	return !( lhs == rhs );
+}
+
+/**
+*	Operator less than for descriptors.
+*	@param lhs Left hand descriptor.
+*	@param rhs Right hand descriptor.
+*	@return true if the left hand descriptor is smaller than the right hand descriptor.
+*/
 inline bool operator<( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs )
 {
 	//Both are invalid; lhs is smaller.

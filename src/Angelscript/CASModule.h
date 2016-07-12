@@ -9,22 +9,50 @@
 
 class asIScriptModule;
 
+/**
+*	The user data ID for the CASModule instance in asIScriptModule.
+*/
 #define CASMODULE_USER_DATA_ID 10001
 
+/**
+*	Angelscript module. Wraps asIScriptModule and provides the descriptor.
+*	Is reference counted, unlike the script module.
+*/
 class CASModule final : public CASAtomicRefCountedBaseClass
 {
 public:
+	/**
+	*	Constructor.
+	*	@param pModule Script module.
+	*	@param descriptor Descriptor for this module.
+	*/
 	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor );
+
+	/**
+	*	Destructor.
+	*/
 	~CASModule();
 
 	void Release() const;
 
+	/**
+	*	Discards the module. It can no longer be used after this.
+	*/
 	void Discard();
 
+	/**
+	*	@return The script module.
+	*/
 	asIScriptModule* GetModule() { return m_pModule; }
 
+	/**
+	*	@return The module name.
+	*/
 	const char* GetModuleName() const;
 
+	/**
+	*	@return The descriptor.
+	*/
 	const CASModuleDescriptor& GetDescriptor() const { return *m_pDescriptor; }
 
 private:
@@ -37,10 +65,26 @@ private:
 	CASModule& operator=( const CASModule& ) = delete;
 };
 
+/**
+*	Gets a module from a script module.
+*	@param pModule Script module to retrieve the module from.
+*	@return The module, or null if it couldn't be retrieved.
+*/
 CASModule* GetModuleFromScriptModule( const asIScriptModule* pModule );
 
+/**
+*	Gets a module from a script function.
+*	@param pModule Script function to retrieve the module from.
+*	@return The module, or null if it couldn't be retrieved.
+*/
 CASModule* GetModuleFromScriptFunction( const asIScriptFunction* pFunction );
 
+/**
+*	Less function for modules.
+*	@param pLHS Left hand module.
+*	@param pRHS Right hand module.
+*	@return true if the left hand module is smaller than the right hand module.
+*/
 inline bool ModuleLess( const CASModule* pLHS, const CASModule* pRHS )
 {
 	if(  pLHS->GetDescriptor() < pRHS->GetDescriptor() )
@@ -50,10 +94,13 @@ inline bool ModuleLess( const CASModule* pLHS, const CASModule* pRHS )
 		return false;
 
 	//Use the memory address for sorting. They need only be sorted in a unique order.
-	return reinterpret_cast<intptr_t>( pLHS ) < reinterpret_cast<intptr_t>( pRHS );
+	return pLHS < pRHS;
 }
 
-struct ModuleEqualByName
+/**
+*	Functor that overloads operator() to return true if a module equals a given name.
+*/
+struct ModuleEqualByName final
 {
 	const char* const pszModuleName;
 

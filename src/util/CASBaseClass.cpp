@@ -2,14 +2,6 @@
 
 #include "CASBaseClass.h"
 
-CASBaseClass::CASBaseClass()
-{
-}
-
-CASBaseClass::~CASBaseClass()
-{
-}
-
 void CASRefCountedBaseClass::AddRef() const
 {
 	++m_iRefCount;

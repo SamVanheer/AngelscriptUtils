@@ -7,23 +7,52 @@
 class asIScriptEngine;
 struct asSMessageInfo;
 
+/**
+*	Manages the Angelscript engine instance, the module and hook managers.
+*/
 class CASManager final
 {
 public:
+	/**
+	*	Constructor.
+	*/
 	CASManager();
-	~CASManager() = default;
 
+	/**
+	*	Destructor.
+	*/
+	~CASManager();
+
+	/**
+	*	@return The script engine.
+	*/
 	asIScriptEngine* GetEngine() { return m_pScriptEngine; }
 
+	/**
+	*	@return The module manager.
+	*/
 	CASModuleManager& GetModuleManager() { return m_ModuleManager; }
 
+	/**
+	*	@return The hook manager.
+	*/
 	CASHookManager& GetHookManager() { return m_HookManager; }
 
+	/**
+	*	Initializes the manager.
+	*	@return true on success, false otherwise.
+	*/
 	bool Initialize();
 
+	/**
+	*	Shuts down the manager.
+	*/
 	void Shutdown();
 
 private:
+	/**
+	*	@see asIScriptEngine::SetMessageCallback
+	*/
 	void MessageCallback( const asSMessageInfo* pMsg );
 
 private:

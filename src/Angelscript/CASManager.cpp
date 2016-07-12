@@ -1,3 +1,4 @@
+#include <cassert>
 #include <iostream>
 
 #include <angelscript.h>
@@ -8,6 +9,11 @@ CASManager::CASManager()
 	: m_ModuleManager( *this )
 	, m_HookManager( *this )
 {
+}
+
+CASManager::~CASManager()
+{
+	assert( !m_pScriptEngine );
 }
 
 bool CASManager::Initialize()
@@ -36,15 +42,22 @@ void CASManager::Shutdown()
 		return;
 	}
 
+	//Unhook all functions to prevent dangling pointers.
+	m_HookManager.UnhookAllFunctions();
+
+	//Clear all modules and destroy all descriptors.
 	m_ModuleManager.Clear();
 
+	//Let it go.
 	m_pScriptEngine->ShutDownAndRelease();
+	m_pScriptEngine = nullptr;
 }
 
 void CASManager::MessageCallback( const asSMessageInfo* pMsg )
 {
 	const char* pType = "";
 
+	//Get the prefix.
 	switch( pMsg->type )
 	{
 	case asMSGTYPE_ERROR: pType = "Error: "; break;
@@ -52,6 +65,7 @@ void CASManager::MessageCallback( const asSMessageInfo* pMsg )
 	default: break;
 	}
 
+	//Only display the section if it was actually set. Some messages are not triggered by script code compilation or execution.
 	const bool bHasSection = pMsg->section && *pMsg->section;
 
 	bool bNeedsNewline = false;
@@ -62,6 +76,7 @@ void CASManager::MessageCallback( const asSMessageInfo* pMsg )
 		bNeedsNewline = true;
 	}
 
+	//Some messages don't refer to script code, and set both to 0.
 	if( pMsg->row != 0 && pMsg->col != 0 )
 	{
 		if( bHasSection )

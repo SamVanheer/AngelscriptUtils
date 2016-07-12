@@ -109,12 +109,6 @@ void CASHook::RemoveFunctionsOfModule( CASModule* pModule )
 
 	for( auto it2 = it; it2 < m_Functions.end(); ++it2 )
 	{
-		//TODO: Delegates need to be double dereferenced for some reason.
-		/*
-		if( ( *it2 )->GetDelegateFunction() )
-			( *it2 )->Release();
-			*/
-
 		( *it2 )->Release();
 	}
 

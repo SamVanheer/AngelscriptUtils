@@ -1,7 +1,7 @@
 #ifndef ANGELSCRIPT_CASARGUMENTS_H
 #define ANGELSCRIPT_CASARGUMENTS_H
 
-#include "util/CASBaseClass.h"
+#include "Angelscript/util/CASBaseClass.h"
 
 /*
 * Everything related to handling arguments is in here

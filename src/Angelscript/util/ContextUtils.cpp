@@ -1,10 +1,10 @@
 #include <cassert>
 #include <cstdarg>
 
-#include "util/ASUtil.h"
+#include "Angelscript/util/ASUtil.h"
 
-#include "wrapper/CASContext.h"
-#include "wrapper/ASCallable.h"
+#include "Angelscript/wrapper/CASContext.h"
+#include "Angelscript/wrapper/ASCallable.h"
 
 #include "ContextUtils.h"
 

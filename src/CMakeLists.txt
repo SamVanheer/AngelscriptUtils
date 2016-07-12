@@ -3,7 +3,6 @@ add_sources(
 )
 
 add_subdirectory( Angelscript )
-add_subdirectory( wrapper )
 add_subdirectory( util )
 
 #install( FILES Speaker.h DESTINATION include )

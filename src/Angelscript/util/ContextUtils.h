@@ -3,7 +3,7 @@
 
 #include <angelscript.h>
 
-#include "wrapper/CASArguments.h"
+#include "Angelscript/wrapper/CASArguments.h"
 
 namespace ctx
 {

@@ -7,8 +7,8 @@
 #include "Angelscript/add_on/scriptarray.h"
 #include "Angelscript/add_on/scriptdictionary.h"
 
-#include "wrapper/ASCallable.h"
-#include "wrapper/CASContext.h"
+#include "Angelscript/wrapper/ASCallable.h"
+#include "Angelscript/wrapper/CASContext.h"
 #include "Angelscript/CASModule.h"
 #include "Angelscript/CASHook.h"
 

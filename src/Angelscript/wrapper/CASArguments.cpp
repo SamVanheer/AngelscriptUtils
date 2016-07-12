@@ -6,7 +6,7 @@
 
 #include <cstdarg>
 
-#include "util/ASUtil.h"
+#include "Angelscript/util/ASUtil.h"
 
 #include "CASArguments.h"
 

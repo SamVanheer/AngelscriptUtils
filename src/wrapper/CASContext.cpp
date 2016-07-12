@@ -5,25 +5,16 @@
 CASContext::CASContext( asIScriptContext& context )
 {
 	m_pContext = &context;
-
-	m_pContext->AddRef();
-}
-
-CASContext::CASContext( asIScriptEngine& engine )
-{
-	m_pContext = engine.RequestContext();
-	m_pEngine = &engine;
-
-	m_pEngine->AddRef();
-}
-
-CASContext::~CASContext()
-{
-	Release();
 }
 
 void CASContext::Release()
 {
+	if( m_pContext )
+	{
+		//TODO return value
+		m_pContext->Unprepare();
+	}
+
 	if( m_pEngine )
 	{
 		m_pEngine->ReturnContext( m_pContext );
@@ -57,7 +48,21 @@ CASContext::operator bool() const
 	return m_pContext != nullptr;
 }
 
-CASNonOwningContext::~CASNonOwningContext()
+CASOwningContext::CASOwningContext( asIScriptContext& context )
+	: CASContext( context )
 {
-	ReleaseOwnership();
+	m_pContext->AddRef();
+}
+
+CASOwningContext::CASOwningContext( asIScriptEngine& engine )
+{
+	m_pContext = engine.RequestContext();
+	m_pEngine = &engine;
+
+	m_pEngine->AddRef();
+}
+
+CASOwningContext::~CASOwningContext()
+{
+	Release();
 }

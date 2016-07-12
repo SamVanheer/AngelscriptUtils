@@ -9,7 +9,7 @@
 template<typename CALLABLE>
 bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list )
 {
-	auto pContext = callable.GetContext()->GetContext();
+	auto pContext = callable.GetContext().GetContext();
 
 	assert( pContext );
 
@@ -48,13 +48,23 @@ bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list )
 
 CASCallable::CASCallable( asIScriptFunction& function, CASContext& context )
 	: m_Function( function )
-	, m_pContext( &context )
+	, m_Context( context )
 {
 }
 
 bool CASCallable::IsValid() const
 {
-	return m_pContext && m_pContext->GetContext();
+	return m_Context.GetContext() != nullptr;
+}
+
+bool CASCallable::GetReturnValue( void* pReturnValue )
+{
+	assert( m_Context );
+
+	asDWORD uiFlags;
+	int iTypeId = m_Function.GetReturnTypeId( &uiFlags );
+
+	return ctx::GetReturnValue( pReturnValue, iTypeId, uiFlags, m_Context.GetContext() );
 }
 
 bool CASFunction::VCall( CallFlags_t flags, va_list list )
@@ -100,7 +110,7 @@ bool CASMethod::operator()( CallFlags_t flags, ... )
 
 bool CASMethod::PreSetArguments()
 {
-	auto pContext = GetContext()->GetContext();
+	auto pContext = GetContext().GetContext();
 
 	return pContext->SetObject( m_pThis ) >= 0;
 }
@@ -118,7 +128,7 @@ bool VCallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, Ca
 	if( !pContext )
 		return false;
 
-	CASNonOwningContext ctx( *pContext );
+	CASContext ctx( *pContext );
 
 	CASFunction func( *pFunction, ctx );
 
@@ -244,7 +254,7 @@ bool VCallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* p
 	if( !pContext )
 		return false;
 
-	CASNonOwningContext ctx( *pContext );
+	CASContext ctx( *pContext );
 
 	CASMethod func( *pFunction, ctx, pThis );
 

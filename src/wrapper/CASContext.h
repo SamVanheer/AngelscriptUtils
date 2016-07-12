@@ -4,14 +4,18 @@
 #include <angelscript.h>
 
 /**
-*	RAII wrapper around a context that maintains ownership for its lifetime.
+*	A context that does not release the context in its destructor.
 */
 class CASContext
 {
 public:
 	CASContext( asIScriptContext& context );
-	CASContext( asIScriptEngine& engine );
-	~CASContext();
+	~CASContext() = default;
+
+protected:
+	CASContext() = default;
+
+public:
 
 	void Release();
 
@@ -32,14 +36,19 @@ private:
 };
 
 /**
-*	A context that does not release the context in its destructor.
+*	RAII wrapper around a context that maintains ownership for its lifetime.
 */
-class CASNonOwningContext final : public CASContext
+class CASOwningContext final : public CASContext
 {
 public:
-	using CASContext::CASContext;
+	CASOwningContext( asIScriptContext& context );
+	CASOwningContext( asIScriptEngine& engine );
+	~CASOwningContext();
 
-	~CASNonOwningContext();
+protected:
+	asIScriptContext* m_pContext = nullptr;
+
+	asIScriptEngine* m_pEngine = nullptr;
 };
 
 #endif //WRAPPER_CASCONTEXT_H

@@ -3,4 +3,8 @@ add_sources(
 	scriptbuilder.cpp
 	scriptstdstring.h
 	scriptstdstring.cpp
+	scriptdictionary.h
+	scriptdictionary.cpp
+	scriptarray.h
+	scriptarray.cpp
 )

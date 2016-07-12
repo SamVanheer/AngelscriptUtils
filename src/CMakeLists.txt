@@ -2,6 +2,7 @@ add_sources(
 	main/Main.cpp
 )
 
+add_subdirectory( Angelscript )
 add_subdirectory( wrapper )
 add_subdirectory( util )
 

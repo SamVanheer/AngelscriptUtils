@@ -58,6 +58,8 @@ endfunction( clear_sources )
 
 # Angelscript library
 
+add_definitions( -DAS_NO_EXCEPTIONS )
+
 add_subdirectory( external/Angelscript )
 
 preprocess_sources()
@@ -78,8 +80,6 @@ set( AngelscriptUtils_VERSION_MINOR 0 )
 #include the subdirectory containing our libs
 add_subdirectory( src )
 
-add_subdirectory( src/Angelscript/add_on )
-
 include_directories( src external/Angelscript/include )
 
 preprocess_sources()
@@ -87,7 +87,7 @@ preprocess_sources()
 #indicate the entry point for the executable
 add_executable( AngelscriptUtils ${PREP_SRCS} )
 
-set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT AngelscriptUtils )
+set_property( GLOBAL PROPERTY VS_STARTUP_PROJECT AngelscriptUtils )
 
 #Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}/src" )

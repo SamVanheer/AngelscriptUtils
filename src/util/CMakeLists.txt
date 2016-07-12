@@ -4,4 +4,5 @@ add_sources(
 	ContextUtils.cpp
 	CASBaseClass.h
 	CASBaseClass.cpp
+	StringUtils.h
 )

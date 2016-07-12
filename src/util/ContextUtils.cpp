@@ -3,6 +3,9 @@
 
 #include "util/ASUtil.h"
 
+#include "wrapper/CASContext.h"
+#include "wrapper/ASCallable.h"
+
 #include "ContextUtils.h"
 
 namespace ctx
@@ -382,6 +385,335 @@ bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue_t& value, asINT6
 			dValue = static_cast<double>( uiValue );
 		else
 			uiValue = static_cast<asINT64>( dValue );
+	}
+
+	return fSuccess;
+}
+
+bool SetPrimitiveArgument( ArgumentValue_t& value, int iTypeId, void* pData, bool& fOutWasPrimitive )
+{
+	if( !pData )
+	{
+		fOutWasPrimitive = false;
+		return false;
+	}
+
+	fOutWasPrimitive = true;
+
+	bool fSuccess = true;
+
+	//We handle signed and unsigned the same way, they occupy the same amount of memory, and will be cast when the destination function receives them.
+	switch( iTypeId )
+	{
+	case asTYPEID_VOID:
+		{
+			//What the hell?! how did somebody pass a void argument?
+			fSuccess = false;
+			break;
+		}
+
+	case asTYPEID_BOOL:		value.byte = *reinterpret_cast<bool*>( pData ); break;
+
+	case asTYPEID_INT8:
+	case asTYPEID_UINT8:	value.byte = *reinterpret_cast<asBYTE*>( pData ); break;
+
+	case asTYPEID_INT16:
+	case asTYPEID_UINT16:	value.word = *reinterpret_cast<asWORD*>( pData ); break;
+
+	case asTYPEID_INT32:
+	case asTYPEID_UINT32:	value.dword = *reinterpret_cast<asDWORD*>( pData ); break;
+
+	case asTYPEID_INT64:
+	case asTYPEID_UINT64:	value.qword = *reinterpret_cast<asQWORD*>( pData ); break;
+
+	case asTYPEID_FLOAT:	value.flValue = *reinterpret_cast<float*>( pData ); break;
+	case asTYPEID_DOUBLE:	value.dValue = *reinterpret_cast<double*>( pData ); break;
+
+	default: //Not a primitive type.
+		{
+			fOutWasPrimitive = false;
+			break;
+		}
+	}
+
+	return fSuccess;
+}
+
+#if 0
+
+bool GetReturnValue( CASArgument& retVal, asIScriptFunction* pFunc, asIScriptContext* pContext, asDWORD* uiOutFlags )
+{
+	if( !pFunc || !pContext )
+		return false;
+
+	asDWORD uiFlags;
+	int iTypeId = pFunc->GetReturnTypeId( &uiFlags );
+
+	if( uiOutFlags )
+		*uiOutFlags = uiFlags;
+
+	return GetReturnValue( retVal, iTypeId, uiFlags, pContext );
+}
+
+bool GetReturnValue( CASArgument& retVal, int iTypeId, asDWORD uiFlags, asIScriptContext* pContext )
+{
+	if( !pContext )
+		return false;
+
+	bool fSuccess = true;
+
+	ArgumentType_t argType = AT_NONE;
+	ArgumentValue_t value;
+
+	//Object handle type
+	if( iTypeId & asTYPEID_OBJHANDLE )
+	{
+		argType = AT_REF;
+		value.pValue = pContext->GetReturnObject();
+	}
+	else if( iTypeId & asTYPEID_MASK_OBJECT ) //Object type (ref or value type)
+	{
+		asIScriptEngine* pEngine = pContext->GetEngine();
+		asITypeInfo* pType = pEngine->GetTypeInfoById( iTypeId );
+
+		if( pType )
+		{
+			const asDWORD uiObjFlags = pType->GetFlags();
+
+			value.pValue = pContext->GetReturnObject();
+
+			if( uiObjFlags & asOBJ_REF )
+			{
+				argType = AT_REF;
+			}
+			else if( uiObjFlags & asOBJ_VALUE )
+			{
+				argType = AT_VALUE;
+
+				//If the object is returned by value, a copy needs to be made
+				//This is handled by CASArgument in the Set method below.
+			}
+			else
+			{
+				//TODO
+				//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: unknown object type, cannot convert!\n" );
+				fSuccess = false;
+			}
+		}
+		else
+		{
+			//TODO
+			//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: failed to get object type!\n" );
+			fSuccess = false;
+		}
+	}
+	else if( iTypeId == asTYPEID_VOID )
+	{
+		argType = AT_VOID;
+	}
+	else //Primitive type (including enum)
+	{
+		bool fWasPrimitive = true;
+
+		//It's a reference
+		if( uiFlags & asTM_INOUTREF )
+		{
+			if( !SetPrimitiveArgument( value, iTypeId, pContext->GetReturnAddress(), fWasPrimitive ) )
+			{
+				//TODO
+				//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: Something went wrong while trying to convert the return value to a usable type!\n" );
+				fSuccess = false;
+			}
+		}
+		else //It's returned by value
+		{
+			switch( iTypeId )
+			{
+			case asTYPEID_BOOL:
+			case asTYPEID_INT8:
+			case asTYPEID_UINT8:	value.byte = pContext->GetReturnByte(); break;
+
+			case asTYPEID_INT16:
+			case asTYPEID_UINT16:	value.word = pContext->GetReturnWord(); break;
+
+			case asTYPEID_INT32:
+			case asTYPEID_UINT32:	value.dword = pContext->GetReturnDWord(); break;
+
+			case asTYPEID_INT64:
+			case asTYPEID_UINT64:	value.qword = pContext->GetReturnQWord(); break;
+
+			case asTYPEID_FLOAT:	value.flValue = pContext->GetReturnFloat(); break;
+			case asTYPEID_DOUBLE:	value.dValue = pContext->GetReturnDouble(); break;
+
+			default: //Not a primitive type.
+				{
+					fWasPrimitive = false;
+					break;
+				}
+			}
+		}
+
+		if( fSuccess )
+		{
+			if( fWasPrimitive )
+				argType = AT_PRIMITIVE;
+			else
+			{
+				if( as::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
+				{
+					argType = AT_ENUM;
+					value.dword = pContext->GetReturnDWord();
+				}
+				else
+				{
+					//TODO
+					//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: unknown primitive return type, cannot convert!\n" );
+					fSuccess = false;
+				}
+			}
+		}
+	}
+
+	//Let the argument class handle copying
+	retVal.Set( iTypeId, argType, value, true );
+
+	return fSuccess;
+}
+#endif
+
+bool GetReturnValue( void* pReturnValue, int iTypeId, asDWORD uiFlags, asIScriptContext* pContext )
+{
+	if( !pContext )
+		return false;
+
+	bool fSuccess = true;
+
+	//Object handle type
+	if( iTypeId & asTYPEID_OBJHANDLE )
+	{
+		*reinterpret_cast<void**>( pReturnValue ) = pContext->GetReturnObject();
+	}
+	else if( iTypeId & asTYPEID_MASK_OBJECT ) //Object type (ref or value type)
+	{
+		asIScriptEngine* pEngine = pContext->GetEngine();
+		asITypeInfo* pType = pEngine->GetTypeInfoById( iTypeId );
+
+		if( pType )
+		{
+			void* pObject = pContext->GetReturnObject();
+
+			asIScriptFunction* pFunc;
+
+			asUINT uiIndex;
+
+			const asUINT uiCount = pType->GetMethodCount();
+
+			//Find an assignment operator
+			for( uiIndex = 0; uiIndex < uiCount; ++uiIndex )
+			{
+				pFunc = pType->GetMethodByIndex( uiIndex );
+
+				if( pFunc->GetParamCount() == 1 )
+				{
+					int iFuncTypeId;
+					asDWORD uiFuncFlags;
+
+					if( pFunc->GetParam( 0, &iFuncTypeId, &uiFuncFlags ) >= 0 )
+					{
+						if( iFuncTypeId == pType->GetTypeId() && uiFuncFlags & asTM_INREF )
+						{
+							pContext->PushState();
+
+							//Call the assignment operator on the object
+							CASContext ctx( *pContext );
+
+							CASMethod func( *pFunc, ctx, pReturnValue );
+
+							func( CallFlag::NONE, pObject );
+
+							pContext->PopState();
+
+							break;
+						}
+					}
+				}
+			}
+
+			if( uiIndex == uiCount )
+			{
+				fSuccess = false;
+				//TODO
+				/*
+				gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: no assignment operator found for type '%s::%s', cannot convert!\n",
+								 pType->GetNamespace(), pType->GetName() );
+								 */
+			}
+		}
+		else
+		{
+			//TODO
+			//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: failed to get object type!\n" );
+			fSuccess = false;
+		}
+	}
+	else if( iTypeId == asTYPEID_VOID )
+	{
+		//TODO
+		//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: type is null!\n" );
+	}
+	else //Primitive type (including enum)
+	{
+		bool fWasPrimitive = true;
+
+		//It's a reference
+		if( uiFlags & asTM_INOUTREF )
+		{
+			*reinterpret_cast<void**>( pReturnValue ) = pContext->GetReturnAddress();
+		}
+		else //It's returned by value
+		{
+			switch( iTypeId )
+			{
+			case asTYPEID_BOOL:		*reinterpret_cast<bool*>( pReturnValue ) = pContext->GetReturnByte() != 0; break;
+			case asTYPEID_INT8:
+			case asTYPEID_UINT8:	*reinterpret_cast<asBYTE*>( pReturnValue ) = pContext->GetReturnByte(); break;
+
+			case asTYPEID_INT16:
+			case asTYPEID_UINT16:	*reinterpret_cast<asWORD*>( pReturnValue ) = pContext->GetReturnWord(); break;
+
+			case asTYPEID_INT32:
+			case asTYPEID_UINT32:	*reinterpret_cast<asDWORD*>( pReturnValue ) = pContext->GetReturnDWord(); break;
+
+			case asTYPEID_INT64:
+			case asTYPEID_UINT64:	*reinterpret_cast<asQWORD*>( pReturnValue ) = pContext->GetReturnQWord(); break;
+
+			case asTYPEID_FLOAT:	*reinterpret_cast<float*>( pReturnValue ) = pContext->GetReturnFloat(); break;
+			case asTYPEID_DOUBLE:	*reinterpret_cast<double*>( pReturnValue ) = pContext->GetReturnDouble(); break;
+
+			default: //Not a primitive type.
+				{
+					fWasPrimitive = false;
+					break;
+				}
+			}
+		}
+
+		if( fSuccess )
+		{
+			if( !fWasPrimitive )
+			{
+				if( as::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
+				{
+					*reinterpret_cast<asDWORD*>( pReturnValue ) = pContext->GetReturnDWord();
+				}
+				else
+				{
+					//TODO
+					//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: unknown primitive return type, cannot convert!\n" );
+					fSuccess = false;
+				}
+			}
+		}
 	}
 
 	return fSuccess;

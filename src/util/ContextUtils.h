@@ -43,6 +43,26 @@ bool ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, 
 *	@see ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& dValue )
 */
 bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue_t& value, asINT64& uiValue, double& dValue );
+
+/**
+*	Tries to set the given data on the given value
+*	This functions returns false if something went wrong.
+*	To determine if the argument was primitive or not, check fOutWasPrimitive
+*/
+bool SetPrimitiveArgument( ArgumentValue_t& value, int iTypeId, void* pData, bool& fOutWasPrimitive );
+
+/**
+*	Convenience method for when you don't want to get return type info yourself
+*	See method below for more information
+*/
+bool GetReturnValue( CASArgument& retVal, asIScriptFunction* pFunc, asIScriptContext* pContext, asDWORD* uiOutFlags );
+
+/**
+*	This method will retrieve the return value from the context according to the return value type given
+*/
+bool GetReturnValue( CASArgument& retVal, int iTypeId, asDWORD uiFlags, asIScriptContext* pContext );
+
+bool GetReturnValue( void* pReturnValue, int iTypeId, asDWORD uiFlags, asIScriptContext* pContext );
 }
 
 #endif //UTIL_CONTEXTUTILS_H

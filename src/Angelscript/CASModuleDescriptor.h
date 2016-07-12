@@ -1,0 +1,117 @@
+#ifndef ANGELSCRIPT_CASMODULEDESCRIPTOR_H
+#define ANGELSCRIPT_CASMODULEDESCRIPTOR_H
+
+#include <cstdint>
+
+#include <limits>
+
+#include <angelscript.h>
+
+namespace as
+{
+typedef int32_t ModulePriority_t;
+
+namespace ModulePriority
+{
+/**
+*	Predefined priority levels for modules.
+*/
+enum ModulePriority : ModulePriority_t
+{
+	NORMAL	= 0,
+	HIGH	= std::numeric_limits<ModulePriority_t>::max() / 2,
+	HIGHEST = std::numeric_limits<ModulePriority_t>::max(),
+	LOW		= std::numeric_limits<ModulePriority_t>::min() / 2,
+	LOWEST	= std::numeric_limits<ModulePriority_t>::min()
+};
+}
+
+typedef uint32_t DescriptorID_t;
+
+const DescriptorID_t INVALID_DESCRIPTOR_ID = 0;
+
+const DescriptorID_t FIRST_DESCRIPTOR_ID = 1;
+
+const DescriptorID_t LAST_DESCRIPTOR_ID = std::numeric_limits<DescriptorID_t>::max();
+}
+
+/**
+*	Describes a module. This includes its name, access mask, and priority in hook/function call execution.
+*/
+class CASModuleDescriptor final
+{
+public:
+	/**
+	*	Constructor.
+	*	@param pszTypeName Type name of the module descriptor.
+	*	@param accessMask Access mask.
+	*	@param priority Hook/function call execution priority.
+	*	@param descriptorID ID assigned to this descriptor.
+	*/
+	CASModuleDescriptor( const char* const pszTypeName, const asDWORD accessMask, const as::ModulePriority_t priority, const as::DescriptorID_t descriptorID );
+
+	const char* GetTypeName() const { return m_pszTypeName; }
+
+	asDWORD GetAccessMask() const { return m_AccessMask; }
+
+	as::ModulePriority_t GetPriority() const { return m_Priority; }
+
+	as::DescriptorID_t GetDescriptorID() const { return m_DescriptorID; }
+
+private:
+	const char* const m_pszTypeName;
+
+	const asDWORD m_AccessMask;
+
+	const as::ModulePriority_t m_Priority;
+
+	const as::DescriptorID_t m_DescriptorID;
+
+private:
+	CASModuleDescriptor( const CASModuleDescriptor& ) = delete;
+	CASModuleDescriptor& operator=( const CASModuleDescriptor& ) = delete;
+};
+
+inline bool operator<( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs )
+{
+	//Both are invalid; lhs is smaller.
+	if( lhs.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID  && rhs.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID )
+		return true;
+
+	//lhs is invalid, always greater.
+	if( lhs.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID && rhs.GetDescriptorID() != as::INVALID_DESCRIPTOR_ID )
+		return false;
+
+	//rhs is invalid, always smaller.
+	if( lhs.GetDescriptorID() != as::INVALID_DESCRIPTOR_ID && rhs.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID )
+		return true;
+
+	//Higher priority, smaller.
+	if( lhs.GetPriority() > rhs.GetPriority() )
+		return true;
+
+	//Lower priority, greater.
+	if( lhs.GetPriority() < rhs.GetPriority() )
+		return false;
+
+	//Same priority, smaller module ID is smaller.
+	return lhs.GetDescriptorID() < rhs.GetDescriptorID();
+}
+
+namespace std
+{
+template<>
+struct less<CASModuleDescriptor>
+{
+	typedef CASModuleDescriptor first_argument_type;
+	typedef CASModuleDescriptor second_argument_type;
+	typedef bool result_type;
+
+	bool operator()( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs ) const
+	{
+		return lhs < rhs;
+	}
+};
+}
+
+#endif //ANGELSCRIPT_CASMODULEDESCRIPTOR_H

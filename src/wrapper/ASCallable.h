@@ -30,9 +30,11 @@ protected:
 public:
 	asIScriptFunction& GetFunction() { return m_Function; }
 
-	CASContext* GetContext() { return m_pContext; }
+	CASContext& GetContext() { return m_Context; }
 
 	bool IsValid() const;
+
+	bool GetReturnValue( void* pReturnValue );
 
 protected:
 	bool PreSetArguments() { return true; }
@@ -42,7 +44,7 @@ protected:
 
 private:
 	asIScriptFunction& m_Function;
-	CASContext* m_pContext;
+	CASContext& m_Context;
 
 private:
 	CASCallable( const CASCallable& ) = delete;
@@ -100,19 +102,19 @@ namespace as
 bool VCallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list );
 
 /**
-*	@see VCallFunction( asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, va_list list )
+*	@see VCallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 */
 bool VCallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, va_list list );
 
 /**
 *	Acquires a context using asIScriptEngine::RequestContext
-*	@see VCallFunction( asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, va_list list )
+*	@see VCallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 */
 bool VCallFunction( asIScriptFunction* pFunction, CallFlags_t flags, va_list list );
 
 /**
 *	Acquires a context using asIScriptEngine::RequestContext
-*	@see VCallFunction( asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, va_list list )
+*	@see VCallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 */
 bool VCallFunction( asIScriptFunction* pFunction, va_list list );
 
@@ -126,19 +128,19 @@ bool VCallFunction( asIScriptFunction* pFunction, va_list list );
 bool CallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... );
 
 /**
-*	@see CallFunction( asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, ... )
+*	@see CallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
 */
 bool CallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, ... );
 
 /**
 *	Acquires a context using asIScriptEngine::RequestContext
-*	@see CallFunction( asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, ... )
+*	@see CallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
 */
 bool CallFunction( asIScriptFunction* pFunction, CallFlags_t flags, ... );
 
 /**
 *	Acquires a context using asIScriptEngine::RequestContext
-*	@see CallFunction( asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, ... )
+*	@see CallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
 */
 bool CallFunction( asIScriptFunction* pFunction, ... );
 
@@ -153,19 +155,19 @@ bool CallFunction( asIScriptFunction* pFunction, ... );
 bool VCallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list );
 
 /**
-*	@see VCallMethod( void* pThis, asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, va_list list )
+*	@see VCallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 */
 bool VCallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, va_list list );
 
 /**
 *	Acquires a context using asIScriptEngine::RequestContext
-*	@see VCallMethod( void* pThis, asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, va_list list )
+*	@see VCallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 */
 bool VCallMethod( void* pThis, asIScriptFunction* pFunction, CallFlags_t flags, va_list list );
 
 /**
 *	Acquires a context using asIScriptEngine::RequestContext
-*	@see VCallMethod( void* pThis, asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, va_list list )
+*	@see VCallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 */
 bool VCallMethod( void* pThis, asIScriptFunction* pFunction, va_list list );
 
@@ -180,19 +182,19 @@ bool VCallMethod( void* pThis, asIScriptFunction* pFunction, va_list list );
 bool CallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... );
 
 /**
-*	@see CallMethod( void* pThis, asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, ... )
+*	@see CallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
 */
 bool CallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, ... );
 
 /**
 *	Acquires a context using asIScriptEngine::RequestContext
-*	@see CallMethod( void* pThis, asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, ... )
+*	@see CallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
 */
 bool CallMethod( void* pThis, asIScriptFunction* pFunction, CallFlags_t flags, ... );
 
 /**
 *	Acquires a context using asIScriptEngine::RequestContext
-*	@see CallMethod( void* pThis, asIScriptFunction& function, asIScriptContext& context, CallFlags_t flags, ... )
+*	@see CallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
 */
 bool CallMethod( void* pThis, asIScriptFunction* pFunction, ... );
 }

@@ -54,6 +54,8 @@ void CASHookManager::RegisterHooks( asIScriptEngine& engine )
 	std::string szNS;
 	std::string szOldNS = engine.GetDefaultNamespace();
 
+	const asDWORD accessMask = engine.SetDefaultAccessMask( 0xFFFFFFFF );
+
 	int result = engine.RegisterEnum( "HookReturnCode" );
 
 	assert( result >= 0 );
@@ -63,6 +65,14 @@ void CASHookManager::RegisterHooks( asIScriptEngine& engine )
 
 	result = engine.RegisterEnumValue( "HookReturnCode", "HOOK_HANDLED", static_cast<int>( HookReturnCode::HANDLED ) );
 	assert( result >= 0 );
+
+	engine.RegisterObjectType( "CHookManager", 0, asOBJ_REF | asOBJ_NOCOUNT );
+
+	engine.RegisterObjectMethod( "CHookManager", "bool HookFunction(const uint32 hookID, ?& in)", asMETHOD( CASHookManager, HookFunction ), asCALL_THISCALL );
+
+	engine.RegisterObjectMethod( "CHookManager", "void UnhookFunction(const uint32 hookID, ?& in)", asMETHOD( CASHookManager, UnhookFunction ), asCALL_THISCALL );
+
+	engine.RegisterGlobalProperty( "CHookManager g_HookManager", this );
 
 	asUINT uiHookIndex = engine.GetFuncdefCount();
 
@@ -81,6 +91,8 @@ void CASHookManager::RegisterHooks( asIScriptEngine& engine )
 		result = engine.SetDefaultNamespace( szNS.c_str() );
 		assert( result >= 0 );
 
+		engine.SetDefaultAccessMask( pHook->GetAccessMask() );
+
 		szDeclaration = std::string( "const uint32 " ) + pHook->GetName();
 		result = engine.RegisterGlobalProperty( szDeclaration.c_str(), &pHook->GetMutableHookID() );
 		assert( result >= 0 );
@@ -93,19 +105,13 @@ void CASHookManager::RegisterHooks( asIScriptEngine& engine )
 		result = engine.RegisterFuncdef( szDeclaration.c_str() );
 		assert( result >= 0 );
 
-		pHook->SetFuncDef( engine.GetFuncdefByIndex( uiHookIndex )->GetFuncdefSignature() );
+		pHook->SetFuncDef( engine.GetFuncdefByIndex( uiHookIndex++ )->GetFuncdefSignature() );
 	}
 
 	result = engine.SetDefaultNamespace( szOldNS.c_str() );
 	assert( result >= 0 );
 
-	engine.RegisterObjectType( "CHookManager", 0, asOBJ_REF | asOBJ_NOCOUNT );
-
-	engine.RegisterObjectMethod( "CHookManager", "bool HookFunction(const uint32 hookID, ?& in)", asMETHOD( CASHookManager, HookFunction ), asCALL_THISCALL );
-
-	engine.RegisterObjectMethod( "CHookManager", "void UnhookFunction(const uint32 hookID, ?& in)", asMETHOD( CASHookManager, UnhookFunction ), asCALL_THISCALL );
-
-	engine.RegisterGlobalProperty( "CHookManager g_HookManager", this );
+	engine.SetDefaultAccessMask( accessMask );
 }
 
 bool CASHookManager::HookFunction( const as::HookID_t hookID, void* pValue, const int iTypeId )

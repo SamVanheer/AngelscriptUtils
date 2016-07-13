@@ -79,6 +79,8 @@ int main( int iArgc, char* pszArgV[] )
 		RegisterScriptArray( manager.GetEngine(), true );
 		RegisterScriptDictionary( manager.GetEngine() );
 
+		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
+
 		manager.GetHookManager().AddHook( &hook );
 
 		manager.GetHookManager().RegisterHooks( *manager.GetEngine() );
@@ -97,15 +99,57 @@ int main( int iArgc, char* pszArgV[] )
 
 		if( pModule )
 		{
-			auto pFunction = pModule->GetModule()->GetFunctionByName( "main" );
+			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "main" ) )
+			{
+				hook.AddFunction( pFunction );
 
-			hook.AddFunction( pFunction );
+				std::string szString = "Hello World!\n";
 
-			std::string szString = "Hello World!\n";
+				as::CallFunction( pFunction, &szString );
 
-			as::CallFunction( pFunction, &szString );
+				hook.Call( CallFlag::NONE, &szString );
+			}
 
-			hook.Call( CallFlag::NONE, &szString );
+			/*
+			if( auto pFunc2 = pModule->GetModule()->GetFunctionByName( "Function" ) )
+			{
+				for( asUINT uiIndex = 0; uiIndex < pFunc2->GetParamCount(); ++uiIndex )
+				{
+					int iTypeId;
+					const char* pszName;
+					pFunc2->GetParam( uiIndex, &iTypeId, nullptr, &pszName );
+
+					std::cout << "Parameter " << uiIndex << ": " << pszName << std::endl;
+				
+					if( auto pType = manager.GetEngine()->GetTypeInfoById( iTypeId ) )
+					{
+						std::cout << pType->GetNamespace() << "::" << pType->GetName() << std::endl;
+
+						asDWORD uiFlags = pType->GetFlags();
+
+						if( uiFlags & asOBJ_VALUE )
+							std::cout << "Value" << std::endl;
+
+						if( uiFlags & asOBJ_REF )
+							std::cout << "Ref" << std::endl;
+
+						if( uiFlags & asOBJ_ENUM )
+							std::cout << "Enum" << std::endl;
+
+						if( uiFlags & asOBJ_FUNCDEF )
+							std::cout << "Funcdef" << std::endl;
+
+						if( uiFlags & asOBJ_POD )
+							std::cout << "POD" << std::endl;
+
+						if( uiFlags & asOBJ_TYPEDEF )
+							std::cout << "Typedef" << std::endl;
+					}
+					else //Only primitive types don't have type info right now.
+						std::cout << "No type info" << std::endl;
+				}
+			}
+			*/
 
 			manager.GetHookManager().UnhookModuleFunctions( pModule );
 

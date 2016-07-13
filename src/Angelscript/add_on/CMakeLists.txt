@@ -7,4 +7,6 @@ add_sources(
 	scriptdictionary.cpp
 	scriptarray.h
 	scriptarray.cpp
+	scriptany.h
+	scriptany.cpp
 )

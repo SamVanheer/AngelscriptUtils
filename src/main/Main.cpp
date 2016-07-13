@@ -6,6 +6,7 @@
 #include "Angelscript/add_on/scriptstdstring.h"
 #include "Angelscript/add_on/scriptarray.h"
 #include "Angelscript/add_on/scriptdictionary.h"
+#include "Angelscript/add_on/scriptany.h"
 
 #include "Angelscript/wrapper/ASCallable.h"
 #include "Angelscript/wrapper/CASContext.h"
@@ -78,6 +79,7 @@ int main( int iArgc, char* pszArgV[] )
 		RegisterStdString( manager.GetEngine() );
 		RegisterScriptArray( manager.GetEngine(), true );
 		RegisterScriptDictionary( manager.GetEngine() );
+		RegisterScriptAny( manager.GetEngine() );
 
 		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
 

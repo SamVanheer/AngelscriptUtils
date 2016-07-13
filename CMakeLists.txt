@@ -77,6 +77,8 @@ project( AngelscriptUtils )
 set( AngelscriptUtils_VERSION_MAJOR 1 )
 set( AngelscriptUtils_VERSION_MINOR 0 )
 
+add_definitions( -D_CRT_SECURE_NO_WARNINGS )
+
 #include the subdirectory containing our libs
 add_subdirectory( src )
 

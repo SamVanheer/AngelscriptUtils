@@ -1,29 +1,51 @@
 #ifndef ANGELSCRIPT_CASARGUMENTS_H
 #define ANGELSCRIPT_CASARGUMENTS_H
 
+#include <vector>
+
 #include "Angelscript/util/CASBaseClass.h"
 
-/*
-* Everything related to handling arguments is in here
-*/
+class asIScriptEngine;
 
 /*
-* Possible types that an argument can be
+*	Everything related to handling arguments is in here
 */
-enum ArgumentType_t
+
+namespace ArgType
 {
-	AT_NONE			= 1 << 0,	//No type set
-	AT_VOID			= 1 << 1,	//No return type
-	AT_PRIMITIVE	= 1 << 2,
-	AT_VALUE		= 1 << 3,
-	AT_REF			= 1 << 4,
-	AT_ENUM			= 1 << 5,	//It's an enum, treat as dword
-};
-
-/*
-* Can store the value of an argument
+/**
+*	Possible types that an argument can be.
+*	TODO: shouldn't be a bit field.
+*	TODO: shouldn't this be trivial to determine using helper functions?
+*	TODO: move to ASUtil.h
+*	TODO: probably obsolete due to ITypeInfo's existence
 */
-struct ArgumentValue_t
+enum ArgType
+{
+	/**
+	*	No type set.
+	*/
+	NONE		= 1 << 0,
+
+	/**
+	*	No return type.
+	*/
+	VOID		= 1 << 1,
+	PRIMITIVE	= 1 << 2,
+	VALUE		= 1 << 3,
+	REF			= 1 << 4,
+
+	/**
+	*	It's an enum, treat as dword.
+	*/
+	ENUM		= 1 << 5,
+};
+}
+
+/**
+*	Can store the value of an argument.
+*/
+struct ArgumentValue final
 {
 	union
 	{
@@ -38,96 +60,210 @@ struct ArgumentValue_t
 		void*		pValue;
 	};
 
-	ArgumentValue_t()
+	ArgumentValue()
 		: qword()
 	{
 	}
 
 };
 
-/*
-* Represents a single argument
+/**
+*	Represents a single argument.
 */
-class CASArgument
+class CASArgument final
 {
 public:
 
-	CASArgument()
-		: m_iTypeId( - 1 )
-		, m_ArgType( AT_NONE )
-		, m_Value()
-	{
-	}
+	/**
+	*	Default constructor.
+	*/
+	CASArgument() = default;
 
+	/**
+	*	Destructor.
+	*/
 	~CASArgument();
 
+	/**
+	*	Copy constructor.
+	*/
 	CASArgument( const CASArgument& other );
+
+	/**
+	*	Assignment operator.
+	*/
 	CASArgument& operator=( const CASArgument& other );
 
+	/**
+	*	@return The type id.
+	*/
 	inline int GetTypeId() const { return m_iTypeId; }
 
-	inline ArgumentType_t GetArgumentType() const { return m_ArgType; }
+	/**
+	*	@return The argument type.
+	*/
+	inline ArgType::ArgType GetArgumentType() const { return m_ArgType; }
 
-	inline ArgumentValue_t& GetArgumentValue() { return m_Value; }
-	inline const ArgumentValue_t& GetArgumentValue() const { return m_Value; }
+	/**
+	*	@return The argument value.
+	*/
+	inline const ArgumentValue& GetArgumentValue() const { return m_Value; }
 
-	bool HasValue() const { return !( m_ArgType & ( AT_VOID | AT_NONE ) ); }
+	/**
+	*	@copydoc GetArgumentValue() const
+	*/
+	inline ArgumentValue& GetArgumentValue() { return m_Value; }
 
-	//For read access only!
+	/**
+	*	@return Whether this argument has a value.
+	*/
+	bool HasValue() const { return !( m_ArgType & ( ArgType::VOID | ArgType::NONE ) ); }
+
+	/**
+	*	Gets the address of the argument.
+	*	For read access only!
+	*	@return The address of the argument.
+	*/
 	void* GetArgumentAsPointer() const;
 
-	bool Set( int iTypeId, ArgumentType_t type, const ArgumentValue_t& value, bool fCopy = false );
+	/**
+	*	Sets the argument to the given value and type.
+	*	@param engine Engine to use.
+	*	@param iTypeId Type Id.
+	*	@param type Argument type.
+	*	@param value Value to assign.
+	*	@param bCopy Whether to copy the value, or point to the same instance.
+	*	@return true on success, false otherwise.
+	*/
+	bool Set( asIScriptEngine& engine, const int iTypeId, const ArgType::ArgType type, const ArgumentValue& value, const bool bCopy = false );
 
+	/**
+	*	Same as the other version, but will retrieve the engine from the active manager instead.
+	*	@see Set( asIScriptEngine& engine, const int iTypeId, const ArgType::ArgType type, const ArgumentValue& value, const bool bCopy = false )
+	*/
+	bool Set( const int iTypeId, const ArgType::ArgType type, const ArgumentValue& value, const bool bCopy = false );
+
+	/**
+	*	Sets the argument to that of the given argument. The value is copy constructed, or in the case of ref types, a reference is added.
+	*	@param other Argument to copy.
+	*	@return true on success, false otherwise.
+	*/
 	bool Set( const CASArgument& other );
 
+	/**
+	*	Resets the argument. It is left with no value.
+	*/
 	void Reset();
 
 private:
 
 	//Object type id
-	int m_iTypeId;
+	int m_iTypeId = -1;
 
 	//Used to prevent looking up the type again if it involves expensive lookup
-	ArgumentType_t m_ArgType;
+	ArgType::ArgType m_ArgType = ArgType::NONE;
 
 	//The actual value.
-	ArgumentValue_t m_Value;
+	ArgumentValue m_Value = ArgumentValue();
 };
 
-/*
-* This class can store a variable number of arguments
+/**
+*	This class can store a variable number of arguments.
 */
-class CASArguments : public CASRefCountedBaseClass
+class CASArguments final : public CASRefCountedBaseClass
 {
 public:
+	typedef std::vector<CASArgument> Arguments_t;
 
-	CASArguments();
-	CASArguments( asIScriptGeneric* pArguments, size_t uiStartIndex = 0 );
-	CASArguments( asIScriptFunction* pTargetFunc, va_list list );
+public:
+
+	/**
+	*	Default constructor. Creates an empty argument list.
+	*/
+	CASArguments() = default;
+
+	/**
+	*	Constructor. Creates a list of arguments based on the given generic call instance.
+	*	@param arguments Generic call instance.
+	*	@param uiStartIndex The index of the first argument to use.
+	*	@see SetArguments( asIScriptGeneric& arguments, size_t uiStartIndex )
+	*/
+	CASArguments( asIScriptGeneric& arguments, size_t uiStartIndex = 0 );
+
+	/**
+	*	Constructor. Creates a list of arguments based on the given function, and the given varargs pointer.
+	*	@param targetFunc Function whose arguments will be used for type info.
+	*	@param list Pointer to the arguments to use.
+	*	@see SetArguments( asIScriptFunction& targetFunc, va_list list )
+	*/
+	CASArguments( asIScriptFunction& targetFunc, va_list list );
+
+	/**
+	*	Destructor.
+	*/
 	~CASArguments();
 
 	void Release() const;
 
+	/**
+	*	Copy constructor.
+	*/
 	CASArguments( const CASArguments& other );
+
+	/**
+	*	Assignment operator.
+	*/
 	CASArguments& operator=( const CASArguments& other );
 
-	CASArgument* GetArgumentList() const { return m_pArguments; }
-
-	size_t GetCount() const { return m_uiCount; }
-
-	bool HasArguments() const { return m_uiCount > 0; }
-
+	/**
+	*	Copies the arguments from the given arguments object to this one.
+	*/
 	void Assign( const CASArguments& other );
 
+	/**
+	*	Clears the list of arguments.
+	*/
 	void Clear();
 
-	bool SetArguments( asIScriptGeneric* pArguments, size_t uiStartIndex = 0 );
+	/**
+	*	@return The list of arguments.
+	*/
+	const Arguments_t& GetArgumentList() const { return m_Arguments; }
 
-	bool SetArguments( asIScriptFunction* pTargetFunc, va_list list );
+	/**
+	*	@return The number of arguments.
+	*/
+	size_t GetArgumentCount() const { return m_Arguments.size(); }
+
+	/**
+	*	Gets the argument at the given index.
+	*	@return The requested argument, or null if the index is invalid.
+	*/
+	const CASArgument* GetArgument( const size_t uiIndex ) const;
+
+	/**
+	*	@return Whether there are any arguments in this object.
+	*/
+	bool HasArguments() const { return !m_Arguments.empty(); }
+
+	/**
+	*	Sets the list of arguments to that of the given generic call instance.
+	*	@param arguments Generic call instance.
+	*	@param uiStartIndex The index of the first argument to use.
+	*	@return true on success, false otherwise.
+	*/
+	bool SetArguments( asIScriptGeneric& arguments, size_t uiStartIndex = 0 );
+
+	/**
+	*	Sets the list of arguments to that of the given function, and the given varargs pointer.
+	*	@param targetFunc Function whose arguments will be used for type info.
+	*	@param list Pointer to the arguments to use.
+	*	@return true on success, false otherwise.
+	*/
+	bool SetArguments( asIScriptFunction& targetFunc, va_list list );
 
 private:
-	CASArgument* m_pArguments;
-	size_t m_uiCount;
+	Arguments_t m_Arguments;
 };
 
 #endif //ANGELSCRIPT_CASARGUMENTS_H

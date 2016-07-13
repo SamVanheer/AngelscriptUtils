@@ -23,6 +23,16 @@ namespace ctx
 bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& context, va_list list );
 
 /**
+*	Sets an argument on arg. Determines whether it's a primitive or object argument.
+*	@param engine Script engine.
+*	@param pData Data to copy.
+*	@param iTypeId Type Id.
+*	@param arg Argument to set.
+*	@return true on success, false otherwise.
+*/
+bool SetArgument( asIScriptEngine& engine, void* pData, int iTypeId, CASArgument& arg );
+
+/**
 *	Sets an argument on the context, taking the argument from varargs.
 *	@param engine Script engine.
 *	@param targetFunc Target function.
@@ -43,7 +53,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 *	@param[ out ] pOutArgType Optional. Argument type.
 *	@return true on success, false otherwise.
 */
-bool GetArgumentFromVarargs( ArgumentValue_t& value, int iTypeId, asDWORD uiTMFlags, va_list& list, asDWORD* puiObjFlags = nullptr, ArgumentType_t* pOutArgType = nullptr );
+bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlags, va_list& list, asDWORD* puiObjFlags = nullptr, ArgType::ArgType* pOutArgType = nullptr );
 
 /**
 *	Sets an argument on the context, taking the argument from an ArgumentValue_t.
@@ -57,7 +67,7 @@ bool GetArgumentFromVarargs( ArgumentValue_t& value, int iTypeId, asDWORD uiTMFl
 *	@return true on success, false otherwise.
 */
 bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context,
-						 asUINT uiIndex, int iSourceTypeId, ArgumentValue_t& value, bool bAllowPrimitiveReferences );
+						 asUINT uiIndex, int iSourceTypeId, ArgumentValue& value, bool bAllowPrimitiveReferences );
 
 /**
 *	Converts the input argument to either an asQWORD or double.
@@ -72,7 +82,17 @@ bool ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, 
 /**
 *	@see ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& flValue )
 */
-bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue_t& value, asINT64& uiValue, double& flValue );
+bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue& value, asINT64& uiValue, double& flValue );
+
+/**
+*	Tries to set the given data on the given value.
+*	@param pData Data to copy.
+*	@param iTypeid Type Id of the pData instance.
+*	@param arg Argument to set.
+*	@param[ out ] bOutWasPrimitive Whether the value was a primitive type or not.
+*	@return true on success, false otherwise.
+*/
+bool SetPrimitiveArgument( void* pData, int iTypeId, CASArgument& arg, bool& bOutWasPrimitive );
 
 /**
 *	Tries to set the given data on the given value.
@@ -82,7 +102,17 @@ bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue_t& value, asINT6
 *	@param[ out ] bOutWasPrimitive Whether the value was a primitive type or not.
 *	@return true on success, false otherwise.
 */
-bool SetPrimitiveArgument( void* pData, int iTypeId, ArgumentValue_t& value, bool& bOutWasPrimitive );
+bool SetPrimitiveArgument( void* pData, int iTypeId, ArgumentValue& value, bool& bOutWasPrimitive );
+
+/**
+*	Sets an object argument on the given argument.
+*	@param engine Script engine.
+*	@param pObject Object to copy or addref.
+*	@param iTypeId Type Id.
+*	@param arg Argument to set.
+*	@return true on success, false otherwise.
+*/
+bool SetObjectArgument( asIScriptEngine& engine, void* pObject, int iTypeId, CASArgument& arg );
 
 /**
 *	Convenience method for when you don't want to get return type info yourself.

@@ -12,6 +12,17 @@
 namespace as
 {
 /**
+*	Returns whether the given type id is that of void.
+*	Exists mostly for completeness.
+*	@param iTypeId Type Id.
+*	@return true if it is void, false otherwise.
+*/
+inline constexpr bool IsVoid( const int iTypeId )
+{
+	return asTYPEID_VOID == iTypeId;
+}
+
+/**
 *	Returns whether a given type id is that of a primitive type.
 *	@param iTypeId Type Id.
 *	@return true if it is a primitive type, false otherwise.

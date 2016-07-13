@@ -9,10 +9,34 @@ struct asSMessageInfo;
 
 /**
 *	Manages the Angelscript engine instance, the module and hook managers.
+*	Multiple instances of this class can exist. In that case, you will have to activate the manager before using it.
+*	Code that accesses the active manager will need it to be activated in order to work properly.
 */
 class CASManager final
 {
 public:
+	/**
+	*	Gets the currently active manager.
+	*	@see ActivateManager
+	*	@see Activate
+	*/
+	static CASManager* GetActiveManager();
+
+	/**
+	*	Makes the given manager the active manager. Can be null.
+	*/
+	static void ActivateManager( CASManager* pManager );
+
+	/**
+	*	Makes this the active manager.
+	*/
+	void Activate();
+
+	/**
+	*	If this manager is the active manager, deactivates it.
+	*/
+	void Deactivate();
+
 	/**
 	*	Constructor.
 	*/
@@ -40,12 +64,14 @@ public:
 
 	/**
 	*	Initializes the manager.
+	*	On success, makes this the active manager.
 	*	@return true on success, false otherwise.
 	*/
 	bool Initialize();
 
 	/**
 	*	Shuts down the manager.
+	*	Will set the active manager to null.
 	*/
 	void Shutdown();
 
@@ -56,6 +82,8 @@ private:
 	void MessageCallback( const asSMessageInfo* pMsg );
 
 private:
+	static CASManager* m_pActiveManager;
+
 	asIScriptEngine* m_pScriptEngine = nullptr;
 
 	CASModuleManager m_ModuleManager;

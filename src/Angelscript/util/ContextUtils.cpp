@@ -31,6 +31,20 @@ bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& contex
 	return bSuccess;
 }
 
+bool SetArgument( asIScriptEngine& engine, void* pData, int iTypeId, CASArgument& arg )
+{
+	bool bSuccess = true;
+
+	bool bWasPrimitive = false;
+
+	bSuccess = SetPrimitiveArgument( pData, iTypeId, arg, bWasPrimitive );
+
+	if( bSuccess && !bWasPrimitive )
+		bSuccess = SetObjectArgument( engine, pData, iTypeId, arg );
+
+	return bSuccess;
+}
+
 bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, asUINT uiIndex, va_list& list )
 {
 	int iTypeId;
@@ -45,7 +59,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 
 	bool bSuccess = true;
 
-	ArgumentValue_t value;
+	ArgumentValue value;
 
 	if( ( bSuccess = GetArgumentFromVarargs( value, iTypeId, uiFlags, list ) ) )
 	{
@@ -57,7 +71,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 	return bSuccess;
 }
 
-bool GetArgumentFromVarargs( ArgumentValue_t& value, int iTypeId, asDWORD uiTMFlags, va_list& list, asDWORD* puiObjFlags, ArgumentType_t* pOutArgType )
+bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlags, va_list& list, asDWORD* puiObjFlags, ArgType::ArgType* pOutArgType )
 {
 	if( pOutArgType && !puiObjFlags )
 		return false;
@@ -65,7 +79,7 @@ bool GetArgumentFromVarargs( ArgumentValue_t& value, int iTypeId, asDWORD uiTMFl
 	bool bSuccess = true;
 
 	if( pOutArgType )
-		*pOutArgType = AT_NONE;
+		*pOutArgType = ArgType::NONE;
 
 	//Its an object (ref or value type), or handle to ref type
 	//Handles reference parameters automatically, source pointer must be correct type
@@ -77,9 +91,9 @@ bool GetArgumentFromVarargs( ArgumentValue_t& value, int iTypeId, asDWORD uiTMFl
 		if( pOutArgType )
 		{
 			if( ( *puiObjFlags ) & asOBJ_REF )
-				*pOutArgType = AT_REF;
+				*pOutArgType = ArgType::REF;
 			else if( ( *puiObjFlags ) & asOBJ_VALUE )
-				*pOutArgType = AT_VALUE;
+				*pOutArgType = ArgType::VALUE;
 			else
 			{
 				//TODO
@@ -131,7 +145,7 @@ bool GetArgumentFromVarargs( ArgumentValue_t& value, int iTypeId, asDWORD uiTMFl
 				if( as::IsEnum( iTypeId ) )
 				{
 					if( pOutArgType )
-						*pOutArgType = AT_ENUM;
+						*pOutArgType = ArgType::ENUM;
 
 					value.dword = va_arg( list, long );
 				}
@@ -146,14 +160,14 @@ bool GetArgumentFromVarargs( ArgumentValue_t& value, int iTypeId, asDWORD uiTMFl
 		}
 
 		if( pOutArgType && bWasPrimitive )
-			*pOutArgType = AT_PRIMITIVE;
+			*pOutArgType = ArgType::PRIMITIVE;
 	}
 
 	return bSuccess;
 }
 
 bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context,
-										asUINT uiIndex, int iSourceTypeId, ArgumentValue_t& value, bool bAllowPrimitiveReferences )
+										asUINT uiIndex, int iSourceTypeId, ArgumentValue& value, bool bAllowPrimitiveReferences )
 {
 	int iTypeId;
 	asDWORD uiFlags;
@@ -335,7 +349,7 @@ bool ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, 
 	return ConvertInputArgToLargest( pArg->GetTypeId(), pArg->GetArgumentValue(), uiValue, flValue );
 }
 
-bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue_t& value, asINT64& uiValue, double& flValue )
+bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue& value, asINT64& uiValue, double& flValue )
 {
 	bool bSuccess = true;
 
@@ -393,7 +407,29 @@ bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue_t& value, asINT6
 	return bSuccess;
 }
 
-bool SetPrimitiveArgument( void* pData, int iTypeId, ArgumentValue_t& value, bool& bOutWasPrimitive )
+bool SetPrimitiveArgument( void* pData, int iTypeId, CASArgument& arg, bool& bOutWasPrimitive )
+{
+	bOutWasPrimitive = false;
+
+	if( !pData )
+		return false;
+
+	ArgumentValue value;
+
+	bool bSuccess = SetPrimitiveArgument( pData, iTypeId, value, bOutWasPrimitive );
+
+	if( bSuccess && bOutWasPrimitive )
+	{
+		bSuccess = arg.Set( iTypeId, ArgType::PRIMITIVE, value );
+
+		if( !bSuccess )
+			bOutWasPrimitive = false;
+	}
+
+	return bSuccess;
+}
+
+bool SetPrimitiveArgument( void* pData, int iTypeId, ArgumentValue& value, bool& bOutWasPrimitive )
 {
 	if( !pData )
 	{
@@ -442,7 +478,85 @@ bool SetPrimitiveArgument( void* pData, int iTypeId, ArgumentValue_t& value, boo
 	return bSuccess;
 }
 
-#if 0
+bool SetObjectArgument( asIScriptEngine& engine, void* pObject, int iTypeId, CASArgument& arg )
+{
+	bool bSuccess = true;
+
+	ArgType::ArgType argType = ArgType::NONE;
+	ArgumentValue value;
+
+	if( asITypeInfo* pType = engine.GetTypeInfoById( iTypeId ) )
+	{
+		const asDWORD uiFlags = pType->GetFlags();
+
+		//Is it a value type?
+		if( uiFlags & asOBJ_VALUE )
+		{
+			argType = ArgType::VALUE;
+			value.pValue = engine.CreateScriptObjectCopy( pObject, pType );
+		}
+		else if( uiFlags & asOBJ_REF ) //is it a reference type?
+		{
+			argType = ArgType::REF;
+
+			//All types are interpreted as pointers
+			value.pValue = pObject;
+
+			if( iTypeId & asTYPEID_OBJHANDLE )
+			{
+				//Handles are pointer to pointer, dereference
+				//If this is a handle to a function (not funcdef), will also be correctly dereferenced
+				value.pValue = *reinterpret_cast<void**>( value.pValue );
+
+				//Remove flag from typeid
+				iTypeId &= ~asTYPEID_OBJHANDLE;
+			}
+
+			//Functions require a little more work
+			if( uiFlags & asOBJ_FUNCDEF )
+			{
+				//Note: you can pass in a function pointer directly, without casting to a funcdef.
+				//However, since a function name can't be used as a parameter, no functions could ever exist with that format.
+				//This is impossible to detect and can't be guarded against.
+				//So we allow it, but warn against it in the manual.
+				asIScriptFunction* pFunc = reinterpret_cast<asIScriptFunction*>( value.pValue );
+
+				//Delegates have to be handled as pointer to pointer
+				if( pFunc->GetFuncType() == asFUNC_DELEGATE )
+					value.pValue = *reinterpret_cast<void**>( value.pValue );
+			}
+
+			engine.AddRefScriptObject( value.pValue, pType );
+		}
+		else
+		{
+			//I don't know what this is.
+			bSuccess = false;
+			//TODO
+			//gASLog()->Error( ASLOG_CRITICAL, "CASArguments: unknown type '%s', aborting!\n", pType->GetName() );
+		}
+	}
+	else
+	{
+		//Check if it's an enum.
+		if( as::IsEnum( iTypeId ) )
+		{
+			argType = ArgType::ENUM;
+			value.dword = *reinterpret_cast<asDWORD*>( pObject );
+		}
+		else //I don't know what this is.
+		{
+			bSuccess = false;
+			//TODO
+			//gASLog()->Error( ASLOG_CRITICAL, "CASArguments: unknown type '%s'(%d), aborting!\n", pEngine->GetTypeDeclaration( iTypeId, true ), iTypeId );
+		}
+	}
+
+	if( bSuccess )
+		arg.Set( iTypeId, argType, value );
+
+	return bSuccess;
+}
 
 bool GetReturnValue( asIScriptContext& context, const asIScriptFunction& func, CASArgument& retVal, asDWORD* uiOutFlags )
 {
@@ -459,18 +573,19 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 {
 	bool bSuccess = true;
 
-	ArgumentType_t argType = AT_NONE;
-	ArgumentValue_t value;
+	ArgType::ArgType argType = ArgType::NONE;
+	ArgumentValue value;
+
+	auto pEngine = context.GetEngine();
 
 	//Object handle type
 	if( iTypeId & asTYPEID_OBJHANDLE )
 	{
-		argType = AT_REF;
+		argType = ArgType::REF;
 		value.pValue = context.GetReturnObject();
 	}
 	else if( iTypeId & asTYPEID_MASK_OBJECT ) //Object type (ref or value type)
 	{
-		asIScriptEngine* pEngine = context.GetEngine();
 		asITypeInfo* pType = pEngine->GetTypeInfoById( iTypeId );
 
 		if( pType )
@@ -481,11 +596,11 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 
 			if( uiObjFlags & asOBJ_REF )
 			{
-				argType = AT_REF;
+				argType = ArgType::REF;
 			}
 			else if( uiObjFlags & asOBJ_VALUE )
 			{
-				argType = AT_VALUE;
+				argType = ArgType::VALUE;
 
 				//If the object is returned by value, a copy needs to be made
 				//This is handled by CASArgument in the Set method below.
@@ -506,7 +621,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 	}
 	else if( iTypeId == asTYPEID_VOID )
 	{
-		argType = AT_VOID;
+		argType = ArgType::VOID;
 	}
 	else //Primitive type (including enum)
 	{
@@ -553,12 +668,12 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 		if( bSuccess )
 		{
 			if( bWasPrimitive )
-				argType = AT_PRIMITIVE;
+				argType = ArgType::PRIMITIVE;
 			else
 			{
 				if( as::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
 				{
-					argType = AT_ENUM;
+					argType = ArgType::ENUM;
 					value.dword = context.GetReturnDWord();
 				}
 				else
@@ -571,12 +686,12 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 		}
 	}
 
-	//Let the argument class handle copying
-	retVal.Set( iTypeId, argType, value, true );
+	if( !bSuccess )
+		return false;
 
-	return bSuccess;
+	//Let the argument class handle copying
+	return retVal.Set( *pEngine, iTypeId, argType, value, true );
 }
-#endif
 
 bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, void* pReturnValue )
 {

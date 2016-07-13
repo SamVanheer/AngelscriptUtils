@@ -5,6 +5,33 @@
 
 #include "CASManager.h"
 
+CASManager* CASManager::m_pActiveManager = nullptr;
+
+CASManager* CASManager::GetActiveManager()
+{
+	assert( m_pActiveManager );
+
+	return m_pActiveManager;
+}
+
+void CASManager::ActivateManager( CASManager* pManager )
+{
+	m_pActiveManager = pManager;
+}
+
+void CASManager::Activate()
+{
+	ActivateManager( this );
+}
+
+void CASManager::Deactivate()
+{
+	if( this == m_pActiveManager )
+	{
+		m_pActiveManager = nullptr;
+	}
+}
+
 CASManager::CASManager()
 	: m_ModuleManager( *this )
 	, m_HookManager( *this )
@@ -32,6 +59,8 @@ bool CASManager::Initialize()
 
 	m_pScriptEngine->SetMessageCallback( asMETHOD( CASManager, MessageCallback ), this, asCALL_THISCALL );
 
+	Activate();
+
 	return true;
 }
 
@@ -42,6 +71,8 @@ void CASManager::Shutdown()
 		return;
 	}
 
+	Activate();
+
 	//Unhook all functions to prevent dangling pointers.
 	m_HookManager.UnhookAllFunctions();
 
@@ -51,6 +82,8 @@ void CASManager::Shutdown()
 	//Let it go.
 	m_pScriptEngine->ShutDownAndRelease();
 	m_pScriptEngine = nullptr;
+
+	Deactivate();
 }
 
 void CASManager::MessageCallback( const asSMessageInfo* pMsg )

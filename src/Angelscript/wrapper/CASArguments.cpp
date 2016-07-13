@@ -1,37 +1,27 @@
-#include "angelscript.h"
-
-#ifdef GetObject
-#undef GetObject
-#endif
-
+#include <cassert>
 #include <cstdarg>
 
+#include <angelscript.h>
+
+#include "Angelscript/CASManager.h"
 #include "Angelscript/util/ASUtil.h"
+#include "Angelscript/util/ContextUtils.h"
 
 #include "CASArguments.h"
 
-#if 0
-
-/*
-* CASArgument
-*/
 CASArgument::~CASArgument()
 {
 	Reset();
 }
 
 CASArgument::CASArgument( const CASArgument& other )
-	: m_iTypeId( -1 )
-	, m_ArgType( AT_NONE )
-	, m_Value()
 {
 	Set( other );
 }
 
 CASArgument& CASArgument::operator=( const CASArgument& other )
 {
-	if( this != &other )
-		Set( other );
+	Set( other );
 
 	return *this;
 }
@@ -43,68 +33,81 @@ void* CASArgument::GetArgumentAsPointer() const
 
 	switch( m_ArgType )
 	{
-	case AT_PRIMITIVE:
-	case AT_ENUM:		return const_cast<asQWORD*>( &m_Value.qword );
+	case ArgType::PRIMITIVE:
+	case ArgType::ENUM:		return const_cast<asQWORD*>( &m_Value.qword );
 
-	case AT_REF:
-	case AT_VALUE:		return m_Value.pValue;
+	case ArgType::REF:
+	case ArgType::VALUE:	return m_Value.pValue;
 
-	default:			return nullptr;
+	default:				return nullptr;
 	}
 }
 
-bool CASArgument::Set( int iTypeId, ArgumentType_t type, const ArgumentValue_t& value, bool fCopy )
+bool CASArgument::Set( asIScriptEngine& engine, const int iTypeId, const ArgType::ArgType type, const ArgumentValue& value, const bool bCopy )
 {
 	Reset();
 
-	if( type == AT_NONE )
+	if( type == ArgType::NONE )
 		return true;
 
-	bool fSuccess = true;
+	bool bSuccess = true;
 
 	m_iTypeId = iTypeId;
 	m_ArgType = type;
 
-	if( fCopy )
+	if( bCopy )
 	{
-		if( type == AT_VALUE || type == AT_REF )
+		if( type == ArgType::VALUE || type == ArgType::REF )
 		{
-			asIScriptEngine* pEngine = gASManager()->GetScriptEngine();
-
-			asITypeInfo* pType = pEngine->GetObjectTypeById( iTypeId );
-
-			if( pType )
+			if( asITypeInfo* pType = engine.GetTypeInfoById( iTypeId ) )
 			{
 				//Need to copy value
-				if( type == AT_VALUE )
-					m_Value.pValue = pEngine->CreateScriptObjectCopy( value.pValue, pType );
-				else //Need to addref
+				if( type == ArgType::VALUE )
 				{
-					pEngine->AddRefScriptObject( value.pValue, pType );
+					m_Value.pValue = engine.CreateScriptObjectCopy( value.pValue, pType );
+				}
+				else
+				{
+					//Need to addref
+					engine.AddRefScriptObject( value.pValue, pType );
 					m_Value = value;
 				}
 			}
 			else
 			{
-				gASLog()->Error( ASLOG_CRITICAL, "CASArgument::Set: failed to get object type!\n" );
-				fSuccess = false;
+				//TODO
+				//gASLog()->Error( ASLOG_CRITICAL, "CASArgument::Set: failed to get object type!\n" );
+				bSuccess = false;
 			}
 		}
-		else if( type == AT_VOID )
+		else if( type == ArgType::VOID )
 		{
 			//Do nothing
 		}
-		else //Primitive type or enum, just copy
+		else
+		{
+			//Primitive type or enum, just copy
 			m_Value = value;
+		}
 	}
-	else if( type != AT_VOID )
+	else if( type != ArgType::VOID )
+	{
 		m_Value = value;
+	}
 
-	return fSuccess;
+	return bSuccess;
+}
+
+bool CASArgument::Set( const int iTypeId, const ArgType::ArgType type, const ArgumentValue& value, const bool bCopy )
+{
+	return Set( *CASManager::GetActiveManager()->GetEngine(), iTypeId, type, value, bCopy );
 }
 
 bool CASArgument::Set( const CASArgument& other )
 {
+	if( this == &other )
+		return true;
+
 	return Set( other.GetTypeId(), other.GetArgumentType(), other.GetArgumentValue(), true );
 }
 
@@ -115,42 +118,33 @@ void CASArgument::Reset()
 		//Release reference if needed
 		if( !as::IsPrimitive( m_iTypeId ) && !as::IsEnum( m_iTypeId ) )
 		{
-			asIScriptEngine* pEngine = gASManager()->GetScriptEngine();
+			auto pEngine = CASManager::GetActiveManager()->GetEngine();
+
 			asITypeInfo* pType = pEngine->GetTypeInfoById( m_iTypeId );
 
 			if( pType )
 				pEngine->ReleaseScriptObject( m_Value.pValue, pType );
 			else
-				gASLog()->Error( ASLOG_CRITICAL, "CASArgument::Reset: failed to get object type!\n" );
+			{
+				//TODO
+				//gASLog()->Error( ASLOG_CRITICAL, "CASArgument::Reset: failed to get object type!\n" );
+			}
 		}
 
 		m_iTypeId = -1;
-		m_ArgType = AT_NONE;
-		m_Value = ArgumentValue_t();
+		m_ArgType = ArgType::NONE;
+		m_Value = ArgumentValue();
 	}
 }
 
-/*
-* CASArguments
-*/
-CASArguments::CASArguments()
-	: m_pArguments( nullptr )
-	, m_uiCount( 0 )
+CASArguments::CASArguments( asIScriptGeneric& arguments, size_t uiStartIndex )
 {
+	SetArguments( arguments, uiStartIndex );
 }
 
-CASArguments::CASArguments( asIScriptGeneric* pArguments, size_t uiStartIndex )
-	: m_pArguments( nullptr )
-	, m_uiCount( 0 )
+CASArguments::CASArguments( asIScriptFunction& targetFunc, va_list list )
 {
-	SetArguments( pArguments, uiStartIndex );
-}
-
-CASArguments::CASArguments( asIScriptFunction* pTargetFunc, va_list list )
-	: m_pArguments( nullptr )
-	, m_uiCount( 0 )
-{
-	SetArguments( pTargetFunc, list );
+	SetArguments( targetFunc, list );
 }
 
 CASArguments::~CASArguments()
@@ -165,8 +159,6 @@ void CASArguments::Release() const
 }
 
 CASArguments::CASArguments( const CASArguments& other )
-	: m_pArguments( nullptr )
-	, m_uiCount( 0 )
 {
 	Assign( other );
 }
@@ -184,33 +176,25 @@ void CASArguments::Assign( const CASArguments& other )
 	{
 		Clear();
 
-		m_uiCount = other.GetCount();
+		m_Arguments.resize( other.GetArgumentCount() );
 
 		if( other.HasArguments() )
 		{
-			m_pArguments = new CASArgument[ m_uiCount ];
-
-			CASArgument* pSourceArgs = other.GetArgumentList();
+			const auto& sourceArgs = other.GetArgumentList();
 
 			//Failure is unlikely, but there might be issues copying between lists that don't occur in init from scripts
-			bool fFailure = false;
+			bool bSuccess = true;
 
-			asIScriptEngine* pEngine = gASManager()->GetScriptEngine();
+			auto pEngine = CASManager::GetActiveManager()->GetEngine();
 
-			for( size_t uiIndex = 0; uiIndex < m_uiCount && !fFailure; ++uiIndex )
+			for( size_t uiIndex = 0; uiIndex < m_Arguments.size() && bSuccess; ++uiIndex )
 			{
-				CASArgument& targetArg = m_pArguments[ uiIndex ];
-				CASArgument* pSourceArg = &pSourceArgs[ uiIndex ];
+				const CASArgument& sourceArg = sourceArgs[ uiIndex ];
 
-				bool fWasPrimitive = false;
-
-				fFailure = CASReflection::SetPrimitiveArgument( targetArg, pSourceArg->GetTypeId(), &pSourceArg->GetArgumentValue().qword, fWasPrimitive );
-
-				if( !fFailure && !fWasPrimitive )
-					fFailure = CASReflection::SetObjectArgument( pEngine, targetArg, pSourceArg->GetTypeId(), &pSourceArg->GetArgumentValue().pValue );
+				bSuccess = m_Arguments[ uiIndex ].Set( *pEngine, sourceArg.GetTypeId(), sourceArg.GetArgumentType(), sourceArg.GetArgumentValue(), true );
 			}
 
-			if( fFailure )
+			if( !bSuccess )
 				Clear();
 		}
 	}
@@ -218,112 +202,111 @@ void CASArguments::Assign( const CASArguments& other )
 
 void CASArguments::Clear()
 {
-	if( m_pArguments )
-	{
-		delete[] m_pArguments;
-		m_pArguments = nullptr;
-		m_uiCount = 0;
-	}
+	m_Arguments.clear();
+	m_Arguments.shrink_to_fit();
 }
 
-bool CASArguments::SetArguments( asIScriptGeneric* pArguments, size_t uiStartIndex )
+const CASArgument* CASArguments::GetArgument( const size_t uiIndex ) const
 {
-	if( !pArguments )
-	{
-		gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments: null arguments pointer!\n" );
-		return false;
-	}
+	assert( uiIndex < m_Arguments.size() );
 
-	const size_t uiArgCount = static_cast<size_t>( pArguments->GetArgCount() );
+	if(  uiIndex >= m_Arguments.size() )
+		return nullptr;
+
+	return &m_Arguments[ uiIndex ];
+}
+
+bool CASArguments::SetArguments( asIScriptGeneric& arguments, size_t uiStartIndex )
+{
+	const size_t uiArgCount = static_cast<size_t>( arguments.GetArgCount() );
 
 	//If true, an internal error occured
 	if( uiStartIndex > uiArgCount )
 	{
-		gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments: start index is greater than argument count!\n" );
+		//TODO
+		//gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments: start index is greater than argument count!\n" );
 		return false;
 	}
 
 	const asUINT uiTargetArgs = uiArgCount - uiStartIndex;
 
-	bool fSuccess = true;
+	bool bSuccess = true;
 
-	CASArgument* pArgsArr = uiTargetArgs > 0 ? new CASArgument[ uiTargetArgs ] : NULL;
+	Arguments_t args( uiTargetArgs );
 
-	asIScriptEngine* pEngine = gASManager()->GetScriptEngine();
+	auto pEngine = CASManager::GetActiveManager()->GetEngine();
 
-	for( asUINT uiIndex = 0; uiIndex < uiTargetArgs && fSuccess; ++uiIndex )
+	for( asUINT uiIndex = 0; uiIndex < uiTargetArgs && bSuccess; ++uiIndex )
 	{
-		int iTypeId = pArguments->GetArgTypeId( uiIndex + uiStartIndex );
-		void* pData = pArguments->GetArgAddress( uiIndex + uiStartIndex );
+		void* pData = arguments.GetArgAddress( uiIndex + uiStartIndex );
+		int iTypeId = arguments.GetArgTypeId( uiIndex + uiStartIndex );
 
-		fSuccess = CASReflection::SetArgument( pEngine, pArgsArr[ uiIndex ], iTypeId, pData );
+		bSuccess = ctx::SetArgument( *pEngine, pData, iTypeId, args[ uiIndex ] );
 	}
 
-	if( fSuccess )
+	if( bSuccess )
 	{
-		m_pArguments = pArgsArr;
-		m_uiCount = uiTargetArgs;
+		m_Arguments = std::move( args );
 	}
-	else
-		delete[] pArgsArr;
 
-	return fSuccess;
+	return bSuccess;
 }
 
 //Store arguments in this object
-bool CASArguments::SetArguments( asIScriptFunction* pTargetFunc, va_list list )
+bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 {
-	if( !pTargetFunc || !list )
+	if( !list )
 		return false;
 
 	Clear();
 
-	const asUINT uiArgCount = pTargetFunc->GetParamCount();
+	const asUINT uiArgCount = targetFunc.GetParamCount();
 
-	CASArgument* pArgsArr = uiArgCount > 0 ? new CASArgument[ uiArgCount ] : NULL;
+	Arguments_t args( uiArgCount );
 
-	bool fSuccess = true;
+	bool bSuccess = true;
 
-	asIScriptEngine* pEngine = gASManager()->GetScriptEngine();
+	auto pEngine = CASManager::GetActiveManager()->GetEngine();
 
 	int iTypeId;
 	asDWORD uiFlags;
 
-	ArgumentValue_t value;
+	ArgumentValue value;
 
-	for( asUINT uiIndex = 0; uiIndex < uiArgCount && fSuccess; ++uiIndex )
+	for( asUINT uiIndex = 0; uiIndex < uiArgCount && bSuccess; ++uiIndex )
 	{
-		if( pTargetFunc->GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
+		if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
 		{
-			gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments(va_list): an error occurred while getting function parameter information, aborting!\n" );
-			fSuccess = false;
+			//TODO
+			//gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments(va_list): an error occurred while getting function parameter information, aborting!\n" );
+			bSuccess = false;
 			break;
 		}
 
-		asITypeInfo* pType = pEngine->GetObjectTypeById( iTypeId );
+		asITypeInfo* pType = pEngine->GetTypeInfoById( iTypeId );
 
 		asDWORD uiObjFlags = pType->GetFlags();
-		ArgumentType_t argType;
+		ArgType::ArgType argType;
 
-		if( ( fSuccess = CASReflection::GetArgumentFromVarargs( value, iTypeId, uiFlags, list, &uiObjFlags, &argType ) ) )
+		if( ( bSuccess = ctx::GetArgumentFromVarargs( value, iTypeId, uiFlags, list, &uiObjFlags, &argType ) ) )
 		{
 			//Make copies of the input arguments; they won't exist anymore once this method has finished execution.
-			pArgsArr[ uiIndex ].Set( iTypeId, argType, value, true );
+			args[ uiIndex ].Set( *pEngine, iTypeId, argType, value, true );
 		}
 		else
-			gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments(va_list): Function '%s::s': failed to set argument %u, aborting!\n", 
+		{
+			//TODO
+			/*
+			gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments(va_list): Function '%s::%s': failed to set argument %u, aborting!\n", 
 				pTargetFunc->GetNamespace(), pTargetFunc->GetName(), uiIndex );
+				*/
+		}
 	}
 
-	if( fSuccess )
+	if( bSuccess )
 	{
-		m_pArguments = pArgsArr;
-		m_uiCount = static_cast<size_t>( uiArgCount );
+		m_Arguments = std::move( args );
 	}
-	else
-		delete[] pArgsArr;
 
-	return fSuccess;
+	return bSuccess;
 }
-
-#endif

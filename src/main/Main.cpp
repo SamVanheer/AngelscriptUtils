@@ -33,6 +33,40 @@ public:
 	}
 };
 
+namespace ModuleAccessMask
+{
+/**
+*	Access masks for modules.
+*/
+enum ModuleAccessMask
+{
+	/**
+	*	No access.
+	*/
+	NONE			= 0,
+
+	/**
+	*	Shared API.
+	*/
+	SHARED			= 1 << 0,
+
+	/**
+	*	Map script specific.
+	*/
+	MAPSCRIPT		= SHARED | 1 << 1,
+
+	/**
+	*	Plugin script specific.
+	*/
+	PLUGIN			= SHARED | 1 << 2,
+
+	/**
+	*	All scripts.
+	*/
+	ALL				= SHARED | MAPSCRIPT | PLUGIN
+};
+}
+
 int main( int iArgc, char* pszArgV[] )
 {
 	std::cout << "Hello World!" << std::endl;
@@ -52,10 +86,10 @@ int main( int iArgc, char* pszArgV[] )
 		manager.GetEngine()->RegisterGlobalFunction( "void Print(const string& in szString)", asFUNCTION( Print ), asCALL_CDECL );
 
 		//Map scripts are per-map scripts that always have their hooks executed before any other module.
-		manager.GetModuleManager().AddDescriptor( "MapScript", 0xFFFF, as::ModulePriority::HIGHEST );
+		manager.GetModuleManager().AddDescriptor( "MapScript", ModuleAccessMask::MAPSCRIPT, as::ModulePriority::HIGHEST );
 
 		//Plugins are persistent scripts that can keep running after map changes.
-		manager.GetModuleManager().AddDescriptor( "Plugin", 0xFFFE );
+		manager.GetModuleManager().AddDescriptor( "Plugin", ModuleAccessMask::PLUGIN );
 
 		CASGenericModuleBuilder builder;
 

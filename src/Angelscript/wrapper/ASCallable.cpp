@@ -2,7 +2,7 @@
 
 #include "CASContext.h"
 
-#include "util/ContextUtils.h"
+#include "Angelscript/util/ContextUtils.h"
 
 #include "ASCallable.h"
 
@@ -72,7 +72,7 @@ bool CASCallable::GetReturnValue( void* pReturnValue )
 	asDWORD uiFlags;
 	int iTypeId = m_Function.GetReturnTypeId( &uiFlags );
 
-	return ctx::GetReturnValue( pReturnValue, iTypeId, uiFlags, m_Context.GetContext() );
+	return ctx::GetReturnValue( *m_Context.GetContext(), iTypeId, uiFlags, pReturnValue );
 }
 
 bool CASFunction::VCall( CallFlags_t flags, va_list list )

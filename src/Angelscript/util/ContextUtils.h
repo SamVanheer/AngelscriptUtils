@@ -5,64 +5,117 @@
 
 #include "Angelscript/wrapper/CASArguments.h"
 
+/**
+*	@defgroup ASContextUtils Angelscript Context Utility Code
+*
+*	@{
+*/
+
 namespace ctx
 {
 /**
 *	Sets arguments for a function call.
+*	@param targetFunc Target function.
+*	@param context Context.
+*	@param list Pointer to the arguments.
+*	@return true on success, false otherwise.
 */
-bool SetArguments( asIScriptFunction& targetFunc, asIScriptContext& context, va_list list );
+bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& context, va_list list );
 
 /**
 *	Sets an argument on the context, taking the argument from varargs.
+*	@param engine Script engine.
+*	@param targetFunc Target function.
+*	@param context Context.
+*	@param uiIndex Argument index.
+*	@param list Pointer to the argument.
+*	@return true on success, false otherwise.
 */
-bool SetContextArgument( asIScriptEngine& engine, asIScriptFunction& targetFunc, asIScriptContext& context, asUINT uiIndex, va_list& list );
+bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, asUINT uiIndex, va_list& list );
 
 /**
 *	Gets the argument of type iTypeId from the stack, and stores it in value
-*	uiTMFlags is a combination of asETypeModifiers, or asTM_NONE
-*	If pOutArgType is set, will also retrieve object type and store it there
-*	puiObjFlags must be set if pOutArgType is set
+*	@param value Value to store the result in.
+*	@param iTypeId Type Id of the value.
+*	@param uiTMFlags A combination of asETypeModifiers, or asTM_NONE.
+*	@param list Pointer to the argument.
+*	@param[ in ] puiObjFlags Optional. Object flags. Must be set if pOutArgType is set.
+*	@param[ out ] pOutArgType Optional. Argument type.
+*	@return true on success, false otherwise.
 */
 bool GetArgumentFromVarargs( ArgumentValue_t& value, int iTypeId, asDWORD uiTMFlags, va_list& list, asDWORD* puiObjFlags = nullptr, ArgumentType_t* pOutArgType = nullptr );
 
 /**
-*	Sets an argument on the context, taking the argument from an ArgumentValue_t
-*	fAllowPrimitiveReferences indicates whether primitive type arguments taken by reference use pValue or &qword
+*	Sets an argument on the context, taking the argument from an ArgumentValue_t.
+*	@param engine Script engine.
+*	@param targetFunc Target function.
+*	@param context Context.
+*	@param uiIndex Argument index.
+*	@param iSourceTypeId Type id of the argument.
+*	@param value Value to set.
+*	@param bAllowPrimitiveReferences Indicates whether primitive type arguments taken by reference use pValue or &qword.
+*	@return true on success, false otherwise.
 */
-bool SetContextArgument( asIScriptEngine& engine, asIScriptFunction& targetFunc, asIScriptContext& context,
-						 asUINT uiIndex, int iSourceTypeId, ArgumentValue_t& value, bool fAllowPrimitiveReferences );
+bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context,
+						 asUINT uiIndex, int iSourceTypeId, ArgumentValue_t& value, bool bAllowPrimitiveReferences );
 
 /**
 *	Converts the input argument to either an asQWORD or double.
-*	iType is either asTYPEID_UINT64 or asTYPEID_DOUBLE
-*	Returns false if conversion failed.
+*	iType is either asTYPEID_UINT64 or asTYPEID_DOUBLE.
+*	@param pArg Argument to convert.
+*	@param uiValue The converted value, as an integer.
+*	@param flValue The converted value, as a float.
+*	@return true on success, false if conversion failed.
 */
-bool ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& dValue );
+bool ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& flValue );
 
 /**
-*	@see ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& dValue )
+*	@see ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& flValue )
 */
-bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue_t& value, asINT64& uiValue, double& dValue );
+bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue_t& value, asINT64& uiValue, double& flValue );
 
 /**
-*	Tries to set the given data on the given value
-*	This functions returns false if something went wrong.
-*	To determine if the argument was primitive or not, check fOutWasPrimitive
+*	Tries to set the given data on the given value.
+*	@param pData Data to copy.
+*	@param iTypeid Type Id of the pData instance.
+*	@param value Value to set.
+*	@param[ out ] bOutWasPrimitive Whether the value was a primitive type or not.
+*	@return true on success, false otherwise.
 */
-bool SetPrimitiveArgument( ArgumentValue_t& value, int iTypeId, void* pData, bool& fOutWasPrimitive );
+bool SetPrimitiveArgument( void* pData, int iTypeId, ArgumentValue_t& value, bool& bOutWasPrimitive );
 
 /**
-*	Convenience method for when you don't want to get return type info yourself
-*	See method below for more information
+*	Convenience method for when you don't want to get return type info yourself.
+*	@param context Context.
+*	@param func Function whose return type will be used.
+*	@param retVal Return value.
+*	@param[ out ] uiOutFlags Optional. Return type flags.
+*	@return true on success, false otherwise.
+*	@see GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CASArgument& retVal )
 */
-bool GetReturnValue( CASArgument& retVal, asIScriptFunction* pFunc, asIScriptContext* pContext, asDWORD* uiOutFlags );
+bool GetReturnValue( asIScriptContext& context, const asIScriptFunction& func, CASArgument& retVal, asDWORD* uiOutFlags = nullptr );
 
 /**
-*	This method will retrieve the return value from the context according to the return value type given
+*	Gets the return value from the context according to the given return value type.
+*	@param context Context.
+*	@param iTypeId Type id of the return value.
+*	@param uiFlags Type flags.
+*	@param retVal Return value.
+*	@return true on success, false otherwise.
 */
-bool GetReturnValue( CASArgument& retVal, int iTypeId, asDWORD uiFlags, asIScriptContext* pContext );
+bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CASArgument& retVal );
 
-bool GetReturnValue( void* pReturnValue, int iTypeId, asDWORD uiFlags, asIScriptContext* pContext );
+/**
+*	Gets the return value from the context according to the given return value type.
+*	@param context Context.
+*	@param iTypeId Type id of the return value.
+*	@param uiFlags Type flags.
+*	@param pReturnValue pointer to the variable that will receive the return value.
+*	@return true on success, false otherwise.
+*/
+bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, void* pReturnValue );
 }
+
+/** @} */
 
 #endif //UTIL_CONTEXTUTILS_H

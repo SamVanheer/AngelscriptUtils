@@ -9,29 +9,6 @@
 
 #include "CASHookManager.h"
 
-/**
-*	Releases a vararg argument.
-*	TODO move
-*/
-static void ReleaseVarArg( asIScriptEngine& engine, void* pObject, const int iTypeId )
-{
-	if( !pObject )
-		return;
-
-	auto pTypeInfo = engine.GetTypeInfoById( iTypeId );
-
-	if( iTypeId & asTYPEID_OBJHANDLE )
-	{
-		pObject = *reinterpret_cast<void**>( pObject );
-	}
-
-	if( iTypeId & asTYPEID_MASK_OBJECT )
-	{
-		auto pFunction = reinterpret_cast<asIScriptFunction*>( pObject );
-		engine.ReleaseScriptObject( pObject, pTypeInfo );
-	}
-}
-
 CASHookManager::CASHookManager( CASManager& manager )
 	: m_Manager( manager )
 {

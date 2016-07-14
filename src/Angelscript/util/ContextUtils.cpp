@@ -10,6 +10,34 @@
 
 namespace ctx
 {
+bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& context, const CASArguments& arguments )
+{
+	const asUINT uiArgCount = targetFunc.GetParamCount();
+
+	if( uiArgCount != arguments.GetArgumentCount() )
+	{
+		//TODO
+		/*
+		gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetArguments: argument count for function '%s::%s' is incorrect: expected %u, got %u!\n",
+						 pTargetFunc->GetNamespace(), pTargetFunc->GetName(), uiArgCount, arguments.GetCount() );
+						 */
+		return false;
+	}
+
+	bool bSuccess = true;
+
+	asIScriptEngine& engine = *context.GetEngine();
+
+	const auto& args = arguments.GetArgumentList();
+
+	for( asUINT uiIndex = 0; uiIndex < uiArgCount && bSuccess; ++uiIndex )
+	{
+		bSuccess = SetContextArgument( engine, targetFunc, context, uiIndex, args[ uiIndex ] );
+	}
+
+	return bSuccess;
+}
+
 bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& context, va_list list )
 {
 	assert( list );
@@ -45,6 +73,12 @@ bool SetArgument( asIScriptEngine& engine, void* pData, int iTypeId, CASArgument
 	return bSuccess;
 }
 
+bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context,
+						 const asUINT uiIndex, const CASArgument& arg )
+{
+	return SetContextArgument( engine, targetFunc, context, uiIndex, arg.GetTypeId(), arg.GetArgumentValue(), false );
+}
+
 bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, asUINT uiIndex, va_list& list )
 {
 	int iTypeId;
@@ -66,6 +100,181 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 		//Remove the handle flag from the typeid.
 		//Input should never be dereferenced
 		bSuccess = SetContextArgument( engine, targetFunc, context, uiIndex, iTypeId & ~asTYPEID_OBJHANDLE, value, true );
+	}
+
+	return bSuccess;
+}
+
+bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context,
+										asUINT uiIndex, int iSourceTypeId, const ArgumentValue& value, bool bAllowPrimitiveReferences )
+{
+	int iTypeId;
+	asDWORD uiFlags;
+
+	if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
+	{
+		//TODO
+		//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: an error occurred while getting function parameter information, aborting!\n" );
+		return false;
+	}
+
+	bool bSuccess = true;
+
+	//It's an object handle (ref type)
+	if( iTypeId & asTYPEID_OBJHANDLE )
+	{
+		void* pSourceObj = ( iSourceTypeId & asTYPEID_OBJHANDLE ) ? *reinterpret_cast<void**>( value.pValue ) : value.pValue;
+
+		if( ( iSourceTypeId & asTYPEID_MASK_OBJECT ) )
+		{
+			asITypeInfo* pType = engine.GetTypeInfoById( iTypeId );
+
+			if( pType )
+			{
+				bool bCanSet = true;
+
+				//Types are functions
+				if( pType->GetFlags() & asOBJ_FUNCDEF )
+				{
+					asIScriptFunction* pSourceFunc = reinterpret_cast<asIScriptFunction*>( pSourceObj );
+
+					//Functions are incompatible, can't set
+					if( !pSourceFunc->IsCompatibleWithTypeId( iTypeId ) )
+					{
+						//TODO
+						/*
+						gASLog()->Error( ASLOG_CRITICAL,
+										 "CASCPPReflection::SetContextArgument: Could not set argument %u, argument function signatures are different, aborting!\n", uiIndex );
+										 */
+						bCanSet = false;
+					}
+				}
+				else
+				{
+					void* pObject = nullptr;
+
+					if( engine.RefCastObject( pSourceObj, engine.GetTypeInfoById( iSourceTypeId ), pType, &pObject ) >= 0 )
+						engine.ReleaseScriptObject( pObject, pType );
+					else
+					{
+						//TODO
+						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: source argument is incompatible with target, aborting!\n" );
+						bCanSet = false;
+					}
+				}
+
+				if( bCanSet )
+					bSuccess = context.SetArgObject( uiIndex, pSourceObj ) >= 0;
+				else
+					bSuccess = false;
+			}
+			else
+			{
+				//TODO
+				//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Could not get object type for argument %u, aborting!\n", uiIndex );
+				bSuccess = false;
+			}
+		}
+		else
+		{
+			//TODO
+			//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: source argument is incompatible with target, aborting!\n" );
+			bSuccess = false;
+		}
+	}
+	else if( iTypeId & asTYPEID_MASK_OBJECT ) //Object value (ref or value type)
+	{
+		bool bIsCompatible = false;
+
+		if( iTypeId == iSourceTypeId )
+			bIsCompatible = true;
+
+		if( bIsCompatible )
+			bSuccess = context.SetArgObject( uiIndex, value.pValue ) >= 0;
+	}
+	else //Primitive type (including enum)
+	{
+		//Primitive type taken by reference
+		if( ( as::IsPrimitive( iTypeId ) ) && ( uiFlags & ( asTM_INREF | asTM_OUTREF ) ) )
+		{
+			const void* pAddress = bAllowPrimitiveReferences ? value.pValue : &value.qword;
+			bSuccess = context.SetArgAddress( uiIndex, const_cast<void*>( pAddress ) ) >= 0;
+		}
+		else
+		{
+			bool bWasPrimitive = true;
+
+			//Needs a little conversion magic
+			asINT64 uiValue;
+			double dValue;
+
+			//Type was a primitive type or enum
+			bSuccess = ConvertInputArgToLargest( iSourceTypeId, value, uiValue, dValue );
+
+			if( bSuccess )
+			{
+				switch( iTypeId )
+				{
+				case asTYPEID_VOID:
+					{
+						//Impossible
+						//TODO
+						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: the impossible happened: a void argument, aborting!\n" );
+						bSuccess = false;
+						break;
+					}
+
+				case asTYPEID_BOOL:
+				case asTYPEID_INT8:
+				case asTYPEID_UINT8:	bSuccess = context.SetArgByte( uiIndex, static_cast<asBYTE>( uiValue ) ) >= 0; break;
+				case asTYPEID_INT16:
+				case asTYPEID_UINT16:	bSuccess = context.SetArgWord( uiIndex, static_cast<asWORD>( uiValue ) ) >= 0; break;
+				case asTYPEID_INT32:
+				case asTYPEID_UINT32:	bSuccess = context.SetArgDWord( uiIndex, static_cast<asDWORD>( uiValue ) ) >= 0; break;
+				case asTYPEID_INT64:
+				case asTYPEID_UINT64:	bSuccess = context.SetArgQWord( uiIndex, uiValue ) >= 0; break;
+
+				case asTYPEID_FLOAT:	bSuccess = context.SetArgFloat( uiIndex, static_cast<float>( dValue ) ) >= 0; break;
+				case asTYPEID_DOUBLE:	bSuccess = context.SetArgDouble( uiIndex, dValue ) >= 0; break;
+
+				default:
+
+					bWasPrimitive = false;
+
+					//It's an enum
+					if( as::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
+					{
+						if( uiFlags & ( asTM_INREF | asTM_OUTREF ) )
+						{
+							const void* pAddress = bAllowPrimitiveReferences ? value.pValue : &value.qword;
+							bSuccess = context.SetArgAddress( uiIndex, const_cast<void*>( pAddress ) ) >= 0;
+						}
+						else
+							bSuccess = context.SetArgDWord( uiIndex, value.dword ) >= 0;
+					}
+					else
+					{
+						//TODO
+						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Attempted to set parameter of unknown type, aborting!\n" );
+						bSuccess = false;
+					}
+					break;
+				}
+
+				if( bWasPrimitive )
+				{
+					if( iTypeId != iSourceTypeId )
+					{
+						//TODO
+						/*
+						gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Attempted to set primitive value of type '%s' to value of type '%s', aborting!\n",
+										 PrimitiveTypeIdToString( iTypeId ), PrimitiveTypeIdToString( iSourceTypeId ) );
+										 */
+						bSuccess = false;
+					}
+				}
+			}
+		}
 	}
 
 	return bSuccess;
@@ -166,181 +375,6 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 	return bSuccess;
 }
 
-bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context,
-										asUINT uiIndex, int iSourceTypeId, ArgumentValue& value, bool bAllowPrimitiveReferences )
-{
-	int iTypeId;
-	asDWORD uiFlags;
-
-	if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
-	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: an error occurred while getting function parameter information, aborting!\n" );
-		return false;
-	}
-
-	bool bSuccess = true;
-
-	//It's an object handle (ref type)
-	if( iTypeId & asTYPEID_OBJHANDLE )
-	{
-		void* pSourceObj = ( iSourceTypeId & asTYPEID_OBJHANDLE ) ? *reinterpret_cast<void**>( value.pValue ) : value.pValue;
-
-		if( ( iSourceTypeId & asTYPEID_MASK_OBJECT ) )
-		{
-			asITypeInfo* pType = engine.GetTypeInfoById( iTypeId );
-
-			if( pType )
-			{
-				bool bCanSet = true;
-
-				//Types are functions
-				if( pType->GetFlags() & asOBJ_FUNCDEF )
-				{
-					asIScriptFunction* pSourceFunc = reinterpret_cast<asIScriptFunction*>( pSourceObj );
-
-					//Functions are incompatible, can't set
-					if( !pSourceFunc->IsCompatibleWithTypeId( iTypeId ) )
-					{
-						//TODO
-						/*
-						gASLog()->Error( ASLOG_CRITICAL,
-										 "CASCPPReflection::SetContextArgument: Could not set argument %u, argument function signatures are different, aborting!\n", uiIndex );
-										 */
-						bCanSet = false;
-					}
-				}
-				else
-				{
-					void* pObject = nullptr;
-
-					if( engine.RefCastObject( pSourceObj, engine.GetTypeInfoById( iSourceTypeId ), pType, &pObject ) >= 0 )
-						engine.ReleaseScriptObject( pObject, pType );
-					else
-					{
-						//TODO
-						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: source argument is incompatible with target, aborting!\n" );
-						bCanSet = false;
-					}
-				}
-
-				if( bCanSet )
-					bSuccess = context.SetArgObject( uiIndex, pSourceObj ) >= 0;
-				else
-					bSuccess = false;
-			}
-			else
-			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Could not get object type for argument %u, aborting!\n", uiIndex );
-				bSuccess = false;
-			}
-		}
-		else
-		{
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: source argument is incompatible with target, aborting!\n" );
-			bSuccess = false;
-		}
-	}
-	else if( iTypeId & asTYPEID_MASK_OBJECT ) //Object value (ref or value type)
-	{
-		bool bIsCompatible = false;
-
-		if( iTypeId == iSourceTypeId )
-			bIsCompatible = true;
-
-		if( bIsCompatible )
-			bSuccess = context.SetArgObject( uiIndex, value.pValue ) >= 0;
-	}
-	else //Primitive type (including enum)
-	{
-		//Primitive type taken by reference
-		if( ( as::IsPrimitive( iTypeId ) ) && ( uiFlags & ( asTM_INREF | asTM_OUTREF ) ) )
-		{
-			void* pAddress = bAllowPrimitiveReferences ? value.pValue : &value.qword;
-			bSuccess = context.SetArgAddress( uiIndex, pAddress ) >= 0;
-		}
-		else
-		{
-			bool bWasPrimitive = true;
-
-			//Needs a little conversion magic
-			asINT64 uiValue;
-			double dValue;
-
-			//Type was a primitive type or enum
-			bSuccess = ConvertInputArgToLargest( iSourceTypeId, value, uiValue, dValue );
-
-			if( bSuccess )
-			{
-				switch( iTypeId )
-				{
-				case asTYPEID_VOID:
-					{
-						//Impossible
-						//TODO
-						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: the impossible happened: a void argument, aborting!\n" );
-						bSuccess = false;
-						break;
-					}
-
-				case asTYPEID_BOOL:
-				case asTYPEID_INT8:
-				case asTYPEID_UINT8:	bSuccess = context.SetArgByte( uiIndex, static_cast<asBYTE>( uiValue ) ) >= 0; break;
-				case asTYPEID_INT16:
-				case asTYPEID_UINT16:	bSuccess = context.SetArgWord( uiIndex, static_cast<asWORD>( uiValue ) ) >= 0; break;
-				case asTYPEID_INT32:
-				case asTYPEID_UINT32:	bSuccess = context.SetArgDWord( uiIndex, static_cast<asDWORD>( uiValue ) ) >= 0; break;
-				case asTYPEID_INT64:
-				case asTYPEID_UINT64:	bSuccess = context.SetArgQWord( uiIndex, uiValue ) >= 0; break;
-
-				case asTYPEID_FLOAT:	bSuccess = context.SetArgFloat( uiIndex, static_cast<float>( dValue ) ) >= 0; break;
-				case asTYPEID_DOUBLE:	bSuccess = context.SetArgDouble( uiIndex, dValue ) >= 0; break;
-
-				default:
-
-					bWasPrimitive = false;
-
-					//It's an enum
-					if( as::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
-					{
-						if( uiFlags & ( asTM_INREF | asTM_OUTREF ) )
-						{
-							void* pAddress = bAllowPrimitiveReferences ? value.pValue : &value.qword;
-							bSuccess = context.SetArgAddress( uiIndex, pAddress ) >= 0;
-						}
-						else
-							bSuccess = context.SetArgDWord( uiIndex, value.dword ) >= 0;
-					}
-					else
-					{
-						//TODO
-						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Attempted to set parameter of unknown type, aborting!\n" );
-						bSuccess = false;
-					}
-					break;
-				}
-
-				if( bWasPrimitive )
-				{
-					if( iTypeId != iSourceTypeId )
-					{
-						//TODO
-						/*
-						gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Attempted to set primitive value of type '%s' to value of type '%s', aborting!\n",
-										 PrimitiveTypeIdToString( iTypeId ), PrimitiveTypeIdToString( iSourceTypeId ) );
-										 */
-						bSuccess = false;
-					}
-				}
-			}
-		}
-	}
-
-	return bSuccess;
-}
-
 bool ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& flValue )
 {
 	if( !pArg )
@@ -405,6 +439,136 @@ bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue& value, asINT64&
 	}
 
 	return bSuccess;
+}
+
+ArgType::ArgType ArgumentTypeFromTypeId( const int iTypeId, const asDWORD uiObjFlags )
+{
+	ArgType::ArgType argType = ArgType::NONE;
+
+	//Its an object (ref or value type), or handle to ref type
+	if( iTypeId & ( asTYPEID_OBJHANDLE | asTYPEID_MASK_OBJECT ) )
+	{
+		if( uiObjFlags & asOBJ_REF )
+			argType = ArgType::REF;
+		else if( uiObjFlags & asOBJ_VALUE )
+			argType = ArgType::VALUE;
+	}
+	else if( as::IsPrimitive( iTypeId ) )
+	{
+		argType = ArgType::PRIMITIVE;
+	}
+	else if( as::IsEnum( iTypeId ) )
+	{
+		argType = ArgType::ENUM;
+	}
+
+	return argType;
+}
+
+bool ConvertEnumToPrimitive( const CASArgument& arg, const int iTypeId, ArgumentValue& outValue )
+{
+	//Enums can convert to integral types
+	//Enum have their type id set to int32, so handle both
+	if( !as::IsEnum( arg.GetTypeId() ) && arg.GetTypeId() != asTYPEID_INT32 )
+	{
+		return false;
+	}
+
+	//Convert the enum value to the appropriate type
+	if( asTYPEID_INT8 <= iTypeId && iTypeId <= asTYPEID_DOUBLE )
+	{
+		switch( iTypeId )
+		{
+		case asTYPEID_INT8:
+		case asTYPEID_UINT8:
+			{
+				if( arg.GetArgumentValue().dword > UINT8_MAX )
+				{
+					//TODO
+					//gASLog()->Warning( ASLOG_CRITICAL, "Truncating enum value to 1 byte!\n" );
+				}
+
+				outValue.byte = static_cast<asBYTE>( arg.GetArgumentValue().dword );
+				break;
+			}
+
+		case asTYPEID_INT16:
+		case asTYPEID_UINT16:
+			{
+				if( arg.GetArgumentValue().dword > UINT16_MAX )
+				{
+					//TODO
+					//gASLog()->Warning( ASLOG_CRITICAL, "Truncating enum value to 2 bytes!\n" );
+				}
+
+				outValue.word = static_cast<asWORD>( arg.GetArgumentValue().dword );
+				break;
+			}
+
+		case asTYPEID_INT32:
+		case asTYPEID_UINT32:	outValue.dword = arg.GetArgumentValue().dword; break;
+
+		case asTYPEID_INT64:
+		case asTYPEID_UINT64:	outValue.qword = arg.GetArgumentValue().dword; break;
+
+		case asTYPEID_FLOAT:	outValue.flValue = static_cast<float>( arg.GetArgumentValue().dword ); break;
+		case asTYPEID_DOUBLE:	outValue.dValue = arg.GetArgumentValue().dword; break;
+		}
+
+		return true;
+	}
+
+	return false;
+}
+
+bool ConvertPrimitiveToEnum( const CASArgument& arg, ArgumentValue& outValue )
+{
+	if( !as::IsPrimitive( arg.GetTypeId() ) )
+	{
+		return false;
+	}
+
+	switch( arg.GetTypeId() )
+	{
+	case asTYPEID_INT8:
+	case asTYPEID_UINT8:	outValue.dword = arg.GetArgumentValue().byte; break;
+
+	case asTYPEID_INT16:
+	case asTYPEID_UINT16:	outValue.dword = arg.GetArgumentValue().word; break;
+
+	case asTYPEID_INT32:
+	case asTYPEID_UINT32:	outValue.dword = arg.GetArgumentValue().dword; break;
+
+	case asTYPEID_INT64:
+	case asTYPEID_UINT64:
+		{
+			if( arg.GetArgumentValue().qword > UINT32_MAX )
+			{
+				//TODO
+				//gASLog()->Warning( ASLOG_CRITICAL, "Truncating 8 byte value to 4 bytes!\n" );
+			}
+
+			outValue.dword = static_cast<asDWORD>( arg.GetArgumentValue().qword );
+			break;
+		}
+
+	case asTYPEID_FLOAT:	outValue.dword = static_cast<asDWORD>( arg.GetArgumentValue().flValue ); break;
+
+	case asTYPEID_DOUBLE:
+		{
+			//TODO: is this correct?
+			if( arg.GetArgumentValue().dValue > UINT32_MAX )
+			{
+				//TODO
+				//gASLog()->Warning( ASLOG_CRITICAL, "Truncating 8 byte value to 4 bytes!\n" );
+			}
+
+			outValue.dword = static_cast<asDWORD>( arg.GetArgumentValue().dValue );
+			break;
+		}
+	}
+
+	return true;
 }
 
 bool SetPrimitiveArgument( void* pData, int iTypeId, CASArgument& arg, bool& bOutWasPrimitive )

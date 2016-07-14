@@ -165,7 +165,8 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 		cleanup.Release();
 	}
 
-	if( !builder.PostBuild( bSuccess, pModule ) )
+	//Don't enter this if statement if bSuccess is false, that gets handled right after.
+	if( !builder.PostBuild( bSuccess, pModule ) && bSuccess )
 	{
 		delete pModule;
 		return nullptr;

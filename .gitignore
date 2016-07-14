@@ -57,5 +57,4 @@ Temporary Items
 *.opendb
 *.cmake
 
-external/*
 bin/*

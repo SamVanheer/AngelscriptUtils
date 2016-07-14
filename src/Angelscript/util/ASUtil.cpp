@@ -1,8 +1,6 @@
-#include <cassert>
 #include <cstdint>
 #include <cstring>
 #include <memory>
-#include <string>
 
 #include "Angelscript/add_on/scriptany.h"
 

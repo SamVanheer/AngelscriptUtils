@@ -135,7 +135,7 @@ int main( int iArgc, char* pszArgV[] )
 
 				std::string szString = "Hello World!\n";
 
-				as::CallFunction( pFunction, &szString );
+				as::Call( pFunction, &szString );
 
 				hook.Call( CallFlag::NONE, &szString );
 			}

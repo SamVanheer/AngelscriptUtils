@@ -100,7 +100,7 @@ void CASHookManager::RegisterHooks( asIScriptEngine& engine )
 		result = engine.SetDefaultNamespace( "" );
 		assert( result >= 0 );
 
-		szDeclaration = std::string( "HookReturnCode " ) + pHook->GetName() + "Function(" + pHook->GetArguments() + ")";
+		szDeclaration = std::string( "HookReturnCode " ) + pHook->GetName() + "Hook(" + pHook->GetArguments() + ")";
 
 		result = engine.RegisterFuncdef( szDeclaration.c_str() );
 		assert( result >= 0 );

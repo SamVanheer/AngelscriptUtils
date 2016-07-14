@@ -191,6 +191,7 @@ public:
 
 	/**
 	*	Adds a new function. Cannot be called while this hook is being called.
+	*	Warning: if the function does not match the hook parameters and return type, this will cause problems.
 	*	@param pFunction Function to add.
 	*	@return true if the function was either added or already added before, false otherwise.
 	*/

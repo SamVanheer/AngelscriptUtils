@@ -27,6 +27,7 @@ enum CallFlag : CallFlags_t
 
 /**
 *	Base class for callable types.
+*	Do not use directly.
 */
 class CASCallable
 {
@@ -98,15 +99,14 @@ private:
 };
 
 /**
-*	A regular function.
+*	Helper class that defines the call methods for callable types.
+*	Do not use directly.
 */
-class CASFunction final : public CASCallable
+template<typename SUBCLASS>
+class CASTCallable : public CASCallable
 {
 public:
-	CASFunction( asIScriptFunction& function, CASContext& context )
-		: CASCallable( function, context )
-	{
-	}
+	using CASCallable::CASCallable;
 
 	/**
 	*	Calls the function.
@@ -114,7 +114,10 @@ public:
 	*	@param list Pointer to a va_list that contains the arguments for the function.
 	*	@return true on success, false otherwise.
 	*/
-	bool VCall( CallFlags_t flags, va_list list );
+	bool VCall( CallFlags_t flags, va_list list )
+	{
+		return CallFunction( GetThisRef(), flags, list );
+	}
 
 	/**
 	*	Calls the function.
@@ -122,7 +125,18 @@ public:
 	*	@param ... The arguments for the function.
 	*	@return true on success, false otherwise.
 	*/
-	bool operator()( CallFlags_t flags, ... );
+	bool Call( CallFlags_t flags, ... )
+	{
+		va_list list;
+
+		va_start( list, flags );
+
+		const auto success = VCall( flags, list );
+
+		va_end( list );
+
+		return success;
+	}
 
 	/**
 	*	Calls the function.
@@ -130,13 +144,50 @@ public:
 	*	@param args List of arguments.
 	*	@return true on success, false otherwise.
 	*/
-	bool CallArgs( CallFlags_t flags, const CASArguments& args );
+	bool CallArgs( CallFlags_t flags, const CASArguments& args )
+	{
+		return CallFunction( GetThisRef(), flags, args );
+	}
+
+	/**
+	*	Calls the function.
+	*	@param flags Call flags.
+	*	@param ... The arguments for the function.
+	*	@return true on success, false otherwise.
+	*/
+	bool operator()( CallFlags_t flags, ... )
+	{
+		va_list list;
+
+		va_start( list, flags );
+
+		const auto success = VCall( flags, list );
+
+		va_end( list );
+
+		return success;
+	}
+
+private:
+	inline SUBCLASS& GetThisRef() { return static_cast<SUBCLASS&>( *this ); }
+};
+
+/**
+*	A regular function.
+*/
+class CASFunction final : public CASTCallable<CASFunction>
+{
+public:
+	CASFunction( asIScriptFunction& function, CASContext& context )
+		: CASTCallable( function, context )
+	{
+	}
 };
 
 /**
 *	An object method.
 */
-class CASMethod final : public CASCallable
+class CASMethod final : public CASTCallable<CASMethod>
 {
 protected:
 	template<typename CALLABLE, typename ARGS>
@@ -150,30 +201,6 @@ public:
 	CASMethod( asIScriptFunction& function, CASContext& context, void* pThis );
 
 	bool IsValid() const;
-
-	/**
-	*	Calls the function.
-	*	@param flags Call flags.
-	*	@param list Pointer to a va_list that contains the arguments for the function.
-	*	@return true on success, false otherwise.
-	*/
-	bool VCall( CallFlags_t flags, va_list list );
-
-	/**
-	*	Calls the function.
-	*	@param flags Call flags.
-	*	@param ... The arguments for the function.
-	*	@return true on success, false otherwise.
-	*/
-	bool operator()( CallFlags_t flags, ... );
-
-	/**
-	*	Calls the function.
-	*	@param flags Call flags.
-	*	@param args List of arguments.
-	*	@return true on success, false otherwise.
-	*/
-	bool CallArgs( CallFlags_t flags, const CASArguments& args );
 
 protected:
 	bool PreSetArguments();
@@ -238,6 +265,32 @@ bool CallFunction( asIScriptFunction* pFunction, ... );
 
 /**
 *	Calls the given function using the given context.
+*	@param pFunction Function to call.
+*	@param pContext Context to use.
+*	@param flags Flags.
+*	@param args Arguments.
+*/
+bool CallFunctionArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args );
+
+/**
+*	@see CallFunctionArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args )
+*/
+bool CallFunctionArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, const CASArguments& args );
+
+/**
+*	Acquires a context using asIScriptEngine::RequestContext
+*	@see CallFunctionArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args )
+*/
+bool CallFunctionArgs( asIScriptFunction* pFunction, CallFlags_t flags, const CASArguments& args );
+
+/**
+*	Acquires a context using asIScriptEngine::RequestContext
+*	@see CallFunctionArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args )
+*/
+bool CallFunctionArgs( asIScriptFunction* pFunction, const CASArguments& args );
+
+/**
+*	Calls the given function using the given context.
 *	@param pThis This pointer.
 *	@param pFunction Function to call.
 *	@param pContext Context to use.
@@ -289,6 +342,33 @@ bool CallMethod( void* pThis, asIScriptFunction* pFunction, CallFlags_t flags, .
 *	@see CallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
 */
 bool CallMethod( void* pThis, asIScriptFunction* pFunction, ... );
+
+/**
+*	Calls the given function using the given context.
+*	@param pThis This pointer.
+*	@param pFunction Function to call.
+*	@param pContext Context to use.
+*	@param flags Flags.
+*	@param args Arguments.
+*/
+bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args );
+
+/**
+*	@see CallMethodArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args )
+*/
+bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, const CASArguments& args );
+
+/**
+*	Acquires a context using asIScriptEngine::RequestContext
+*	@see CallMethodArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args )
+*/
+bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, CallFlags_t flags, const CASArguments& args );
+
+/**
+*	Acquires a context using asIScriptEngine::RequestContext
+*	@see CallMethodArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args )
+*/
+bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, const CASArguments& args );
 }
 
 #endif //WRAPPER_CASCALLABLE_H

@@ -7,42 +7,6 @@ CASContext::CASContext( asIScriptContext& context )
 	m_pContext = &context;
 }
 
-void CASContext::Release()
-{
-	if( m_pContext )
-	{
-		//TODO return value
-		m_pContext->Unprepare();
-	}
-
-	if( m_pEngine )
-	{
-		m_pEngine->ReturnContext( m_pContext );
-		m_pContext = nullptr;
-
-		m_pEngine->Release();
-		m_pEngine = nullptr;
-	}
-	else if( m_pContext )
-	{
-		m_pContext->Release();
-		m_pContext = nullptr;
-	}
-}
-
-void CASContext::ReleaseOwnership()
-{
-	if( m_pContext )
-	{
-		m_pContext = nullptr;
-	}
-
-	if( m_pEngine )
-	{
-		m_pEngine = nullptr;
-	}
-}
-
 CASContext::operator bool() const
 {
 	return m_pContext != nullptr;
@@ -65,4 +29,40 @@ CASOwningContext::CASOwningContext( asIScriptEngine& engine )
 CASOwningContext::~CASOwningContext()
 {
 	Release();
+}
+
+void CASOwningContext::Release()
+{
+	if( m_pContext )
+	{
+		//TODO check return value
+		const auto result = m_pContext->Unprepare();
+	}
+
+	if( m_pEngine )
+	{
+		m_pEngine->ReturnContext( m_pContext );
+		m_pContext = nullptr;
+
+		m_pEngine->Release();
+		m_pEngine = nullptr;
+	}
+	else if( m_pContext )
+	{
+		m_pContext->Release();
+		m_pContext = nullptr;
+	}
+}
+
+void CASOwningContext::ReleaseOwnership()
+{
+	if( m_pContext )
+	{
+		m_pContext = nullptr;
+	}
+
+	if( m_pEngine )
+	{
+		m_pEngine = nullptr;
+	}
 }

@@ -1,5 +1,7 @@
 #include <cassert>
 
+#include <type_traits>
+
 #include "CASContext.h"
 
 #include "Angelscript/util/ContextUtils.h"
@@ -19,6 +21,9 @@ template<typename CALLABLE, typename ARGS>
 bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args )
 {
 	auto pContext = callable.GetContext().GetContext();
+
+	//This will trigger an error if we miss a cast.
+	static_assert( std::is_same<CALLABLE, CASFunction>::value || std::is_same<CALLABLE, CASMethod>::value, "Must use either CASFunction or CASMethod for this function!" );
 
 	assert( pContext );
 
@@ -76,31 +81,8 @@ bool CASCallable::GetReturnValue( void* pReturnValue )
 	return ctx::GetReturnValue( *m_Context.GetContext(), iTypeId, uiFlags, pReturnValue );
 }
 
-bool CASFunction::VCall( CallFlags_t flags, va_list list )
-{
-	return CallFunction( *this, flags, list );
-}
-
-bool CASFunction::operator()( CallFlags_t flags, ... )
-{
-	va_list list;
-
-	va_start( list, flags );
-
-	const auto success = VCall( flags, list );
-
-	va_end( list );
-
-	return success;
-}
-
-bool CASFunction::CallArgs( CallFlags_t flags, const CASArguments& args )
-{
-	return CallFunction( *this, flags, args );
-}
-
 CASMethod::CASMethod( asIScriptFunction& function, CASContext& context, void* pThis )
-	: CASCallable( function, context )
+	: CASTCallable( function, context )
 	, m_pThis( pThis )
 {
 	assert( pThis );
@@ -109,29 +91,6 @@ CASMethod::CASMethod( asIScriptFunction& function, CASContext& context, void* pT
 bool CASMethod::IsValid() const
 {
 	return CASCallable::IsValid() && m_pThis;
-}
-
-bool CASMethod::VCall( CallFlags_t flags, va_list list )
-{
-	return CallFunction( *this, flags, list );
-}
-
-bool CASMethod::operator()( CallFlags_t flags, ... )
-{
-	va_list list;
-
-	va_start( list, flags );
-
-	const auto success = VCall( flags, list );
-
-	va_end( list );
-
-	return success;
-}
-
-bool CASMethod::CallArgs( CallFlags_t flags, const CASArguments& args )
-{
-	return CallFunction( *this, flags, args );
 }
 
 bool CASMethod::PreSetArguments()
@@ -176,16 +135,12 @@ bool VCallFunction( asIScriptFunction* pFunction, CallFlags_t flags, va_list lis
 	if( !pFunction )
 		return false;
 
-	auto pContext = pFunction->GetEngine()->RequestContext();
+	CASOwningContext ctx( *pFunction->GetEngine() );
 
-	if( !pContext )
+	if( !ctx )
 		return false;
 
-	auto success = VCallFunction( pFunction, pContext, flags, list );
-
-	pFunction->GetEngine()->ReturnContext( pContext );
-
-	return success;
+	return VCallFunction( pFunction, ctx.GetContext(), flags, list );
 }
 
 bool VCallFunction( asIScriptFunction* pFunction, va_list list )
@@ -195,16 +150,12 @@ bool VCallFunction( asIScriptFunction* pFunction, va_list list )
 	if( !pFunction )
 		return false;
 
-	auto pContext = pFunction->GetEngine()->RequestContext();
+	CASOwningContext ctx( *pFunction->GetEngine() );
 
-	if( !pContext )
+	if( !ctx )
 		return false;
 
-	auto success = VCallFunction( pFunction, pContext, list );
-
-	pFunction->GetEngine()->ReturnContext( pContext );
-
-	return success;
+	return VCallFunction( pFunction, ctx.GetContext(), list );
 }
 
 bool CallFunction( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
@@ -269,6 +220,52 @@ bool CallFunction( asIScriptFunction* pFunction, ... )
 	return success;
 }
 
+bool CallFunctionArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args )
+{
+	assert( pFunction );
+	assert( pContext );
+
+	if( !pFunction )
+		return false;
+
+	if( !pContext )
+		return false;
+
+	CASContext ctx( *pContext );
+
+	CASFunction func( *pFunction, ctx );
+
+	if( !func.IsValid() )
+		return false;
+
+	return func.CallArgs( flags, args );
+}
+
+bool CallFunctionArgs( asIScriptFunction* pFunction, asIScriptContext* pContext, const CASArguments& args )
+{
+	return CallFunctionArgs( pFunction, pContext, CallFlag::NONE, args );
+}
+
+bool CallFunctionArgs( asIScriptFunction* pFunction, CallFlags_t flags, const CASArguments& args )
+{
+	assert( pFunction );
+
+	if( !pFunction )
+		return false;
+
+	CASOwningContext ctx( *pFunction->GetEngine() );
+
+	if( !ctx )
+		return false;
+
+	return CallFunctionArgs( pFunction, ctx.GetContext(), flags, args );
+}
+
+bool CallFunctionArgs( asIScriptFunction* pFunction, const CASArguments& args )
+{
+	return CallFunctionArgs( pFunction, CallFlag::NONE, args );
+}
+
 bool VCallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 {
 	assert( pFunction );
@@ -304,16 +301,12 @@ bool VCallMethod( void* pThis, asIScriptFunction* pFunction, CallFlags_t flags, 
 	if( !pFunction )
 		return false;
 
-	auto pContext = pFunction->GetEngine()->RequestContext();
+	CASOwningContext ctx( *pFunction->GetEngine() );
 
-	if( !pContext )
+	if( !ctx )
 		return false;
 
-	auto success = VCallMethod( pThis, pFunction, pContext, flags, list );
-
-	pFunction->GetEngine()->ReturnContext( pContext );
-
-	return success;
+	return VCallMethod( pThis, pFunction, ctx.GetContext(), flags, list );
 }
 
 bool VCallMethod( void* pThis, asIScriptFunction* pFunction, va_list list )
@@ -323,16 +316,12 @@ bool VCallMethod( void* pThis, asIScriptFunction* pFunction, va_list list )
 	if( !pFunction )
 		return false;
 
-	auto pContext = pFunction->GetEngine()->RequestContext();
+	CASOwningContext ctx( *pFunction->GetEngine() );
 
-	if( !pContext )
+	if( !ctx )
 		return false;
 
-	auto success = VCallMethod( pThis, pFunction, pContext, list );
-
-	pFunction->GetEngine()->ReturnContext( pContext );
-
-	return success;
+	return VCallMethod( pThis, pFunction, ctx.GetContext(), list );
 }
 
 bool CallMethod( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, ... )
@@ -395,5 +384,51 @@ bool CallMethod( void* pThis, asIScriptFunction* pFunction, ... )
 	va_end( list );
 
 	return success;
+}
+
+bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, CallFlags_t flags, const CASArguments& args )
+{
+	assert( pFunction );
+	assert( pContext );
+
+	if( !pFunction )
+		return false;
+
+	if( !pContext )
+		return false;
+
+	CASContext ctx( *pContext );
+
+	CASMethod method( *pFunction, ctx, pThis );
+
+	if( !method.IsValid() )
+		return false;
+
+	return method.CallArgs( flags, args );
+}
+
+bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, asIScriptContext* pContext, const CASArguments& args )
+{
+	return CallMethodArgs( pThis, pFunction, pContext, CallFlag::NONE, args );
+}
+
+bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, CallFlags_t flags, const CASArguments& args )
+{
+	assert( pFunction );
+
+	if( !pFunction )
+		return false;
+
+	CASOwningContext ctx( *pFunction->GetEngine() );
+
+	if( !ctx )
+		return false;
+
+	return CallMethodArgs( pThis, pFunction, ctx.GetContext(), flags, args );
+}
+
+bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, const CASArguments& args )
+{
+	return CallMethodArgs( pThis, pFunction, CallFlag::NONE, args );
 }
 }

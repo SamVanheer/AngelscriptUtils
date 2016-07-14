@@ -9,6 +9,10 @@
 class CASContext
 {
 public:
+	/**
+	*	Constructor. The context is not AddRef'd.
+	*	@param context Context.
+	*/
 	CASContext( asIScriptContext& context );
 	~CASContext() = default;
 
@@ -17,18 +21,15 @@ protected:
 
 public:
 
-	void Release();
-
-	void ReleaseOwnership();
-
+	/**
+	*	@return Whether this context is valid.
+	*/
 	operator bool() const;
 
 	asIScriptContext* GetContext() { return m_pContext; }
 
 protected:
 	asIScriptContext* m_pContext = nullptr;
-
-	asIScriptEngine* m_pEngine = nullptr;
 
 private:
 	CASContext( const CASContext& ) = delete;
@@ -41,9 +42,33 @@ private:
 class CASOwningContext final : public CASContext
 {
 public:
+	/**
+	*	Constructor. The context is AddRef'd.
+	*	@param context Context.
+	*/
 	CASOwningContext( asIScriptContext& context );
+
+	/**
+	*	Constructor. A context is acquired using asIScriptEngine::RequestContext.
+	*	@param engine Script engine.
+	*/
 	CASOwningContext( asIScriptEngine& engine );
+
 	~CASOwningContext();
+
+	/**
+	*	Releases the context.
+	*/
+	void Release();
+
+	/**
+	*	Releases ownership of the context.
+	*/
+	void ReleaseOwnership();
+
+private:
+	//TODO: consider: the engine can be retrieved using m_pContext->GetEngine. All that's needed is a flag that indicates where it came from.
+	asIScriptEngine* m_pEngine = nullptr;
 };
 
 #endif //WRAPPER_CASCONTEXT_H

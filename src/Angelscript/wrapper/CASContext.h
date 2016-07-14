@@ -44,11 +44,6 @@ public:
 	CASOwningContext( asIScriptContext& context );
 	CASOwningContext( asIScriptEngine& engine );
 	~CASOwningContext();
-
-protected:
-	asIScriptContext* m_pContext = nullptr;
-
-	asIScriptEngine* m_pEngine = nullptr;
 };
 
 #endif //WRAPPER_CASCONTEXT_H

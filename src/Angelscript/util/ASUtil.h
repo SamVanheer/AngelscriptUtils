@@ -634,6 +634,23 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 
 	return true;
 }
+
+/**
+*	Creates a function signature that can be called with the given arguments.
+*	@param engine Script engine.
+*	@param function Stream that will receive the signature.
+*	@param pszReturnType Return type.
+*	@param pszFunctionName Function name.
+*	@param args Argument list.
+*	@param uiStartIndex First argument in the generic call instance to check.
+*	@param arguments Generic call instance whose arguments will be used for type information.
+*	@return true on success, false otherwise.
+*/
+bool CreateFunctionSignature(
+	asIScriptEngine& engine,
+	std::stringstream& function, const char* const pszReturnType, const char* const pszFunctionName,
+	const CASArguments& args,
+	const asUINT uiStartIndex, asIScriptGeneric& arguments );
 }
 
 /** @} */

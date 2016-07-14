@@ -362,4 +362,85 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 
 	return bSuccess;
 }
+
+bool CreateFunctionSignature(
+	asIScriptEngine& engine,
+	std::stringstream& function, const char* const pszReturnType, const char* const pszFunctionName,
+	const CASArguments& args,
+	const asUINT uiStartIndex, asIScriptGeneric& arguments )
+{
+	assert( pszReturnType );
+	assert( pszFunctionName );
+
+	if( !pszReturnType ||!pszFunctionName )
+		return false;
+
+	bool bSuccess = true;
+
+	function << pszReturnType << ' ' << pszFunctionName << '(';
+
+	const size_t uiCount = args.GetArgumentCount();
+
+	//Needs to match.
+	if( uiCount != ( arguments.GetArgCount() - uiStartIndex ) )
+	{
+		return false;
+	}
+
+	for( size_t uiIndex = 0; uiIndex < uiCount && bSuccess; ++uiIndex )
+	{
+		const auto pArg = args.GetArgument( uiIndex );
+
+		const int iTypeId = arguments.GetArgTypeId( uiIndex + uiStartIndex );
+
+		const auto pszTypeDecl = engine.GetTypeDeclaration( iTypeId, true );
+
+		if( !pszTypeDecl )
+		{
+			bSuccess = false;
+			break;
+		}
+
+		if( uiIndex > 0 )
+		{
+			//Get ready for the next argument to be appended.
+			function << ", ";
+		}
+
+		function << pszTypeDecl;
+
+		switch( pArg->GetArgumentType() )
+		{
+		default:
+		case ArgType::NONE:
+		case ArgType::VOID:
+			{
+				//This should never occur, unless the argument parser fails without returning false
+				//TODO
+				//gASLog()->Error( ASLOG_CRITICAL, "CScheduler: invalid input argument!\n" );
+				bSuccess = false;
+				break;
+			}
+
+		case ArgType::PRIMITIVE:
+		case ArgType::ENUM:			break;
+		case ArgType::VALUE:		function << "& in"; break; //Value types are always passed by reference.
+		case ArgType::REF:
+			{
+				//Always pass as handle
+				if( pszTypeDecl[ strlen( pszTypeDecl ) - 1 ] != '@' )
+					function << '@';
+
+				break;
+			}
+		}
+	}
+
+	if( bSuccess )
+	{
+		function << ')';
+	}
+
+	return bSuccess;
+}
 }

@@ -14,6 +14,16 @@ add_sources(
 	IASModuleBuilder.h
 )
 
+add_includes(
+	CASManager.h
+	CASModuleDescriptor.h
+	CASModule.h
+	CASModuleManager.h
+	CASHook.h
+	CASHookManager.h
+	IASModuleBuilder.h
+)
+
 add_subdirectory( add_on )
 add_subdirectory( ScriptAPI )
 add_subdirectory( util )

@@ -7,3 +7,10 @@ add_sources(
 	ASReflection.h
 	ASReflection.cpp
 )
+
+add_includes(
+	IASReflectionGroup.h
+	CASEngineReflectionGroup.h
+	CASModuleReflectionGroup.h
+	ASReflection.h
+)

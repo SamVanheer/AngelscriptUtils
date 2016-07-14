@@ -6,3 +6,9 @@ add_sources(
 	CASBaseClass.h
 	CASBaseClass.cpp
 )
+
+add_includes(
+	ASUtil.h
+	ContextUtils.h
+	CASBaseClass.h
+)

@@ -10,3 +10,11 @@ add_sources(
 	scriptany.h
 	scriptany.cpp
 )
+
+add_includes(
+	scriptbuilder.h
+	scriptstdstring.h
+	scriptdictionary.h
+	scriptarray.h
+	scriptany.h
+)

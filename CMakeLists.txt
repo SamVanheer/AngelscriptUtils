@@ -56,6 +56,40 @@ function( clear_sources )
 	set( PREP_SRCS PARENT_SCOPE )
 endfunction( clear_sources )
 
+# Function to add include files.
+function( add_includes )
+  get_property(is_defined GLOBAL PROPERTY INCLUDES_LIST DEFINED)
+  if(NOT is_defined)
+    define_property(GLOBAL PROPERTY INCLUDES_LIST
+      BRIEF_DOCS "List of include files"
+      FULL_DOCS "List of include files to be compiled in one library")
+  endif()
+  # make absolute paths
+  set(INCLUDES)
+  foreach(s IN LISTS ARGN)
+    if(NOT IS_ABSOLUTE "${s}")
+      get_filename_component(s "${s}" ABSOLUTE)
+    endif()
+    list(APPEND INCLUDES "${s}")
+  endforeach()
+  # append to global list
+  set_property(GLOBAL APPEND PROPERTY INCLUDES_LIST "${INCLUDES}")
+endfunction( add_includes )
+
+# Function to install includes.
+function( install_includes _include_root_path )
+	get_property(INCLUDES GLOBAL PROPERTY INCLUDES_LIST)
+	
+	foreach(_include IN ITEMS ${INCLUDES})
+		get_filename_component(_include_path "${_include}" PATH)
+		file(RELATIVE_PATH _include_path_rel "${_include_root_path}" "${_include_path}")
+		string(REPLACE "/" "\\" _group_path "${_include_path_rel}")
+		install( FILES "${_include}" DESTINATION "include/${_group_path}" )
+	endforeach()
+	
+	set_property( GLOBAL PROPERTY INCLUDES_LIST "" )
+endfunction( install_includes )
+
 project( AngelscriptUtils )
 
 # Angelscript library
@@ -70,6 +104,7 @@ add_library( Angelscript ${PREP_SRCS} )
 
 install( TARGETS Angelscript DESTINATION bin )
 install( FILES external/Angelscript/include/Angelscript.h DESTINATION include )
+install_includes( "${CMAKE_SOURCE_DIR}/external/Angelscript/src" )
 
 clear_sources()
 
@@ -92,6 +127,7 @@ add_library( AngelscriptUtils ${PREP_SRCS} )
 create_source_groups( "${CMAKE_SOURCE_DIR}/src" )
 
 install( TARGETS AngelscriptUtils DESTINATION bin )
+install_includes( "${CMAKE_SOURCE_DIR}/src" )
 
 clear_sources()
 
@@ -111,5 +147,6 @@ set_property( GLOBAL PROPERTY VS_STARTUP_PROJECT AngelscriptUtilsTest )
 target_link_libraries( AngelscriptUtilsTest AngelscriptUtils Angelscript )
 
 install( TARGETS AngelscriptUtilsTest DESTINATION bin )
+install_includes( "${CMAKE_SOURCE_DIR}/src" )
 
 clear_sources()

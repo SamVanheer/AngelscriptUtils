@@ -6,3 +6,9 @@ add_sources(
 	CASArguments.h
 	CASArguments.cpp
 )
+
+add_includes( 
+	CASContext.h 
+	ASCallable.h
+	CASArguments.h
+)

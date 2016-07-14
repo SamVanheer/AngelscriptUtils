@@ -3,4 +3,8 @@ add_sources(
 	CASScheduler.cpp
 )
 
+add_includes(
+	CASScheduler.h
+)
+
 add_subdirectory( Reflection )

@@ -13,18 +13,19 @@ public:
 	*	Constructor. The context is not AddRef'd.
 	*	@param context Context.
 	*/
-	CASContext( asIScriptContext& context );
-	~CASContext() = default;
+	CASContext( asIScriptContext& context )
+		: m_pContext( &context )
+	{
+	}
 
-protected:
-	CASContext() = default;
+	~CASContext() = default;
 
 public:
 
 	/**
 	*	@return Whether this context is valid.
 	*/
-	operator bool() const;
+	operator bool() const { return m_pContext != nullptr; }
 
 	asIScriptContext* GetContext() { return m_pContext; }
 
@@ -46,15 +47,31 @@ public:
 	*	Constructor. The context is AddRef'd.
 	*	@param context Context.
 	*/
-	CASOwningContext( asIScriptContext& context );
+	CASOwningContext( asIScriptContext& context )
+		: CASContext( context )
+	{
+		m_pContext->AddRef();
+	}
 
 	/**
 	*	Constructor. A context is acquired using asIScriptEngine::RequestContext.
 	*	@param engine Script engine.
 	*/
-	CASOwningContext( asIScriptEngine& engine );
+	CASOwningContext( asIScriptEngine& engine )
+		: CASContext( *engine.RequestContext() )
+	{
+		m_pEngine = &engine;
 
-	~CASOwningContext();
+		m_pEngine->AddRef();
+	}
+
+	/**
+	*	Destructor.
+	*/
+	~CASOwningContext()
+	{
+		Release();
+	}
 
 	/**
 	*	Releases the context.

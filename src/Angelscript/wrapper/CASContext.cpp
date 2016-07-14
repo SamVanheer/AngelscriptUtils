@@ -2,35 +2,6 @@
 
 #include "CASContext.h"
 
-CASContext::CASContext( asIScriptContext& context )
-{
-	m_pContext = &context;
-}
-
-CASContext::operator bool() const
-{
-	return m_pContext != nullptr;
-}
-
-CASOwningContext::CASOwningContext( asIScriptContext& context )
-	: CASContext( context )
-{
-	m_pContext->AddRef();
-}
-
-CASOwningContext::CASOwningContext( asIScriptEngine& engine )
-{
-	m_pContext = engine.RequestContext();
-	m_pEngine = &engine;
-
-	m_pEngine->AddRef();
-}
-
-CASOwningContext::~CASOwningContext()
-{
-	Release();
-}
-
 void CASOwningContext::Release()
 {
 	if( m_pContext )

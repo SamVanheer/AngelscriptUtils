@@ -7,6 +7,7 @@
 #include <angelscript.h>
 
 class CASContext;
+class CASArguments;
 
 typedef uint32_t CallFlags_t;
 
@@ -30,8 +31,8 @@ enum CallFlag : CallFlags_t
 class CASCallable
 {
 protected:
-	template<typename CALLABLE>
-	friend bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list );
+	template<typename CALLABLE, typename ARGS>
+	friend bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args );
 
 protected:
 	/**
@@ -122,6 +123,14 @@ public:
 	*	@return true on success, false otherwise.
 	*/
 	bool operator()( CallFlags_t flags, ... );
+
+	/**
+	*	Calls the function.
+	*	@param flags Call flags.
+	*	@param args List of arguments.
+	*	@return true on success, false otherwise.
+	*/
+	bool CallArgs( CallFlags_t flags, const CASArguments& args );
 };
 
 /**
@@ -130,8 +139,8 @@ public:
 class CASMethod final : public CASCallable
 {
 protected:
-	template<typename CALLABLE>
-	friend bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list );
+	template<typename CALLABLE, typename ARGS>
+	friend bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args );
 
 public:
 	/**
@@ -157,6 +166,14 @@ public:
 	*	@return true on success, false otherwise.
 	*/
 	bool operator()( CallFlags_t flags, ... );
+
+	/**
+	*	Calls the function.
+	*	@param flags Call flags.
+	*	@param args List of arguments.
+	*	@return true on success, false otherwise.
+	*/
+	bool CallArgs( CallFlags_t flags, const CASArguments& args );
 
 protected:
 	bool PreSetArguments();

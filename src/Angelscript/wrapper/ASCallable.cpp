@@ -10,12 +10,13 @@
 *	Calls a function.
 *	@param callable Callable object.
 *	@param flags Call flags.
-*	@param list Pointer to a va_list that contains the arguments for the function.
+*	@param args The arguments for the function.
 *	@tparam CALLABLE Type of the callable object.
+*	@tparam ARGS Arguments list type.
 *	@return true on success, false otherwise.
 */
-template<typename CALLABLE>
-bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list )
+template<typename CALLABLE, typename ARGS>
+bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args )
 {
 	auto pContext = callable.GetContext().GetContext();
 
@@ -33,10 +34,10 @@ bool CallFunction( CALLABLE& callable, CallFlags_t flags, va_list list )
 		return false;
 	}
 
-	if( !callable.PreSetArguments( ) )
+	if( !callable.PreSetArguments() )
 		return false;
 
-	auto success = ctx::SetArguments( function, *pContext, list );
+	auto success = ctx::SetArguments( function, *pContext, args );
 
 	if( !success )
 		return false;
@@ -93,6 +94,11 @@ bool CASFunction::operator()( CallFlags_t flags, ... )
 	return success;
 }
 
+bool CASFunction::CallArgs( CallFlags_t flags, const CASArguments& args )
+{
+	return CallFunction( *this, flags, args );
+}
+
 CASMethod::CASMethod( asIScriptFunction& function, CASContext& context, void* pThis )
 	: CASCallable( function, context )
 	, m_pThis( pThis )
@@ -121,6 +127,11 @@ bool CASMethod::operator()( CallFlags_t flags, ... )
 	va_end( list );
 
 	return success;
+}
+
+bool CASMethod::CallArgs( CallFlags_t flags, const CASArguments& args )
+{
+	return CallFunction( *this, flags, args );
 }
 
 bool CASMethod::PreSetArguments()

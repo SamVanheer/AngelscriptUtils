@@ -15,5 +15,6 @@ add_sources(
 )
 
 add_subdirectory( add_on )
+add_subdirectory( ScriptAPI )
 add_subdirectory( util )
 add_subdirectory( wrapper )

@@ -2,11 +2,14 @@
 
 #include <angelscript.h>
 
+#include "ScriptAPI/CASScheduler.h"
+
 #include "CASModule.h"
 
 CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor )
 	: m_pModule( pModule )
 	, m_pDescriptor( &descriptor )
+	, m_pScheduler( new CASScheduler( *this ) )
 {
 	assert( pModule );
 
@@ -15,7 +18,11 @@ CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descr
 
 CASModule::~CASModule()
 {
-	Discard();
+	//Discard should've been called first.
+	assert( !m_pModule );
+
+	//Delete last, in case code calls it during destruction
+	delete m_pScheduler;
 }
 
 void CASModule::Release() const
@@ -28,6 +35,9 @@ void CASModule::Release() const
 
 void CASModule::Discard()
 {
+	//Clears out the functions that might be holding references to this module
+	m_pScheduler->ClearTimerList();
+
 	if( m_pModule )
 	{
 		m_pModule->Discard();

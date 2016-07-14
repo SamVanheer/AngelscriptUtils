@@ -8,6 +8,7 @@
 #include "CASModuleDescriptor.h"
 
 class asIScriptModule;
+class CASScheduler;
 
 /**
 *	The user data ID for the CASModule instance in asIScriptModule.
@@ -55,10 +56,17 @@ public:
 	*/
 	const CASModuleDescriptor& GetDescriptor() const { return *m_pDescriptor; }
 
+	/**
+	*	@return The scheduler.
+	*/
+	CASScheduler* GetScheduler() { return m_pScheduler; }
+
 private:
 	asIScriptModule* m_pModule;
 
 	const CASModuleDescriptor* m_pDescriptor;
+
+	CASScheduler* m_pScheduler;
 
 private:
 	CASModule( const CASModule& ) = delete;

@@ -2,20 +2,23 @@
 
 #include <angelscript.h>
 
+#include "Angelscript/CASManager.h"
+#include "Angelscript/CASHook.h"
+#include "Angelscript/CASModule.h"
+#include "Angelscript/IASModuleBuilder.h"
+
 #include "Angelscript/add_on/scriptbuilder.h"
 #include "Angelscript/add_on/scriptstdstring.h"
 #include "Angelscript/add_on/scriptarray.h"
 #include "Angelscript/add_on/scriptdictionary.h"
 #include "Angelscript/add_on/scriptany.h"
 
+#include "Angelscript/ScriptAPI/CASScheduler.h"
+
+#include "Angelscript/util/ASUtil.h"
+
 #include "Angelscript/wrapper/ASCallable.h"
 #include "Angelscript/wrapper/CASContext.h"
-#include "Angelscript/CASModule.h"
-#include "Angelscript/CASHook.h"
-
-#include "Angelscript/IASModuleBuilder.h"
-
-#include "Angelscript/CASManager.h"
 
 void Print( const std::string& szString )
 {
@@ -30,7 +33,29 @@ public:
 
 	bool AddScripts( CScriptBuilder& builder ) override
 	{
+		//By using a handle this can be changed, but since there are no other instances, it can only be made null.
+		//TODO: figure out a better way.
+		auto result = builder.AddSectionFromMemory( 
+			"__Globals", 
+			"CScheduler@ Scheduler;" );
+
+		if( result < 0 )
+			return false;
+
 		return builder.AddSectionFromFile( "external/test.as" ) >= 0;
+	}
+
+	bool PostBuild( const bool bSuccess, CASModule* pModule )
+	{
+		if( !bSuccess )
+			return false;
+
+		auto& scriptModule = *pModule->GetModule();
+
+		if( !as::SetGlobalByName( scriptModule, "Scheduler", pModule->GetScheduler() ) )
+			return false;
+
+		return true;
 	}
 };
 
@@ -80,6 +105,7 @@ int main( int iArgc, char* pszArgV[] )
 		RegisterScriptArray( manager.GetEngine(), true );
 		RegisterScriptDictionary( manager.GetEngine() );
 		RegisterScriptAny( manager.GetEngine() );
+		RegisterScriptScheduler( manager.GetEngine() );
 
 		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
 
@@ -111,6 +137,8 @@ int main( int iArgc, char* pszArgV[] )
 
 				hook.Call( CallFlag::NONE, &szString );
 			}
+
+			pModule->GetScheduler()->Think( 10 );
 
 			/*
 			if( auto pFunc2 = pModule->GetModule()->GetFunctionByName( "Function" ) )

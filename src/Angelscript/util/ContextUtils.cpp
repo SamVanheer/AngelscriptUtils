@@ -79,7 +79,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 	return SetContextArgument( engine, targetFunc, context, uiIndex, arg.GetTypeId(), arg.GetArgumentValue(), false );
 }
 
-bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, asUINT uiIndex, va_list& list )
+bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, const asUINT uiIndex, va_list& list )
 {
 	int iTypeId;
 	asDWORD uiFlags;
@@ -106,7 +106,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 }
 
 bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context,
-										asUINT uiIndex, int iSourceTypeId, const ArgumentValue& value, bool bAllowPrimitiveReferences )
+										const asUINT uiIndex, int iSourceTypeId, const ArgumentValue& value, bool bAllowPrimitiveReferences )
 {
 	int iTypeId;
 	asDWORD uiFlags;
@@ -375,12 +375,9 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 	return bSuccess;
 }
 
-bool ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& flValue )
+bool ConvertInputArgToLargest( const CASArgument& arg, asINT64& uiValue, double& flValue )
 {
-	if( !pArg )
-		return false;
-
-	return ConvertInputArgToLargest( pArg->GetTypeId(), pArg->GetArgumentValue(), uiValue, flValue );
+	return ConvertInputArgToLargest( arg.GetTypeId(), arg.GetArgumentValue(), uiValue, flValue );
 }
 
 bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue& value, asINT64& uiValue, double& flValue )

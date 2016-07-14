@@ -61,7 +61,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 *	@param list Pointer to the argument.
 *	@return true on success, false otherwise.
 */
-bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, asUINT uiIndex, va_list& list );
+bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, const asUINT uiIndex, va_list& list );
 
 /**
 *	Sets an argument on the context, taking the argument from an ArgumentValue_t.
@@ -75,7 +75,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 *	@return true on success, false otherwise.
 */
 bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context,
-						 asUINT uiIndex, int iSourceTypeId, const ArgumentValue& value, bool bAllowPrimitiveReferences );
+						 const asUINT uiIndex, int iSourceTypeId, const ArgumentValue& value, bool bAllowPrimitiveReferences );
 
 /**
 *	Gets the argument of type iTypeId from the stack, and stores it in value
@@ -92,22 +92,41 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 /**
 *	Converts the input argument to either an asQWORD or double.
 *	iType is either asTYPEID_UINT64 or asTYPEID_DOUBLE.
-*	@param pArg Argument to convert.
+*	@param arg Argument to convert.
 *	@param uiValue The converted value, as an integer.
 *	@param flValue The converted value, as a float.
 *	@return true on success, false if conversion failed.
 */
-bool ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& flValue );
+bool ConvertInputArgToLargest( const CASArgument& arg, asINT64& uiValue, double& flValue );
 
 /**
 *	@see ConvertInputArgToLargest( const CASArgument* const pArg, asINT64& uiValue, double& flValue )
 */
 bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue& value, asINT64& uiValue, double& flValue );
 
+/**
+*	Gets the argument type from a type id and object flags.
+*	@param iTypeId Type id.
+*	@param uiObjFlags Object flags.
+*	@return Argument type.
+*/
 ArgType::ArgType ArgumentTypeFromTypeId( const int iTypeId, const asDWORD uiObjFlags );
 
+/**
+*	Converts an enum to a primitive type.
+*	@param arg Argument to convert.
+*	@param iTypeId Type Id.
+*	@param outValue Converted value.
+*	@return true on success, false otherwise.
+*/
 bool ConvertEnumToPrimitive( const CASArgument& arg, const int iTypeId, ArgumentValue& outValue );
 
+/**
+*	Converts a primitive type to an enum.
+*	@param arg Argument to convert.
+*	@param outValue Converted value.
+*	@return true on success, false otherwise.
+*/
 bool ConvertPrimitiveToEnum( const CASArgument& arg, ArgumentValue& outValue );
 
 /**

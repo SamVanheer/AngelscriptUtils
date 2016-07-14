@@ -145,4 +145,55 @@ typedef CASGCBaseClass<CASRefCountedBaseClass> CASGCRefCountedBaseClass;
 */
 typedef CASGCBaseClass<CASAtomicRefCountedBaseClass> CASGCAtomicRefCountedBaseClass;
 
+namespace as
+{
+/**
+*	Registers a ref counted class's ref counting behaviors.
+*	@param pEngine Script engine.
+*	@param pszObjectName Object name.
+*/
+template<typename CLASS>
+void RegisterRefCountedBaseClass( asIScriptEngine* pEngine, const char* pszObjectName )
+{
+	pEngine->RegisterObjectBehaviour(
+		pszObjectName, asBEHAVE_ADDREF, "void AddRef()",
+		asMETHODPR( CLASS, AddRef, ( ) const, void ), asCALL_THISCALL );
+
+	pEngine->RegisterObjectBehaviour(
+		pszObjectName, asBEHAVE_RELEASE, "void Release()",
+		asMETHODPR( CLASS, Release, ( ) const, void ), asCALL_THISCALL );
+}
+
+/**
+*	Registers a garbage collected, ref counted class's ref counting and gc behaviors.
+*	@param pEngine Script engine.
+*	@param pszObjectName Object name.
+*/
+template<typename CLASS>
+void RegisterGCRefCountedBaseClass( asIScriptEngine* pEngine, const char* pszObjectName )
+{
+	RegisterSCScriptRefCountedBaseClass<CLASS>( pEngine, pszObjectName );
+
+	pEngine->RegisterObjectBehaviour(
+		pszObjectName, asBEHAVE_GETREFCOUNT, "int GetRefCount() const",
+		asMETHODPR( CLASS, GetRefCount, ( ) const, int ), asCALL_THISCALL );
+
+	pEngine->RegisterObjectBehaviour(
+		pszObjectName, asBEHAVE_GETGCFLAG, "bool GetGCFlag() const",
+		asMETHODPR( CLASS, GetGCFlag, ( ) const, bool ), asCALL_THISCALL );
+
+	pEngine->RegisterObjectBehaviour(
+		pszObjectName, asBEHAVE_SETGCFLAG, "void SetGCFlag()",
+		asMETHODPR( CLASS, SetGCFlag, ( ) const, void ), asCALL_THISCALL );
+
+	pEngine->RegisterObjectBehaviour(
+		pszObjectName, asBEHAVE_ENUMREFS, "void EnumReferences(int& in)",
+		asMETHOD( CLASS, EnumReferences ), asCALL_THISCALL );
+
+	pDocumentation->RegisterObjectBehaviour(
+		pszObjectName, asBEHAVE_RELEASEREFS, "void ReleaseReferences(int& in)",
+		asMETHOD( CLASS, ReleaseReferences ), asCALL_THISCALL );
+}
+}
+
 #endif //ANGELSCRIPT_CASBASECLASS_H

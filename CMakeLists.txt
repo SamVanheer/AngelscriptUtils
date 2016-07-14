@@ -56,6 +56,8 @@ function( clear_sources )
 	set( PREP_SRCS PARENT_SCOPE )
 endfunction( clear_sources )
 
+project( AngelscriptUtils )
+
 # Angelscript library
 
 add_definitions( -DAS_NO_EXCEPTIONS )
@@ -71,8 +73,6 @@ install( FILES external/Angelscript/include/Angelscript.h DESTINATION include )
 
 clear_sources()
 
-project( AngelscriptUtils )
-
 #version number
 set( AngelscriptUtils_VERSION_MAJOR 1 )
 set( AngelscriptUtils_VERSION_MINOR 0 )
@@ -86,15 +86,30 @@ include_directories( src external/Angelscript/include )
 
 preprocess_sources()
 
-#indicate the entry point for the executable
-add_executable( AngelscriptUtils ${PREP_SRCS} )
-
-set_property( GLOBAL PROPERTY VS_STARTUP_PROJECT AngelscriptUtils )
+add_library( AngelscriptUtils ${PREP_SRCS} )
 
 #Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}/src" )
 
-# Indicate which libraries to include during the link process.
-target_link_libraries( AngelscriptUtils Angelscript )
-
 install( TARGETS AngelscriptUtils DESTINATION bin )
+
+clear_sources()
+
+#This really needs a better approach.
+add_sources( 
+	src/main/Main.cpp
+)
+
+preprocess_sources()
+
+#indicate the entry point for the executable
+add_executable( AngelscriptUtilsTest ${PREP_SRCS} )
+
+set_property( GLOBAL PROPERTY VS_STARTUP_PROJECT AngelscriptUtilsTest )
+
+# Indicate which libraries to include during the link process.
+target_link_libraries( AngelscriptUtilsTest AngelscriptUtils Angelscript )
+
+install( TARGETS AngelscriptUtilsTest DESTINATION bin )
+
+clear_sources()

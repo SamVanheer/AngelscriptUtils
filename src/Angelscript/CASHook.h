@@ -13,6 +13,12 @@
 class CASModule;
 
 /**
+*	@defgroup ASHooks Angelscript Hooks
+*
+*	@{
+*/
+
+/**
 *	Stop modes for hooks. Allows you to specify whether hooks should continue executing after a function has handled it.
 */
 enum class HookStopMode
@@ -264,5 +270,7 @@ private:
 	CASHook( const CASHook& ) = delete;
 	CASHook& operator=( const CASHook& ) = delete;
 };
+
+/** @} */
 
 #endif //ANGELSCRIPT_CASHOOK_H

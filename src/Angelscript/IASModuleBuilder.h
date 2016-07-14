@@ -5,6 +5,12 @@ class CScriptBuilder;
 class CASModule;
 
 /**
+*	@addtogroup ASModule
+*
+*	@{
+*/
+
+/**
 *	Interface used to provide necessary information to build a module.
 */
 class IASModuleBuilder
@@ -30,7 +36,7 @@ public:
 	virtual bool AddScripts( CScriptBuilder& builder ) = 0;
 
 	/**
-	*	Allows #include statements to be processed.
+	*	Allows \#include statements to be processed.
 	*	@param builder Builder to add scripts to.
 	*	@param pszIncludeFileName Name of the file that is being included.
 	*	@param pszFromFileName Name of the file that contains the include statement.
@@ -57,5 +63,7 @@ public:
 inline IASModuleBuilder::~IASModuleBuilder()
 {
 }
+
+/** @} */
 
 #endif //ANGELSCRIPT_IASMODULEBUILDER_H

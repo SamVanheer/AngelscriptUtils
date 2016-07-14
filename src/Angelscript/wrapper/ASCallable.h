@@ -12,6 +12,12 @@
 class CASContext;
 class CASArguments;
 
+/**
+*	@defgroup ASCallable Angelscript Call Utils
+*
+*	@{
+*/
+
 typedef uint32_t CallFlags_t;
 
 namespace CallFlag
@@ -356,8 +362,9 @@ inline bool VCallFunc( asIScriptContext* pContext, CallFlags_t flags, asIScriptF
 }
 
 /**
-*	Overload that calls object method.
+*	Overload that calls object methods.
 *	Do not use directly.
+*	@param pThis This pointer.
 *	@param pContext Script context. If null, acquires a context using asIScriptEngine::RequestContext.
 *	@param flags Call flags.
 *	@param pFunction Function to call.
@@ -386,6 +393,7 @@ inline bool VCallFunc( void* pThis, asIScriptContext* pContext, CallFlags_t flag
 *	@param methodCallName Name of the functions to define for object method calls.
 *	@param funcToCall Which function to call to perform the call.
 *	@param argType Argument list argument type and name.
+*	@param argName Argument list name.
 *	@param preCall Function macro to use before a call occurs.
 *	@param postCall Function macro to use after a call has occurred.
 */
@@ -639,5 +647,7 @@ bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, CallFlags_t flag
 */
 bool CallMethodArgs( void* pThis, asIScriptFunction* pFunction, const CASArguments& args );
 }
+
+/** @} */
 
 #endif //WRAPPER_CASCALLABLE_H

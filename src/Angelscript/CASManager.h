@@ -8,6 +8,12 @@ class asIScriptEngine;
 struct asSMessageInfo;
 
 /**
+*	@defgroup ASManager Angelscript Manager
+*
+*	@{
+*/
+
+/**
 *	Manages the Angelscript engine instance, the module and hook managers.
 *	Multiple instances of this class can exist. In that case, you will have to activate the manager before using it.
 *	Code that accesses the active manager will need it to be activated in order to work properly.
@@ -93,5 +99,7 @@ private:
 	CASManager( const CASManager& ) = delete;
 	CASManager& operator=( const CASManager& ) = delete;
 };
+
+/** @} */
 
 #endif //ANGELSCRIPT_CASMANAGER_H

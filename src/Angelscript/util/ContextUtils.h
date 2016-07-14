@@ -6,7 +6,7 @@
 #include "Angelscript/wrapper/CASArguments.h"
 
 /**
-*	@defgroup ASContextUtils Angelscript Context Utility Code
+*	@addtogroup ASContext
 *
 *	@{
 */
@@ -132,7 +132,7 @@ bool ConvertPrimitiveToEnum( const CASArgument& arg, ArgumentValue& outValue );
 /**
 *	Tries to set the given data on the given value.
 *	@param pData Data to copy.
-*	@param iTypeid Type Id of the pData instance.
+*	@param iTypeId Type Id of the pData instance.
 *	@param arg Argument to set.
 *	@param[ out ] bOutWasPrimitive Whether the value was a primitive type or not.
 *	@return true on success, false otherwise.
@@ -142,7 +142,7 @@ bool SetPrimitiveArgument( void* pData, int iTypeId, CASArgument& arg, bool& bOu
 /**
 *	Tries to set the given data on the given value.
 *	@param pData Data to copy.
-*	@param iTypeid Type Id of the pData instance.
+*	@param iTypeId Type Id of the pData instance.
 *	@param value Value to set.
 *	@param[ out ] bOutWasPrimitive Whether the value was a primitive type or not.
 *	@return true on success, false otherwise.

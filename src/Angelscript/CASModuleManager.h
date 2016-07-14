@@ -17,6 +17,12 @@ class CASModule;
 class IASModuleBuilder;
 
 /**
+*	@addtogroup ASModule
+*
+*	@{
+*/
+
+/**
 *	Manages the list of module descriptors and modules.
 */
 class CASModuleManager final
@@ -151,5 +157,7 @@ private:
 	CASModuleManager( const CASModuleManager& ) = delete;
 	CASModuleManager& operator=( const CASModuleManager& ) = delete;
 };
+
+/** @} */
 
 #endif //ANGELSCRIPT_CASMODULEMANAGER_H

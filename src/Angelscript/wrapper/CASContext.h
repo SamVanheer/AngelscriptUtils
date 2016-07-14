@@ -4,6 +4,12 @@
 #include <angelscript.h>
 
 /**
+*	@defgroup ASContext Angelscript Context Utils
+*
+*	@{
+*/
+
+/**
 *	A context that does not release the context in its destructor.
 */
 class CASContext
@@ -87,5 +93,7 @@ private:
 	//TODO: consider: the engine can be retrieved using m_pContext->GetEngine. All that's needed is a flag that indicates where it came from.
 	asIScriptEngine* m_pEngine = nullptr;
 };
+
+/** @} */
 
 #endif //WRAPPER_CASCONTEXT_H

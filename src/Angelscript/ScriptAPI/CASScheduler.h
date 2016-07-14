@@ -214,7 +214,7 @@ public:
 public:
 	/**
 	*	Constructor.
-	*	@param pOwningModule The module that owns this scheduler.
+	*	@param owningModule The module that owns this scheduler.
 	*/
 	CASScheduler( CASModule& owningModule );
 

@@ -4,6 +4,12 @@
 #include <angelscript.h>
 
 /**
+*	@defgroup ASBaseClass Angelscript Base classes
+*
+*	@{
+*/
+
+/**
 *	Base class for Angelscript classes that require one.
 */
 class CASBaseClass
@@ -197,5 +203,7 @@ void RegisterGCRefCountedBaseClass( asIScriptEngine* pEngine, const char* pszObj
 		asMETHOD( CLASS, ReleaseReferences ), asCALL_THISCALL );
 }
 }
+
+/** @} */
 
 #endif //ANGELSCRIPT_CASBASECLASS_H

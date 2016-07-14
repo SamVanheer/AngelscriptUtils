@@ -105,6 +105,7 @@ bool HasDefaultConstructor( const asITypeInfo& type );
 
 /**
 *	Creates an instance of an object using its default constructor.
+*	@param engine Script engine.
 *	@param type Object type.
 *	@return Object instance, or null if the object could not be instantiated.
 */
@@ -332,6 +333,7 @@ struct CASRegisterMethod final
 /**
 *	Registers a varargs function.
 *	@param engine Script Engine.
+*	@param pszObjectName Object name.
 *	@param pszReturnType Return type.
 *	@param pszName Function name.
 *	@param pszArguments Mandatory parameters.

@@ -11,6 +11,12 @@ class CASManager;
 class CASModule;
 
 /**
+*	@addtogroup ASHooks
+*
+*	@{
+*/
+
+/**
 *	Manages the list of hooks.
 */
 class CASHookManager final
@@ -99,5 +105,7 @@ private:
 	CASHookManager( const CASHookManager& ) = delete;
 	CASHookManager& operator=( const CASHookManager& ) = delete;
 };
+
+/** @} */
 
 #endif //ANGELSCRIPT_CASHOOKMANAGER_H

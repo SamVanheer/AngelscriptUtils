@@ -7,6 +7,12 @@
 
 #include <angelscript.h>
 
+/**
+*	@addtogroup ASModule
+*
+*	@{
+*/
+
 namespace as
 {
 typedef int32_t ModulePriority_t;
@@ -142,5 +148,7 @@ struct less<CASModuleDescriptor>
 	}
 };
 }
+
+/** @} */
 
 #endif //ANGELSCRIPT_CASMODULEDESCRIPTOR_H

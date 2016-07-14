@@ -7,8 +7,11 @@
 
 class asIScriptEngine;
 
-/*
-*	Everything related to handling arguments is in here
+/**
+*	@defgroup ASArguments Angelscript Arguments Utils
+*	Everything related to handling arguments is in here.
+*
+*	@{
 */
 
 namespace ArgType
@@ -265,5 +268,7 @@ public:
 private:
 	Arguments_t m_Arguments;
 };
+
+/** @} */
 
 #endif //ANGELSCRIPT_CASARGUMENTS_H

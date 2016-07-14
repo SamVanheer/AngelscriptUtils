@@ -11,6 +11,12 @@ class asIScriptModule;
 class CASScheduler;
 
 /**
+*	@defgroup ASModule Angelscript Module
+*
+*	@{
+*/
+
+/**
 *	The user data ID for the CASModule instance in asIScriptModule.
 */
 #define CASMODULE_USER_DATA_ID 10001
@@ -82,7 +88,7 @@ CASModule* GetModuleFromScriptModule( const asIScriptModule* pModule );
 
 /**
 *	Gets a module from a script function.
-*	@param pModule Script function to retrieve the module from.
+*	@param pFunction Script function to retrieve the module from.
 *	@return The module, or null if it couldn't be retrieved.
 */
 CASModule* GetModuleFromScriptFunction( const asIScriptFunction* pFunction );
@@ -136,5 +142,7 @@ struct ModuleEqualByName final
 		return strcmp( pModule->GetModuleName(), pszModuleName ) == 0;
 	}
 };
+
+/** @} */
 
 #endif //ANGELSCRIPT_CASMODULE_H

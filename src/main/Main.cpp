@@ -14,6 +14,7 @@
 #include "Angelscript/add_on/scriptany.h"
 
 #include "Angelscript/ScriptAPI/CASScheduler.h"
+#include "Angelscript/ScriptAPI/Reflection/ASReflection.h"
 
 #include "Angelscript/util/ASUtil.h"
 
@@ -106,6 +107,7 @@ int main( int iArgc, char* pszArgV[] )
 		RegisterScriptDictionary( manager.GetEngine() );
 		RegisterScriptAny( manager.GetEngine() );
 		RegisterScriptScheduler( manager.GetEngine() );
+		RegisterScriptReflection( *manager.GetEngine() );
 
 		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
 

@@ -71,3 +71,27 @@ CASModule* GetModuleFromScriptFunction( const asIScriptFunction* pFunction )
 
 	return pModule;
 }
+
+CASModule* GetModuleFromScriptContext( asIScriptContext* pContext )
+{
+	assert( pContext );
+
+	auto pFunction = pContext->GetFunction( pContext->GetCallstackSize() - 1 );
+
+	if( !pFunction )
+		return nullptr;
+
+	return GetModuleFromScriptFunction( pFunction );
+}
+
+asIScriptModule* GetScriptModuleFromScriptContext( asIScriptContext* pContext )
+{
+	assert( pContext );
+
+	auto pFunction = pContext->GetFunction( pContext->GetCallstackSize() - 1 );
+
+	if( !pFunction )
+		return nullptr;
+
+	return pFunction->GetModule();
+}

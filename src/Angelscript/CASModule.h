@@ -88,6 +88,20 @@ CASModule* GetModuleFromScriptModule( const asIScriptModule* pModule );
 CASModule* GetModuleFromScriptFunction( const asIScriptFunction* pFunction );
 
 /**
+*	Gets a module from a script context.
+*	@param pContext Script context to retrieve the module from. Uses the function currently being executed.
+*	@return The module, or null if it couldn't be retrieved.
+*/
+CASModule* GetModuleFromScriptContext( asIScriptContext* pContext );
+
+/**
+*	Gets a script module from a script context.
+*	@param pContext Script context to retrieve the module from. Uses the function currently being executed.
+*	@return The script module, or null if it couldn't be retrieved.
+*/
+asIScriptModule* GetScriptModuleFromScriptContext( asIScriptContext* pContext );
+
+/**
 *	Less function for modules.
 *	@param pLHS Left hand module.
 *	@param pRHS Right hand module.

@@ -1,6 +1,8 @@
 #ifndef ANGELSCRIPT_CASBASECLASS_H
 #define ANGELSCRIPT_CASBASECLASS_H
 
+#include <angelscript.h>
+
 /**
 *	Base class for Angelscript classes that require one.
 */

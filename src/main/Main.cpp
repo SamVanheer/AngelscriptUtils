@@ -138,6 +138,28 @@ int main( int iArgc, char* pszArgV[] )
 				hook.Call( CallFlag::NONE, &szString );
 			}
 
+			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "NoArgs" ) )
+			{
+				//Regular varargs.
+				as::Call( pFunction );
+				//Argument list.
+				as::CallArgs( pFunction, CASArguments() );
+
+				auto pFunc = [ = ]( CallFlags_t flags, ... )
+				{
+					va_list list;
+
+					va_start( list, flags );
+
+					as::VCall( flags, pFunction, list );
+
+					va_end( list );
+				};
+
+				//va_list version.
+				pFunc( CallFlag::NONE );
+			}
+
 			pModule->GetScheduler()->Think( 10 );
 
 			/*

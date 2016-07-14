@@ -1,8 +1,4 @@
-#include <cassert>
-
 #include <type_traits>
-
-#include "CASContext.h"
 
 #include "Angelscript/util/ContextUtils.h"
 

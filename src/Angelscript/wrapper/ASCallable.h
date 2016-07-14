@@ -1,10 +1,13 @@
 #ifndef WRAPPER_CASCALLABLE_H
 #define WRAPPER_CASCALLABLE_H
 
+#include <cassert>
 #include <cstdarg>
 #include <cstdint>
 
 #include <angelscript.h>
+
+#include "CASContext.h"
 
 class CASContext;
 class CASArguments;
@@ -211,6 +214,272 @@ private:
 
 namespace as
 {
+/**
+*	Performs a function call.
+*	Do not use directly.
+*	@param functor Functor that Can perform function calls.
+*	@param pContext Script context. If null, acquires a context using asIScriptEngine::RequestContext.
+*	@param flags Call flags.
+*	@param pFunction Function to call.
+*	@param args Argument list to use for the call.
+*	@tparam FUNCTOR Functor type.
+*	@tparam ARGS Argument list type.
+*	@return true on success, false otherwise.
+*/
+template<typename FUNCTOR, typename ARGS>
+inline bool VCall( FUNCTOR functor, asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, const ARGS& args )
+{
+	assert( pFunction );
+
+	if( !pFunction )
+		return false;
+
+	if( pContext )
+	{
+		CASContext ctx( *pContext );
+
+		return functor( *pFunction, ctx, flags, args );
+	}
+	else
+	{
+		CASOwningContext ctx( *pFunction->GetEngine() );
+
+		return functor( *pFunction, ctx, flags, args );
+	}
+}
+
+/**
+*	Internal helper functor used for calls.
+*/
+struct CASFunctionFunctor final
+{
+	/**
+	*	Calls a function using varargs.
+	*	@param function Function to call.
+	*	@param context Context to use.
+	*	@param flags Call flags.
+	*	@param list List of arguments.
+	*/
+	bool operator()( asIScriptFunction& function, CASContext& context, CallFlags_t flags, va_list list )
+	{
+		CASFunction func( function, context );
+
+		if( !func.IsValid() )
+			return false;
+
+		return func.VCall( flags, list );
+	}
+
+	/**
+	*	Calls a function using an argument list.
+	*	@param function Function to call.
+	*	@param context Context to use.
+	*	@param flags Call flags.
+	*	@param args List of arguments.
+	*/
+	bool operator()( asIScriptFunction& function, CASContext& context, CallFlags_t flags, const CASArguments& args )
+	{
+		CASFunction func( function, context );
+
+		if( !func.IsValid() )
+			return false;
+
+		return func.CallArgs( flags, args );
+	}
+};
+
+/**
+*	Internal helper functor used for calls.
+*/
+struct CASMethodFunctor final
+{
+	void* const pThis;
+
+	/**
+	*	Constructor.
+	*	@param pThis This pointer.
+	*/
+	CASMethodFunctor( void* pThis )
+		: pThis( pThis )
+	{
+	}
+
+	/**
+	*	Calls an object method using varargs.
+	*	@param function Function to call.
+	*	@param context Context to use.
+	*	@param flags Call flags.
+	*	@param list List of arguments.
+	*/
+	bool operator()( asIScriptFunction& function, CASContext& context, CallFlags_t flags, va_list list )
+	{
+		CASMethod method( function, context, pThis );
+
+		if( !method.IsValid() )
+			return false;
+
+		return method.VCall( flags, list );
+	}
+
+	/**
+	*	Calls an object method using an argument list.
+	*	@param function Function to call.
+	*	@param context Context to use.
+	*	@param flags Call flags.
+	*	@param args List of arguments.
+	*/
+	bool operator()( asIScriptFunction& function, CASContext& context, CallFlags_t flags, const CASArguments& args )
+	{
+		CASMethod method( function, context, pThis );
+
+		if( !method.IsValid() )
+			return false;
+
+		return method.CallArgs( flags, args );
+	}
+};
+
+/**
+*	Overload that calls global functions.
+*	Do not use directly.
+*	@param pContext Script context. If null, acquires a context using asIScriptEngine::RequestContext.
+*	@param flags Call flags.
+*	@param pFunction Function to call.
+*	@param args Argument list to use for the call.
+*	@tparam ARGS Argument list type.
+*	@return true on success, false otherwise.
+*/
+template<typename ARGS>
+inline bool VCallFunc( asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, const ARGS& args )
+{
+	return VCall( CASFunctionFunctor(), pContext, flags, pFunction, args );
+}
+
+/**
+*	Overload that calls object method.
+*	Do not use directly.
+*	@param pContext Script context. If null, acquires a context using asIScriptEngine::RequestContext.
+*	@param flags Call flags.
+*	@param pFunction Function to call.
+*	@param args Argument list to use for the call.
+*	@tparam ARGS Argument list type.
+*	@return true on success, false otherwise.
+*/
+template<typename ARGS>
+inline bool VCallFunc( void* pThis, asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, const ARGS& args )
+{
+	return VCall( CASMethodFunctor( pThis ), pContext, flags, pFunction, args );
+}
+
+/**
+*	Implements a single function call.
+*/
+#define __IMPLEMENT_SINGLE_CALL( call, preCall, postCall )	\
+	preCall()												\
+	const auto success = call;								\
+	postCall()												\
+	return success
+
+/**
+*	Implements function overloads for calling functions or object methods.
+*	@param funcCallName Name of the functions to define for global function calls.
+*	@param methodCallName Name of the functions to define for object method calls.
+*	@param funcToCall Which function to call to perform the call.
+*	@param argType Argument list argument type and name.
+*	@param preCall Function macro to use before a call occurs.
+*	@param postCall Function macro to use after a call has occurred.
+*/
+#define __IMPLEMENT_CALL( funcCallName, methodCallName, funcToCall, argType, argName, preCall, postCall )						\
+inline bool funcCallName( asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, argType )				\
+{																																\
+	__IMPLEMENT_SINGLE_CALL( ( funcToCall( pContext, flags, pFunction, argName ) ), preCall, postCall );						\
+}																																\
+																																\
+inline bool funcCallName( CallFlags_t flags, asIScriptFunction* pFunction, argType )											\
+{																																\
+	__IMPLEMENT_SINGLE_CALL( 																									\
+		( funcToCall( static_cast<asIScriptContext*>( nullptr ), flags, pFunction, argName ) ), 								\
+		preCall, postCall );																									\
+}																																\
+																																\
+inline bool funcCallName( asIScriptContext* pContext, asIScriptFunction* pFunction, argType )									\
+{																																\
+	__IMPLEMENT_SINGLE_CALL( ( funcToCall( pContext, CallFlag::NONE, pFunction, argName ) ), preCall, postCall );				\
+}																																\
+																																\
+inline bool funcCallName( asIScriptFunction* pFunction, argType )																\
+{																																\
+	__IMPLEMENT_SINGLE_CALL( 																									\
+		( funcToCall( static_cast<asIScriptContext*>( nullptr ), CallFlag::NONE, pFunction, argName ) ), 						\
+		preCall, postCall );																									\
+}																																\
+																																\
+inline bool methodCallName( void* pThis, asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, argType )	\
+{																																\
+	__IMPLEMENT_SINGLE_CALL( ( funcToCall( pThis, pContext, flags, pFunction, argName ) ), preCall, postCall );					\
+}																																\
+																																\
+inline bool methodCallName( void* pThis, CallFlags_t flags, asIScriptFunction* pFunction, argType )								\
+{																																\
+	__IMPLEMENT_SINGLE_CALL( ( funcToCall( pThis, nullptr, flags, pFunction, argName ) ), preCall, postCall );					\
+}																																\
+																																\
+inline bool methodCallName( void* pThis, asIScriptContext* pContext, asIScriptFunction* pFunction, argType )					\
+{																																\
+	__IMPLEMENT_SINGLE_CALL( ( funcToCall( pThis, pContext, CallFlag::NONE, pFunction, argName ) ), preCall, postCall );		\
+}																																\
+																																\
+inline bool methodCallName( void* pThis, asIScriptFunction* pFunction, argType )												\
+{																																\
+	__IMPLEMENT_SINGLE_CALL( ( funcToCall( pThis, nullptr, CallFlag::NONE, pFunction, argName ) ), preCall, postCall );			\
+}
+
+/**
+*	Simplified version of __IMPLEMENT_CALL that uses the same name for global function and object method call functions.
+*/
+#define __IMPLEMENT_CALL_SIMPLE( funcName, funcToCall, argType, argName, preCall, postCall )	\
+__IMPLEMENT_CALL( funcName, funcName, funcToCall, argType, argName, preCall, postCall )
+
+#define __DO_NOTHING()
+
+/*
+*	Implement calls for argument lists.
+*/
+__IMPLEMENT_CALL_SIMPLE( CallArgs, VCallFunc, const CASArguments& args, args, __DO_NOTHING, __DO_NOTHING )
+
+/*
+*	Implement calls for va_list types.
+*/
+__IMPLEMENT_CALL_SIMPLE( VCall, VCallFunc, va_list list, list, __DO_NOTHING, __DO_NOTHING )
+
+#define __VA_ARG_PARAM ...
+
+#define __BEGIN_VA_LIST()		\
+ va_list list;					\
+va_start( list, pFunction );
+
+#define __END_VA_LIST()		\
+va_end( list );
+
+/*
+*	Implement calls for varargs.
+*/
+__IMPLEMENT_CALL_SIMPLE( Call, VCallFunc, __VA_ARG_PARAM, list, __BEGIN_VA_LIST, __END_VA_LIST )
+
+/*
+*	Clean up macros
+*/
+#undef __IMPLEMENT_SINGLE_CALL
+#undef __DO_NOTHING
+#undef __VA_ARG_PARAM
+#undef __BEGIN_VA_LIST
+#undef __END_VA_LIST
+
+/*
+*	These are all obsolete, but still work.
+*	TODO: remove.
+*/
+
 /**
 *	Calls the given function using the given context.
 *	@param pFunction Function to call.

@@ -1,5 +1,4 @@
 #include <cstdint>
-#include <cstring>
 #include <memory>
 
 #include "Angelscript/add_on/scriptany.h"

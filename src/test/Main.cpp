@@ -337,26 +337,20 @@ int main( int iArgc, char* pszArgV[] )
 			//Try to create a C++ class that is extended in a script.
 			bool bCreatedExtend = false;
 
-			if( auto pType = pModule->GetModule()->GetTypeInfoByName( "CEntity" ) )
+			//This data will need to be stored somewhere, bound to the baseclass.
+			if( auto pEntity = as::CreateExtensionClassInstance<CScriptBaseEntity>( *pEngine, *pModule->GetModule(), "CEntity", "CBaseEntity", "BaseEntity" ) )
 			{
-				if( auto pInstance = as::CreateObjectInstance( *pEngine, *pType ) )
-				{
-					CScriptBaseEntity instance( CASObjPtr( pInstance, pType, true ) );
+				bCreatedExtend = true;
 
-					//This data will need to be stored somewhere, bound to the baseclass.
-					if( as::InitializeExtendClass( instance, &instance, "CBaseEntity", "BaseEntity" ) )
-					{
-						bCreatedExtend = true;
+				CBaseEntity* pBaseEnt = pEntity;
 
-						CBaseEntity* pEntity = &instance;
+				pBaseEnt->Spawn();
 
-						pEntity->Spawn();
+				const int result = pBaseEnt->ScheduleOfType( "foo" );
 
-						const int result = pEntity->ScheduleOfType( "foo" );
+				int x = 10;
 
-						int x = 10;
-					}
-				}
+				delete pEntity;
 			}
 
 			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;

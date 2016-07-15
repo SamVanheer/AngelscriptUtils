@@ -1,7 +1,12 @@
 #ifndef ANGELSCRIPT_UTIL_ASEXTENDADAPTER_H
 #define ANGELSCRIPT_UTIL_ASEXTENDADAPTER_H
 
+#include <cassert>
 #include <string>
+
+#include <angelscript.h>
+
+#include "ASUtil.h"
 
 class IASExtendAdapter;
 
@@ -40,6 +45,59 @@ std::string CreateExtendBaseclassDeclaration(
 bool InitializeExtendClass( 
 	IASExtendAdapter& adapter, void* const pThis, 
 	const char* const pszCPPClassName, const char* const pszCPPBaseClassName );
+
+/**
+*	Creates an instance of an extension class.
+*	@param engine Script engine.
+*	@param typeInfo Type info for the class.
+*	@param pszCPPClassName Registered name of the class that represents the C++ version of the class.
+*	@param pszCPPBaseClassName Registered name of the class that provides base class method calling features. Can be null, in which case no BaseClass member is initialized.
+*	@tparam CLASS Class type to instantiate. Must derive from IASExtendAdapter.
+*	@return Instance, or null if an error occurred.
+*/
+template<typename CLASS>
+CLASS* CreateExtensionClassInstance(
+	asIScriptEngine& engine, 
+	asITypeInfo& typeInfo, const char* const pszCPPClassName, const char* const pszCPPBaseClassName = nullptr )
+{
+	assert( pszCPPClassName );
+
+	if( auto pInstance = as::CreateObjectInstance( engine, typeInfo ) )
+	{
+		auto* pCPPInstance = new CLASS( CASObjPtr( pInstance, &typeInfo, true ) );
+
+		if( as::InitializeExtendClass( *pCPPInstance, pCPPInstance, pszCPPClassName, pszCPPBaseClassName ) )
+		{
+			return pCPPInstance;
+		}
+
+		delete pCPPInstance;
+	}
+
+	return nullptr;
+}
+
+/**
+*	Creates an instance of an extension class.
+*	@param module Script module that contains the class.
+*	@param pszClassName Name of the script class to instantiate.
+*	@see CreateExtensionClassInstance( asIScriptEngine& engine, asITypeInfo& typeInfo, const char* const pszCPPClassName, const char* const pszCPPBaseClassName )
+*/
+template<typename CLASS>
+CLASS* CreateExtensionClassInstance(
+	asIScriptEngine& engine, asIScriptModule& module, 
+	const char* const pszClassName, const char* const pszCPPClassName, const char* const pszCPPBaseClassName = nullptr )
+{
+	assert( pszClassName );
+
+	//TODO: namespaces
+	if( auto pType = module.GetTypeInfoByName( pszClassName ) )
+	{
+		return CreateExtensionClassInstance<CLASS>( engine, *pType, pszCPPClassName, pszCPPBaseClassName );
+	}
+
+	return nullptr;
+}
 }
 
 /** @} */

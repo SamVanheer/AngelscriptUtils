@@ -18,7 +18,7 @@ public:
 
 	void Spawn() override
 	{
-		CALL_EXTEND_FUNC( Spawn, "" );
+		CALL_EXTEND_FUNC( Spawn, "()" );
 	}
 
 	//This is used to handle the reference type being a pointer.
@@ -29,7 +29,7 @@ public:
 
 	int ScheduleOfType( const std::string& szName ) override
 	{
-		CALL_EXTEND_FUNC_RET_DIFFFUNC( int, ScheduleOfType, ThisClass::ScheduleOfTypePtr, "const string& in", &szName );
+		CALL_EXTEND_FUNC_RET_DIFFFUNC( int, ScheduleOfType, ThisClass::ScheduleOfTypePtr, "(const string& in)", &szName );
 	}
 };
 

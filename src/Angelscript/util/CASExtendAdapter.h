@@ -94,7 +94,7 @@ private:
 #define CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, baseMethodName, pszParams, ... )						\
 retType result;																										\
 																													\
-if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( #retType " " #methodName "(" pszParams " )" ) )	\
+if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( #retType " " #methodName pszParams ) )				\
 {																													\
 	CASOwningContext ctx( *pFunction->GetEngine() );																\
 																													\
@@ -130,7 +130,7 @@ CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, BaseClass::methodName, pszPa
 *	@param ... Arguments to pass.
 */
 #define CALL_EXTEND_FUNC_DIFFFUNC( methodName, baseMethodName, pszParams, ... )								\
-if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( "void " #methodName "(" pszParams " )" ) )	\
+if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( "void " #methodName pszParams ) )			\
 {																											\
 	as::Call( GetObject().Get(), pFunction, __VA_ARGS__ );													\
 }																											\

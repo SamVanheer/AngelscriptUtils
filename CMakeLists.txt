@@ -90,7 +90,64 @@ function( install_includes _include_root_path )
 	set_property( GLOBAL PROPERTY INCLUDES_LIST "" )
 endfunction( install_includes )
 
+macro(configure_msvc_runtime)
+  if(MSVC)
+    # Default to statically-linked runtime.
+    if("${MSVC_RUNTIME}" STREQUAL "")
+      set(MSVC_RUNTIME "static")
+    endif()
+    # Set compiler options.
+    set(variables
+      CMAKE_C_FLAGS_DEBUG
+      CMAKE_C_FLAGS_MINSIZEREL
+      CMAKE_C_FLAGS_RELEASE
+      CMAKE_C_FLAGS_RELWITHDEBINFO
+      CMAKE_CXX_FLAGS_DEBUG
+      CMAKE_CXX_FLAGS_MINSIZEREL
+      CMAKE_CXX_FLAGS_RELEASE
+      CMAKE_CXX_FLAGS_RELWITHDEBINFO
+    )
+    if(${MSVC_RUNTIME} STREQUAL "static")
+      message(STATUS
+        "MSVC -> forcing use of statically-linked runtime."
+      )
+      foreach(variable ${variables})
+        if(${variable} MATCHES "/MD")
+          string(REGEX REPLACE "/MD" "/MT" ${variable} "${${variable}}")
+        endif()
+      endforeach()
+    else()
+      message(STATUS
+        "MSVC -> forcing use of dynamically-linked runtime."
+      )
+      foreach(variable ${variables})
+        if(${variable} MATCHES "/MT")
+          string(REGEX REPLACE "/MT" "/MD" ${variable} "${${variable}}")
+        endif()
+      endforeach()
+    endif()
+  endif()
+endmacro()
+
 project( AngelscriptUtils )
+
+configure_msvc_runtime()
+
+set(variables
+  CMAKE_C_FLAGS_DEBUG
+  CMAKE_C_FLAGS_MINSIZEREL
+  CMAKE_C_FLAGS_RELEASE
+  CMAKE_C_FLAGS_RELWITHDEBINFO
+  CMAKE_CXX_FLAGS_DEBUG
+  CMAKE_CXX_FLAGS_MINSIZEREL
+  CMAKE_CXX_FLAGS_RELEASE
+  CMAKE_CXX_FLAGS_RELWITHDEBINFO
+)
+message(STATUS "Initial build flags:")
+foreach(variable ${variables})
+  message(STATUS "  '${variable}': ${${variable}}")
+endforeach()
+message(STATUS "")
 
 # Angelscript library
 
@@ -102,7 +159,7 @@ preprocess_sources()
 
 add_library( Angelscript ${PREP_SRCS} )
 
-install( TARGETS Angelscript DESTINATION bin )
+install( TARGETS Angelscript DESTINATION lib )
 install( FILES external/Angelscript/include/angelscript.h DESTINATION include )
 install_includes( "${CMAKE_SOURCE_DIR}/external/Angelscript/src" )
 
@@ -126,7 +183,7 @@ add_library( AngelscriptUtils ${PREP_SRCS} )
 #Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}/src" )
 
-install( TARGETS AngelscriptUtils DESTINATION bin )
+install( TARGETS AngelscriptUtils DESTINATION lib )
 install_includes( "${CMAKE_SOURCE_DIR}/src" )
 
 clear_sources()

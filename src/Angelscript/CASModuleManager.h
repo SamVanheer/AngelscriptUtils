@@ -28,7 +28,7 @@ class IASModuleBuilder;
 class CASModuleManager final
 {
 private:
-	typedef std::unordered_map<const char*, std::unique_ptr<CASModuleDescriptor>, Hash_C_String<const char*>, EqualTo_C_String<const char*>> Descriptors_t;
+	typedef std::unordered_map<const char*, std::unique_ptr<CASModuleDescriptor>, as::Hash_C_String<const char*>, as::EqualTo_C_String<const char*>> Descriptors_t;
 	typedef std::vector<CASModule*> Modules_t;
 
 public:

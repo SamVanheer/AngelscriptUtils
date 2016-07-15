@@ -1,6 +1,7 @@
 add_sources(
 	ASUtil.h
 	ASUtil.cpp
+	StringUtils.h
 	ContextUtils.h
 	ContextUtils.cpp
 	CASBaseClass.h
@@ -15,6 +16,7 @@ add_sources(
 
 add_includes(
 	ASUtil.h
+	StringUtils.h
 	ContextUtils.h
 	CASBaseClass.h
 	CASRefPtr.h

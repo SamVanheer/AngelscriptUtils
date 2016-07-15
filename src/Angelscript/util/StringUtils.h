@@ -1,8 +1,11 @@
-#ifndef UTIL_STRINGUTILS_H
-#define UTIL_STRINGUTILS_H
+#ifndef ANGELSCRIPT_UTIL_STRINGUTILS_H
+#define ANGELSCRIPT_UTIL_STRINGUTILS_H
 
 #include <cstring>
 
+//Implemented in the as namespace to prevent collisions with other implementations.
+namespace as
+{
 /**
 *	Taken from MSVC string hash.
 */
@@ -47,5 +50,6 @@ struct EqualTo_C_String final
 		return COMPARE( lhs, rhs ) == 0;
 	}
 };
+}
 
-#endif //UTIL_STRINGUTILS_H
+#endif //ANGELSCRIPT_UTIL_STRINGUTILS_H

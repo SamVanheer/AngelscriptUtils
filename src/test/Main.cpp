@@ -5,6 +5,7 @@
 #include "Angelscript/CASManager.h"
 #include "Angelscript/CASHook.h"
 #include "Angelscript/CASModule.h"
+#include "Angelscript/IASInitializer.h"
 #include "Angelscript/IASModuleBuilder.h"
 
 #include "Angelscript/add_on/scriptbuilder.h"
@@ -16,15 +17,14 @@
 #include "Angelscript/ScriptAPI/CASScheduler.h"
 #include "Angelscript/ScriptAPI/Reflection/ASReflection.h"
 
+#include "Angelscript/util/ASExtendAdapter.h"
 #include "Angelscript/util/ASUtil.h"
+#include "Angelscript/util/CASExtendAdapter.h"
 #include "Angelscript/util/CASRefPtr.h"
 #include "Angelscript/util/CASObjPtr.h"
 
 #include "Angelscript/wrapper/ASCallable.h"
 #include "Angelscript/wrapper/CASContext.h"
-
-#include "Angelscript/util/ASExtendAdapter.h"
-#include "Angelscript/util/CASExtendAdapter.h"
 
 #include "CBaseEntity.h"
 #include "CScriptBaseEntity.h"
@@ -75,6 +75,51 @@ void Print( const std::string& szString )
 *	Can be hooked by calling g_Hooks.HookFunction( Hooks::Main, @MainHook( ... ) );
 */
 CASHook hook( "Main", "const string& in", "", ModuleAccessMask::ALL, HookStopMode::ON_HANDLED );
+
+class CASTestInitializer : public IASInitializer
+{
+public:
+	bool RegisterCoreAPI( CASManager& manager ) override
+	{
+		RegisterStdString( manager.GetEngine() );
+		RegisterScriptArray( manager.GetEngine(), true );
+		RegisterScriptDictionary( manager.GetEngine() );
+		RegisterScriptAny( manager.GetEngine() );
+		RegisterScriptScheduler( manager.GetEngine() );
+		RegisterScriptReflection( *manager.GetEngine() );
+
+		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
+
+		return true;
+	}
+
+	bool AddHooks( CASManager& manager, CASHookManager& hookManager ) override
+	{
+		//Add a hook. Scripts will be able to hook these, when it's invoked by C++ code all hooked functions are called.
+		hookManager.AddHook( &hook );
+
+		return true;
+	}
+
+	bool RegisterAPI( CASManager& manager ) override
+	{
+		auto pEngine = manager.GetEngine();
+
+		//Printing function.
+		pEngine->RegisterGlobalFunction( "void Print(const string& in szString)", asFUNCTION( Print ), asCALL_CDECL );
+
+		//Register the interface that all custom entities use. Allows you to take them as handles to functions.
+		pEngine->RegisterInterface( "IScriptEntity" );
+
+		//Register the entity class.
+		RegisterScriptCBaseEntity( *pEngine );
+
+		//Register the entity base class. Used to call base class implementations.
+		RegisterScriptBaseEntity( *pEngine );
+
+		return true;
+	}
+};
 
 /**
 *	Builder for the test script.
@@ -130,37 +175,11 @@ int main( int iArgc, char* pszArgV[] )
 
 	CASManager manager;
 
-	if( manager.Initialize() )
+	CASTestInitializer initializer;
+
+	if( manager.Initialize( initializer ) )
 	{
-		//Register the API.
-		RegisterStdString( manager.GetEngine() );
-		RegisterScriptArray( manager.GetEngine(), true );
-		RegisterScriptDictionary( manager.GetEngine() );
-		RegisterScriptAny( manager.GetEngine() );
-		RegisterScriptScheduler( manager.GetEngine() );
-		RegisterScriptReflection( *manager.GetEngine() );
-
-		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
-
-		//Add a hook. Scripts will be able to hook these, when it's invoked by C++ code all hooked functions are called.
-		manager.GetHookManager().AddHook( &hook );
-
-		//Registers all hooks. One-time event that happens on startup.
-		manager.GetHookManager().RegisterHooks( *manager.GetEngine() );
-
-		//Printing function.
-		manager.GetEngine()->RegisterGlobalFunction( "void Print(const string& in szString)", asFUNCTION( Print ), asCALL_CDECL );
-
 		auto pEngine = manager.GetEngine();
-
-		//Register the interface that all custom entities use. Allows you to take them as handles to functions.
-		pEngine->RegisterInterface( "IScriptEntity" );
-
-		//Register the entity class.
-		RegisterScriptCBaseEntity( *pEngine );
-
-		//Register the entity base class. Used to call base class implementations.
-		RegisterScriptBaseEntity( *pEngine );
 
 		//Create the declaration used for script entity base classes.
 		const auto szDecl = as::CreateExtendBaseclassDeclaration( "CScriptBaseEntity", "IScriptEntity", "CBaseEntity", "BaseEntity" );

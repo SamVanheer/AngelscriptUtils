@@ -3,6 +3,8 @@
 
 #include <angelscript.h>
 
+#include "IASInitializer.h"
+
 #include "CASManager.h"
 
 CASManager* CASManager::m_pActiveManager = nullptr;
@@ -43,7 +45,7 @@ CASManager::~CASManager()
 	assert( !m_pScriptEngine );
 }
 
-bool CASManager::Initialize()
+bool CASManager::Initialize( IASInitializer& initializer )
 {
 	if( m_pScriptEngine )
 	{
@@ -60,6 +62,18 @@ bool CASManager::Initialize()
 	m_pScriptEngine->SetMessageCallback( asMETHOD( CASManager, MessageCallback ), this, asCALL_THISCALL );
 
 	Activate();
+
+	if( !initializer.RegisterCoreAPI( *this ) )
+		return false;
+
+	if( !initializer.AddHooks( *this, m_HookManager ) )
+		return false;
+
+	//Registers all hooks. One-time event that happens on startup.
+	m_HookManager.RegisterHooks( *GetEngine() );
+
+	if( !initializer.RegisterAPI( *this ) )
+		return false;
 
 	return true;
 }

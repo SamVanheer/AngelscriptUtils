@@ -12,6 +12,7 @@ add_sources(
 	CASHookManager.h
 	CASHookManager.cpp
 	IASModuleBuilder.h
+	IASInitializer.h
 )
 
 add_includes(
@@ -22,6 +23,7 @@ add_includes(
 	CASHook.h
 	CASHookManager.h
 	IASModuleBuilder.h
+	IASInitializer.h
 )
 
 add_subdirectory( add_on )

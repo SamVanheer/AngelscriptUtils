@@ -7,6 +7,8 @@
 class asIScriptEngine;
 struct asSMessageInfo;
 
+class IASInitializer;
+
 /**
 *	@defgroup ASManager Angelscript Manager
 *
@@ -71,9 +73,10 @@ public:
 	/**
 	*	Initializes the manager.
 	*	On success, makes this the active manager.
+	*	@param initializer Initializer to use.
 	*	@return true on success, false otherwise.
 	*/
-	bool Initialize();
+	bool Initialize( IASInitializer& initializer );
 
 	/**
 	*	Shuts down the manager.

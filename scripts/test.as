@@ -40,6 +40,24 @@ void NoArgs()
 	Print( "No arguments works\n" );
 }
 
+class Lifetime
+{
+	Lifetime()
+	{
+		Print( "Lifetime constructed\n" );
+	}
+	
+	~Lifetime()
+	{
+		Print( "Lifetime destroyed\n" );
+	}
+}
+
+Lifetime@ GetLifetime()
+{
+	return @Lifetime();
+}
+
 int main( const string& in szString )
 {
 	Print( "foo\nbar\n" );

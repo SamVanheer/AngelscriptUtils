@@ -18,6 +18,7 @@
 
 #include "Angelscript/util/ASUtil.h"
 #include "Angelscript/util/CASRefPtr.h"
+#include "Angelscript/util/CASObjPtr.h"
 
 #include "Angelscript/wrapper/ASCallable.h"
 #include "Angelscript/wrapper/CASContext.h"
@@ -159,6 +160,37 @@ int main( int iArgc, char* pszArgV[] )
 
 				//Call the hook.
 				hook.Call( CallFlag::NONE, &szString );
+			}
+
+			//Test the object pointer.
+			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "GetLifetime" ) )
+			{
+				CASOwningContext ctx( *manager.GetEngine() );
+
+				CASFunction func( *pFunction, ctx );
+
+				if( func.Call( CallFlag::NONE ) )
+				{
+					CASObjPtr ptr;
+
+					void* pThis;
+
+					if( func.GetReturnValue( &pThis ) )
+					{
+						const int iTypeId = pFunction->GetReturnTypeId();
+
+						ptr.Set( pThis, manager.GetEngine()->GetTypeInfoById( iTypeId ) );
+					}
+
+					if( ptr )
+					{
+						std::cout << "Object stored" << std::endl << "Type: " << ptr.GetTypeInfo()->GetName() << std::endl;
+					}
+					else
+					{
+						std::cout << "Object not stored" << std::endl;
+					}
+				}
 			}
 
 			//Call a function using the different function call helpers.

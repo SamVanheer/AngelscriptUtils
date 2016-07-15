@@ -214,6 +214,39 @@ inline T* SetRefPointer( T*& pPointer, T* const pObj, const bool bTransferOwners
 	return pPointer;
 }
 
+/*
+*	Handles the setting of a pointer to an Angelscript reference counted script object.
+*	@param pDestThis The pointer to assign the object to.
+*	@param pSourceThis Pointer to the object being assigned. Can be null.
+*	@param bTransferOwnership If false, The destination pointer and the source pointer will both maintain a reference to the object.
+*			Otherwise, the source pointer will no longer maintain a reference to it.
+*
+*	@return Pointer to the object.
+*/
+inline void* SetObjPointer( void*& pDestThis, void* const pSourceThis, asITypeInfo& typeInfo, const bool bTransferOwnership = false )
+{
+	auto pEngine = typeInfo.GetEngine();
+
+	if( pDestThis )
+	{
+		pEngine->ReleaseScriptObject( pDestThis, &typeInfo );
+	}
+
+	if( pSourceThis )
+	{
+		pDestThis = pSourceThis;
+
+		if( !bTransferOwnership )
+			pEngine->AddRefScriptObject( pDestThis, &typeInfo );
+	}
+	else
+	{
+		pDestThis = nullptr;
+	}
+
+	return pDestThis;
+}
+
 /**
 *	Registers a varargs function.
 *	@param engine Script Engine.

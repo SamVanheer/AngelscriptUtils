@@ -1,8 +1,6 @@
 #ifndef ANGELSCRIPT_UTIL_CASREFPTR_H
 #define ANGELSCRIPT_UTIL_CASREFPTR_H
 
-#include <utility>
-
 #include <angelscript.h>
 
 #include "ASUtil.h"
@@ -40,6 +38,11 @@ public:
 	CASRefPtr( T* pPointer, const bool bTransferOwnership = false );
 
 	/**
+	*	Assignment operator.
+	*/
+	CASRefPtr& operator=( T* const pPtr );
+
+	/**
 	*	Copy constructor.
 	*/
 	CASRefPtr( const CASRefPtr& other );
@@ -55,7 +58,7 @@ public:
 	CASRefPtr( CASRefPtr&& other );
 
 	/**
-	*	Move operator.
+	*	Move assignment operator.
 	*/
 	CASRefPtr& operator=( CASRefPtr&& other );
 
@@ -98,6 +101,54 @@ public:
 	*/
 	T* Set( T* const pSourcePtr, const bool bTransferOwnership = false );
 
+	/**
+	*	Operator dereference.
+	*/
+	const T& operator*() const
+	{
+		return *m_pPointer;
+	}
+
+	/**
+	*	@copydoc operator*() const
+	*/
+	T& operator*()
+	{
+		return *m_pPointer;
+	}
+
+	/**
+	*	Operator class member.
+	*/
+	const T* operator->() const
+	{
+		return m_pPointer;
+	}
+
+	/**
+	*	@copydoc operator->() const
+	*/
+	T* operator->()
+	{
+		return m_pPointer;
+	}
+
+	/**
+	*	Operator T*.
+	*/
+	operator const T*() const
+	{
+		return m_pPointer;
+	}
+
+	/**
+	*	@copydoc operator const T*() const
+	*/
+	operator T*()
+	{
+		return m_pPointer;
+	}
+
 private:
 	T* m_pPointer = nullptr;
 };
@@ -120,6 +171,17 @@ CASRefPtr<T, ADAPTER>::CASRefPtr( T* pPointer, const bool bTransferOwnership )
 }
 
 template<typename T, typename ADAPTER>
+CASRefPtr<T, ADAPTER>& CASRefPtr<T, ADAPTER>::operator=( T* const pPtr )
+{
+	if( m_pPointer != pPtr )
+	{
+		Set( m_pPointer, pPtr, false );
+	}
+
+	return *this;
+}
+
+template<typename T, typename ADAPTER>
 CASRefPtr<T, ADAPTER>::CASRefPtr( const CASRefPtr<T, ADAPTER>& other )
 {
 	Set( m_pPointer, other.m_pPointer, false );
@@ -138,8 +200,8 @@ CASRefPtr<T, ADAPTER>& CASRefPtr<T, ADAPTER>::operator=( const CASRefPtr<T, ADAP
 
 template<typename T, typename ADAPTER>
 CASRefPtr<T, ADAPTER>::CASRefPtr( CASRefPtr<T, ADAPTER>&& other )
+	: m_pPointer( other.m_pPointer )
 {
-	Set( m_pPointer, other.m_pPointer, true );
 	other.m_pPointer = nullptr;
 }
 
@@ -158,7 +220,7 @@ CASRefPtr<T, ADAPTER>& CASRefPtr<T, ADAPTER>::operator=( CASRefPtr<T, ADAPTER>&&
 template<typename T, typename ADAPTER>
 CASRefPtr<T, ADAPTER>::~CASRefPtr()
 {
-	Set( m_pPointer, nullptr, false );
+	Reset();
 }
 
 template<typename T, typename ADAPTER>

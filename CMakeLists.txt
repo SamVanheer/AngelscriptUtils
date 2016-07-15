@@ -103,7 +103,7 @@ preprocess_sources()
 add_library( Angelscript ${PREP_SRCS} )
 
 install( TARGETS Angelscript DESTINATION bin )
-install( FILES external/Angelscript/include/Angelscript.h DESTINATION include )
+install( FILES external/Angelscript/include/angelscript.h DESTINATION include )
 install_includes( "${CMAKE_SOURCE_DIR}/external/Angelscript/src" )
 
 clear_sources()

@@ -6,6 +6,7 @@ add_sources(
 	CASBaseClass.h
 	CASBaseClass.cpp
 	CASRefPtr.h
+	CASObjPtr.h
 )
 
 add_includes(
@@ -13,4 +14,5 @@ add_includes(
 	ContextUtils.h
 	CASBaseClass.h
 	CASRefPtr.h
+	CASObjPtr.h
 )

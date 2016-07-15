@@ -61,7 +61,7 @@ std::pair<const CASModuleDescriptor*, bool> CASModuleManager::AddDescriptor( con
 
 	++m_NextDescriptorID;
 
-	return std::make_pair( descriptor.get(), true );
+	return std::make_pair( result.first->second.get(), true );
 }
 
 /*

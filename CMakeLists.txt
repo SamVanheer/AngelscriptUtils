@@ -133,13 +133,20 @@ clear_sources()
 
 #This really needs a better approach.
 add_sources( 
-	src/main/Main.cpp
+	src/test/CBaseEntity.h
+	src/test/CBaseEntity.cpp
+	src/test/CScriptBaseEntity.h
+	src/test/ASCBaseEntity.h
+	src/test/Main.cpp
 )
 
 preprocess_sources()
 
 #indicate the entry point for the executable
 add_executable( AngelscriptUtilsTest ${PREP_SRCS} )
+
+#Create filters
+create_source_groups( "${CMAKE_SOURCE_DIR}/src" )
 
 set_property( GLOBAL PROPERTY VS_STARTUP_PROJECT AngelscriptUtilsTest )
 

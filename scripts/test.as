@@ -1,4 +1,17 @@
 
+class CEntity : CScriptBaseEntity
+{
+	void Spawn()
+	{
+		Print( "Spawned\n" );
+	}
+	
+	int ScheduleOfType( const string& in szName )
+	{
+		return BaseClass.ScheduleOfType( szName ) + 2;
+	}
+}
+
 enum E
 {
 	VAL = 0,
@@ -58,26 +71,8 @@ Lifetime@ GetLifetime()
 	return @Lifetime();
 }
 
-int main( const string& in szString )
+void PrintReflection()
 {
-	Print( "foo\nbar\n" );
-	Print( szString );
-	
-	g_HookManager.HookFunction( Hooks::Main, MainFunc );
-	g_HookManager.HookFunction( Hooks::Main, @MainHook( Foo().Func ) );
-	
-	dictionary foo;
-	
-	foo.set( "bar", @MainHook( @Foo().Func ) );
-	
-	MainHook@ pFunc;
-	
-	foo.get( "bar", @pFunc );
-	
-	pFunc( "test\n" );
-	
-	Scheduler.SetTimeout( "Func", 5, "what's going on" );
-	
 	/*
 	*	Let's print out all global functions registered by the program.
 	*/
@@ -104,6 +99,29 @@ int main( const string& in szString )
 			Print( pMethod.GetDeclaration( bIncludeObjectName: false, bIncludeParamNames: true ) + "\n" );
 		}
 	}
+}
+
+int main( const string& in szString )
+{
+	Print( "foo\nbar\n" );
+	Print( szString );
+	
+	g_HookManager.HookFunction( Hooks::Main, MainFunc );
+	g_HookManager.HookFunction( Hooks::Main, @MainHook( Foo().Func ) );
+	
+	dictionary foo;
+	
+	foo.set( "bar", @MainHook( @Foo().Func ) );
+	
+	MainHook@ pFunc;
+	
+	foo.get( "bar", @pFunc );
+	
+	pFunc( "test\n" );
+	
+	Scheduler.SetTimeout( "Func", 5, "what's going on" );
+	
+	//PrintReflection();
 	
 	return 1;
 }

@@ -23,6 +23,13 @@
 #include "Angelscript/wrapper/ASCallable.h"
 #include "Angelscript/wrapper/CASContext.h"
 
+#include "Angelscript/util/ASExtendAdapter.h"
+#include "Angelscript/util/CASExtendAdapter.h"
+
+#include "CBaseEntity.h"
+#include "CScriptBaseEntity.h"
+#include "ASCBaseEntity.h"
+
 namespace ModuleAccessMask
 {
 /**
@@ -75,6 +82,10 @@ CASHook hook( "Main", "const string& in", "", ModuleAccessMask::ALL, HookStopMod
 class CASTestModuleBuilder : public IASModuleBuilder
 {
 public:
+	CASTestModuleBuilder( const std::string& szDecl )
+		: m_szDecl( szDecl )
+	{
+	}
 
 	bool AddScripts( CScriptBuilder& builder ) override
 	{
@@ -85,6 +96,11 @@ public:
 			"CScheduler@ Scheduler;" );
 
 		if( result < 0 )
+			return false;
+
+		if( builder.AddSectionFromMemory(
+			"__CScriptBaseEntity",
+			m_szDecl.c_str() ) < 0 )
 			return false;
 
 		return builder.AddSectionFromFile( "scripts/test.as" ) >= 0;
@@ -103,6 +119,9 @@ public:
 
 		return true;
 	}
+
+private:
+	std::string m_szDecl;
 };
 
 int main( int iArgc, char* pszArgV[] )
@@ -132,6 +151,22 @@ int main( int iArgc, char* pszArgV[] )
 		//Printing function.
 		manager.GetEngine()->RegisterGlobalFunction( "void Print(const string& in szString)", asFUNCTION( Print ), asCALL_CDECL );
 
+		auto pEngine = manager.GetEngine();
+
+		//Register the interface that all custom entities use. Allows you to take them as handles to functions.
+		pEngine->RegisterInterface( "IScriptEntity" );
+
+		//Register the entity class.
+		RegisterScriptCBaseEntity( *pEngine );
+
+		//Register the entity base class. Used to call base class implementations.
+		RegisterScriptBaseEntity( *pEngine );
+
+		//Create the declaration used for script entity base classes.
+		const auto szDecl = as::CreateExtendBaseclassDeclaration( "CScriptBaseEntity", "IScriptEntity", "CBaseEntity", "BaseEntity" );
+
+		std::cout << szDecl << std::endl;
+
 		//Create some module types.
 
 		//Map scripts are per-map scripts that always have their hooks executed before any other module.
@@ -141,7 +176,7 @@ int main( int iArgc, char* pszArgV[] )
 		manager.GetModuleManager().AddDescriptor( "Plugin", ModuleAccessMask::PLUGIN );
 
 		//Make a map script.
-		CASTestModuleBuilder builder;
+		CASTestModuleBuilder builder( szDecl );
 
 		auto pModule = manager.GetModuleManager().BuildModule( "MapScript", "MapModule", builder );
 
@@ -279,6 +314,33 @@ int main( int iArgc, char* pszArgV[] )
 				}
 			}
 			*/
+
+			//Try to create a C++ class that is extended in a script.
+			bool bCreatedExtend = false;
+
+			if( auto pType = pModule->GetModule()->GetTypeInfoByName( "CEntity" ) )
+			{
+				if( auto pInstance = as::CreateObjectInstance( *pEngine, *pType ) )
+				{
+					CScriptBaseEntity instance( CASObjPtr( pInstance, pType, true ) );
+
+					//This data will need to be stored somewhere, bound to the baseclass.
+					if( as::InitializeExtendClass( instance, &instance, "CBaseEntity", "BaseEntity" ) )
+					{
+						bCreatedExtend = true;
+
+						CBaseEntity* pEntity = &instance;
+
+						pEntity->Spawn();
+
+						const int result = pEntity->ScheduleOfType( "foo" );
+
+						int x = 10;
+					}
+				}
+			}
+
+			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
 
 			//Remove the module.
 			manager.GetModuleManager().RemoveModule( pModule );

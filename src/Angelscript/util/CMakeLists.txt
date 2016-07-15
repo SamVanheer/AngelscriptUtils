@@ -7,6 +7,10 @@ add_sources(
 	CASBaseClass.cpp
 	CASRefPtr.h
 	CASObjPtr.h
+	IASExtendAdapter.h
+	CASExtendAdapter.h
+	ASExtendAdapter.h
+	ASExtendAdapter.cpp
 )
 
 add_includes(
@@ -15,4 +19,7 @@ add_includes(
 	CASBaseClass.h
 	CASRefPtr.h
 	CASObjPtr.h
+	IASExtendAdapter.h
+	CASExtendAdapter.h
+	ASExtendAdapter.h
 )

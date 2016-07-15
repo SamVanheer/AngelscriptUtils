@@ -98,6 +98,22 @@ public:
 	void Set( void* pThis, CASRefPtr<asITypeInfo> typeInfo, const bool bTransferOwnership = false );
 
 	/**
+	*	Operator dereference.
+	*/
+	const void* operator*() const
+	{
+		return m_pThis;
+	}
+
+	/**
+	*	@copydoc operator*() const
+	*/
+	void* operator*()
+	{
+		return m_pThis;
+	}
+
+	/**
 	*	Operator void*.
 	*/
 	operator const void*() const
@@ -224,7 +240,7 @@ inline void CASObjPtr::Reset()
 	}
 }
 
-void CASObjPtr::Set( void* pThis, CASRefPtr<asITypeInfo> typeInfo, const bool bTransferOwnership )
+inline void CASObjPtr::Set( void* pThis, CASRefPtr<asITypeInfo> typeInfo, const bool bTransferOwnership )
 {
 	Reset();
 

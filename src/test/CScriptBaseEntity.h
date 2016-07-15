@@ -29,7 +29,7 @@ public:
 
 	int ScheduleOfType( const std::string& szName ) override
 	{
-		CALL_EXTEND_FUNC_RET_DIFFFUNC( int, ScheduleOfType, ScheduleOfTypePtr, "const string& in", &szName );
+		CALL_EXTEND_FUNC_RET_DIFFFUNC( int, ScheduleOfType, ThisClass::ScheduleOfTypePtr, "const string& in", &szName );
 	}
 };
 

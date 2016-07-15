@@ -70,57 +70,6 @@ public:
 		return m_Object;
 	}
 
-	/**
-	*	Calls a method.
-	*	@param pszDecl Method declaration.
-	*	@param func C++ function to call if the method isn't found in the script.
-	*	@param args Arguments to pass to either method.
-	*	@tparam FUNC Function pointer type.
-	*	@tparam ARGS Argument types.
-	*/
-	template<typename FUNC, typename... ARGS>
-	void Call( const char* const pszDecl, FUNC func, ARGS&&... args )
-	{
-		if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( pszDecl ) )
-		{
-			as::Call( GetObject().Get(), pFunction, std::move( args )... );
-		}
-		else
-		{
-			( *static_cast<DerivedClass*>( this ).*func )( std::move( args )... );
-		}
-	}
-
-	/**
-	*	Calls a method.
-	*	@param result Result value.
-	*	@param pszDecl Method declaration.
-	*	@param func C++ function to call if the method isn't found in the script.
-	*	@param args Arguments to pass to either method.
-	*	@tparam RESULT Result type.
-	*	@tparam FUNC Function pointer type.
-	*	@tparam ARGS Argument types.
-	*/
-	template<typename RESULT, typename FUNC, typename... ARGS>
-	void Call( RESULT& result, const char* const pszDecl, FUNC func, ARGS&&... args )
-	{
-		if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( pszDecl ) )
-		{
-			CASOwningContext ctx( *pFunction->GetEngine() );
-
-			CASMethod method( *pFunction, ctx, GetObject().Get() );
-
-			if( method.Call( CallFlag::NONE, std::move( args )... ) )
-			{
-				method.GetReturnValue( &result );
-			}
-		}
-		else
-		{
-			result = ( *static_cast<DerivedClass*>( this ).*func )( std::move( args )... );
-		}
-	}
-
 private:
 	CASObjPtr m_Object;
 
@@ -142,11 +91,25 @@ private:
 *	@param pszParams Script method parameters.
 *	@param ... Arguments to pass.
 */
-#define CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, baseMethodName, pszParams, ... )			\
-retType result;																							\
-																										\
-Call( result, #retType " " #methodName "(" pszParams " )", &ThisClass::baseMethodName, __VA_ARGS__ );	\
-																										\
+#define CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, baseMethodName, pszParams, ... )						\
+retType result;																										\
+																													\
+if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( #retType " " #methodName "(" pszParams " )" ) )	\
+{																													\
+	CASOwningContext ctx( *pFunction->GetEngine() );																\
+																													\
+	CASMethod method( *pFunction, ctx, GetObject().Get() );															\
+																													\
+	if( method.Call( CallFlag::NONE, __VA_ARGS__ ) )																\
+	{																												\
+		method.GetReturnValue( &result );																			\
+	}																												\
+}																													\
+else																												\
+{																													\
+	result = baseMethodName( __VA_ARGS__ );																			\
+}																													\
+																													\
 return result
 
 /**
@@ -156,8 +119,8 @@ return result
 *	@param pszParams Script method parameters.
 *	@param ... Arguments to pass.
 */
-#define CALL_EXTEND_FUNC_RET( retType, methodName, pszParams, ... )							\
-CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, methodName, pszParams, __VA_ARGS__ )
+#define CALL_EXTEND_FUNC_RET( retType, methodName, pszParams, ... )									\
+CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, BaseClass::methodName, pszParams, __VA_ARGS__ )
 
 /**
 *	Calls a method that has a different C++ method name.
@@ -166,8 +129,15 @@ CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, methodName, pszParams, __VA_
 *	@param pszParams Script method parameters.
 *	@param ... Arguments to pass.
 */
-#define CALL_EXTEND_FUNC_DIFFFUNC( methodName, baseMethodName, pszParams, ... )			\
-Call( "void " #methodName "(" pszParams " )", &ThisClass::baseMethodName, __VA_ARGS__ )
+#define CALL_EXTEND_FUNC_DIFFFUNC( methodName, baseMethodName, pszParams, ... )								\
+if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( "void " #methodName "(" pszParams " )" ) )	\
+{																											\
+	as::Call( GetObject().Get(), pFunction, __VA_ARGS__ );													\
+}																											\
+else																										\
+{																											\
+	baseMethodName( __VA_ARGS__ );																			\
+}
 
 /**
 *	Calls a method.
@@ -175,8 +145,8 @@ Call( "void " #methodName "(" pszParams " )", &ThisClass::baseMethodName, __VA_A
 *	@param pszParams Script method parameters.
 *	@param ... Arguments to pass.
 */
-#define CALL_EXTEND_FUNC( methodName, pszParams, ... )						\
-CALL_EXTEND_FUNC_DIFFFUNC( methodName, methodName, pszParams, __VA_ARGS__ )
+#define CALL_EXTEND_FUNC( methodName, pszParams, ... )									\
+CALL_EXTEND_FUNC_DIFFFUNC( methodName, BaseClass::methodName, pszParams, __VA_ARGS__ )
 
 /** @} */
 

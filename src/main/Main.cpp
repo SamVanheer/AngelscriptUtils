@@ -31,27 +31,27 @@ enum ModuleAccessMask
 	/**
 	*	No access.
 	*/
-	NONE = 0,
+	NONE		= 0,
 
 	/**
 	*	Shared API.
 	*/
-	SHARED = 1 << 0,
+	SHARED		= 1 << 0,
 
 	/**
 	*	Map script specific.
 	*/
-	MAPSCRIPT = SHARED | 1 << 1,
+	MAPSCRIPT	= SHARED | 1 << 1,
 
 	/**
 	*	Plugin script specific.
 	*/
-	PLUGIN = SHARED | 1 << 2,
+	PLUGIN		= SHARED | 1 << 2,
 
 	/**
 	*	All scripts.
 	*/
-	ALL = SHARED | MAPSCRIPT | PLUGIN
+	ALL			= SHARED | MAPSCRIPT | PLUGIN
 };
 }
 
@@ -228,11 +228,7 @@ int main( int iArgc, char* pszArgV[] )
 			}
 			*/
 
-			//Unhook the functions that the module registered.
-			manager.GetHookManager().UnhookModuleFunctions( pModule );
-
 			//Remove the module.
-			//TODO: removing a module should unhook functions.
 			manager.GetModuleManager().RemoveModule( pModule );
 		}
 	}

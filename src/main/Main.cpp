@@ -17,6 +17,7 @@
 #include "Angelscript/ScriptAPI/Reflection/ASReflection.h"
 
 #include "Angelscript/util/ASUtil.h"
+#include "Angelscript/util/CASRefPtr.h"
 
 #include "Angelscript/wrapper/ASCallable.h"
 #include "Angelscript/wrapper/CASContext.h"
@@ -163,6 +164,25 @@ int main( int iArgc, char* pszArgV[] )
 			//Call a function using the different function call helpers.
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "NoArgs" ) )
 			{
+				{
+					//Test the smart pointer.
+					CASRefPtr<asIScriptFunction> func;
+
+					CASRefPtr<asIScriptFunction> func2( pFunction );
+
+					func = func2;
+
+					func = std::move( func2 );
+
+					CASRefPtr<asIScriptFunction> func3( func );
+
+					CASRefPtr<asIScriptFunction> func4( std::move( func ) );
+
+					func.Set( pFunction );
+
+					auto pPtr = func.Get();
+				}
+
 				//Regular varargs.
 				as::Call( pFunction );
 				//Argument list.

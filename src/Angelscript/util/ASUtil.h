@@ -159,6 +159,9 @@ template<typename T>
 class CASReferenceAdapter
 {
 public:
+	typedef T Type_t;
+
+public:
 
 	static inline void AddRef( const T* const pObj )
 	{
@@ -181,16 +184,19 @@ private:
 *	Handles the setting of a pointer to an Angelscript reference counted object.
 *	@param pPointer The pointer to assign the object to.
 *	@param pObj Pointer to the object being assigned. Can be null.
-*	@param bTransferOwnership If true, calls Release on the original pointer if it is non-null.
+*	@param bTransferOwnership If false, The destination pointer and the source pointer will both maintain a reference to the object.
+*			Otherwise, the source pointer will no longer maintain a reference to it.
+*	@tparam T Object type.
+*	@tparam ADAPTER Adapter that implements static AddRef and Release functions for the given object type.
 *
-*	@returnPpointer to the object.
+*	@return Pointer to the object.
 */
-template<typename T>
-inline T* SetRefPointer( T*& pPointer, T* const pObj, const bool bTransferOwnership = true )
+template<typename T, typename ADAPTER = CASReferenceAdapter<T>>
+inline T* SetRefPointer( T*& pPointer, T* const pObj, const bool bTransferOwnership = false )
 {
 	if( pPointer )
 	{
-		CASReferenceAdapter<T>::Release( pPointer );
+		ADAPTER::Release( pPointer );
 	}
 
 	if( pObj )
@@ -198,7 +204,7 @@ inline T* SetRefPointer( T*& pPointer, T* const pObj, const bool bTransferOwners
 		pPointer = pObj;
 
 		if( !bTransferOwnership )
-			CASReferenceAdapter<T>::AddRef( pPointer );
+			ADAPTER::AddRef( pPointer );
 	}
 	else
 	{

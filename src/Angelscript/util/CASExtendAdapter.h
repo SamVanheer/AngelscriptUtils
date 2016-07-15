@@ -10,6 +10,12 @@
 #include "Angelscript/wrapper/ASCallable.h"
 
 /**
+*	@addtogroup ASExtend
+*
+*	@{
+*/
+
+/**
 *	Class used to adapt C++ classes for extension in Angelscript.
 *	@tparam BASECLASS C++ class to extend. Should be a class with at least one virtual function.
 *	@tparam DERIVEDCLASS C++ class that will be instantiated. Used to call object methods correctly.
@@ -48,16 +54,30 @@ public:
 		assert( object );
 	}
 
+	/**
+	*	@return The object instance.
+	*/
 	const CASObjPtr& GetObject() const override final
 	{
 		return m_Object;
 	}
 
+	/**
+	*	@copydoc GetObject() const
+	*/
 	CASObjPtr GetObject() override final
 	{
 		return m_Object;
 	}
 
+	/**
+	*	Calls a method.
+	*	@param pszDecl Method declaration.
+	*	@param func C++ function to call if the method isn't found in the script.
+	*	@param args Arguments to pass to either method.
+	*	@tparam FUNC Function pointer type.
+	*	@tparam ARGS Argument types.
+	*/
 	template<typename FUNC, typename... ARGS>
 	void Call( const char* const pszDecl, FUNC func, ARGS&&... args )
 	{
@@ -71,6 +91,16 @@ public:
 		}
 	}
 
+	/**
+	*	Calls a method.
+	*	@param result Result value.
+	*	@param pszDecl Method declaration.
+	*	@param func C++ function to call if the method isn't found in the script.
+	*	@param args Arguments to pass to either method.
+	*	@tparam RESULT Result type.
+	*	@tparam FUNC Function pointer type.
+	*	@tparam ARGS Argument types.
+	*/
 	template<typename RESULT, typename FUNC, typename... ARGS>
 	void Call( RESULT& result, const char* const pszDecl, FUNC func, ARGS&&... args )
 	{
@@ -147,5 +177,7 @@ Call( "void " #methodName "(" pszParams " )", &ThisClass::baseMethodName, __VA_A
 */
 #define CALL_EXTEND_FUNC( methodName, pszParams, ... )						\
 CALL_EXTEND_FUNC_DIFFFUNC( methodName, methodName, pszParams, __VA_ARGS__ )
+
+/** @} */
 
 #endif //ANGELSCRIPT_UTIL_CASEXTENDADAPTER_H

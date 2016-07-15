@@ -9,6 +9,12 @@
 #include "CASRefPtr.h"
 
 /**
+*	@addtogroup ASUtil
+*
+*	@{
+*/
+
+/**
 *	Smart pointer for script objects.
 */
 class CASObjPtr final
@@ -114,7 +120,7 @@ public:
 	}
 
 	/**
-	*	Operator void*.
+	*	Operator const void*.
 	*/
 	operator const void*() const
 	{
@@ -122,7 +128,7 @@ public:
 	}
 
 	/**
-	*	@copydoc operator const void*() const
+	*	Operator void*.
 	*/
 	operator void*()
 	{
@@ -259,5 +265,7 @@ inline void CASObjPtr::Set( void* pThis, CASRefPtr<asITypeInfo> typeInfo, const 
 		}
 	}
 }
+
+/** @} */
 
 #endif //ANGELSCRIPT_UTIL_CASOBJPTR_H

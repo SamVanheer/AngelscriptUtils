@@ -6,6 +6,12 @@
 #include "ASUtil.h"
 
 /**
+*	@addtogroup ASUtil
+*
+*	@{
+*/
+
+/**
 *	Smart pointer for Angelscript objects.
 *	@tparam T Object type.
 *	@tparam ADAPTER Adapter that implements static AddRef and Release functions for the given object type.
@@ -95,7 +101,7 @@ public:
 	/**
 	*	Sets the pointer to the given object. If this pointer is currently holding a reference to another object, that object is released.
 	*	@param pSourcePtr Object to point to. Can be null.
-	*	@param bTransferOwnershipWhether to transfer ownership or not.
+	*	@param bTransferOwnership Whether to transfer ownership or not.
 	*	@return Pointer to the object.
 	*	@see as::SetRefPointer
 	*/
@@ -134,7 +140,7 @@ public:
 	}
 
 	/**
-	*	Operator T*.
+	*	Operator const T*.
 	*/
 	operator const T*() const
 	{
@@ -142,7 +148,7 @@ public:
 	}
 
 	/**
-	*	@copydoc operator const T*() const
+	*	Operator T*.
 	*/
 	operator T*()
 	{
@@ -265,5 +271,7 @@ T* CASRefPtr<T, ADAPTER>::Set( T* const pSourcePtr, const bool bTransferOwnershi
 {
 	return Set( m_pPointer, pSourcePtr, bTransferOwnership );
 }
+
+/** @} */
 
 #endif //ANGELSCRIPT_UTIL_CASREFPTR_H

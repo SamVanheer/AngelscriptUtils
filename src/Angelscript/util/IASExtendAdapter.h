@@ -4,6 +4,12 @@
 #include "CASObjPtr.h"
 
 /**
+*	@addtogroup ASExtend
+*
+*	@{
+*/
+
+/**
 *	Interface used to adapt C++ classes for extension in Angelscript.
 */
 class IASExtendAdapter
@@ -25,5 +31,7 @@ public:
 inline IASExtendAdapter::~IASExtendAdapter()
 {
 }
+
+/** @} */
 
 #endif //ANGELSCRIPT_UTIL_IASEXTENDADAPTER_H

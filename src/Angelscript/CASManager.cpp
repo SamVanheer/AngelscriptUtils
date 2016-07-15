@@ -59,7 +59,18 @@ bool CASManager::Initialize( IASInitializer& initializer )
 		return false;
 	}
 
-	m_pScriptEngine->SetMessageCallback( asMETHOD( CASManager, MessageCallback ), this, asCALL_THISCALL );
+	asSFuncPtr msgCallback;
+	void* pObj;
+	asDWORD callConv;
+
+	if( !initializer.GetMessageCallback( msgCallback, pObj, callConv ) )
+	{
+		msgCallback = asMETHOD( CASManager, MessageCallback );
+		pObj = this;
+		callConv = asCALL_THISCALL;
+	}
+
+	m_pScriptEngine->SetMessageCallback( msgCallback, pObj, callConv );
 
 	Activate();
 

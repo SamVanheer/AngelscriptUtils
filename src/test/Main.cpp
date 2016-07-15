@@ -151,7 +151,7 @@ public:
 		return builder.AddSectionFromFile( "scripts/test.as" ) >= 0;
 	}
 
-	bool PostBuild( const bool bSuccess, CASModule* pModule ) override
+	bool PostBuild( CScriptBuilder& builder, const bool bSuccess, CASModule* pModule ) override
 	{
 		if( !bSuccess )
 			return false;

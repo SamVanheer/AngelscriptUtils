@@ -53,11 +53,12 @@ public:
 
 	/**
 	*	Called after the build has finished.
+	*	@param builder Builder.
 	*	@param bSuccess Whether the build succeeded or failed.
 	*	@param pModule If bSuccess is true, the module. Otherwise, null.
 	*	@return true if the module should be kept, false if it should be discarded.
 	*/
-	virtual bool PostBuild( const bool bSuccess, CASModule* pModule ) { return true; }
+	virtual bool PostBuild( CScriptBuilder& builder, const bool bSuccess, CASModule* pModule ) { return true; }
 };
 
 inline IASModuleBuilder::~IASModuleBuilder()

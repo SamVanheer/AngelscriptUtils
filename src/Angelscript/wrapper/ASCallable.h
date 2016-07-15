@@ -7,6 +7,8 @@
 
 #include <angelscript.h>
 
+#include "Angelscript/util/ContextUtils.h"
+
 #include "CASContext.h"
 
 class CASContext;
@@ -34,6 +36,58 @@ enum CallFlag : CallFlags_t
 };
 }
 
+namespace as
+{
+/**
+*	Calls a function.
+*	@param callable Callable object.
+*	@param flags Call flags.
+*	@param args The arguments for the function.
+*	@tparam CALLABLE Type of the callable object.
+*	@tparam ARGS Arguments list type.
+*	@return true on success, false otherwise.
+*/
+template<typename CALLABLE, typename ARGS>
+bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args )
+{
+	auto pContext = callable.GetContext().GetContext();
+
+	assert( pContext );
+
+	if( !pContext )
+		return false;
+
+	auto& function = callable.GetFunction();
+
+	auto result = pContext->Prepare( &function );
+
+	if( result < 0 )
+	{
+		return false;
+	}
+
+	if( !callable.PreSetArguments() )
+		return false;
+
+	auto success = ctx::SetArguments( function, *pContext, args );
+
+	if( !success )
+		return false;
+
+	if( !callable.PreExecute() )
+		return false;
+
+	result = pContext->Execute();
+
+	if( !callable.PostExecute( result ) )
+		return false;
+
+	//TODO: check for errors. - Solokiller
+
+	return result >= 0;
+}
+}
+
 /**
 *	Base class for callable types.
 *	Do not use directly.
@@ -42,7 +96,7 @@ class CASCallable
 {
 protected:
 	template<typename CALLABLE, typename ARGS>
-	friend bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args );
+	friend bool as::CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args );
 
 protected:
 	/**
@@ -107,6 +161,27 @@ private:
 	CASCallable& operator=( const CASCallable& ) = delete;
 };
 
+inline CASCallable::CASCallable( asIScriptFunction& function, CASContext& context )
+	: m_Function( function )
+	, m_Context( context )
+{
+}
+
+inline bool CASCallable::IsValid() const
+{
+	return m_Context.GetContext() != nullptr;
+}
+
+inline bool CASCallable::GetReturnValue( void* pReturnValue )
+{
+	assert( m_Context );
+
+	asDWORD uiFlags;
+	const int iTypeId = m_Function.GetReturnTypeId( &uiFlags );
+
+	return ctx::GetReturnValue( *m_Context.GetContext(), iTypeId, uiFlags, pReturnValue );
+}
+
 /**
 *	Helper class that defines the call methods for callable types.
 *	Do not use directly.
@@ -125,7 +200,7 @@ public:
 	*/
 	bool VCall( CallFlags_t flags, va_list list )
 	{
-		return CallFunction( GetThisRef(), flags, list );
+		return as::CallFunction( GetThisRef(), flags, list );
 	}
 
 	/**
@@ -155,7 +230,7 @@ public:
 	*/
 	bool CallArgs( CallFlags_t flags, const CASArguments& args )
 	{
-		return CallFunction( GetThisRef(), flags, args );
+		return as::CallFunction( GetThisRef(), flags, args );
 	}
 
 	/**
@@ -200,7 +275,7 @@ class CASMethod final : public CASTCallable<CASMethod>
 {
 protected:
 	template<typename CALLABLE, typename ARGS>
-	friend bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args );
+	friend bool as::CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args );
 
 public:
 	/**
@@ -217,6 +292,25 @@ protected:
 private:
 	void* m_pThis;
 };
+
+inline CASMethod::CASMethod( asIScriptFunction& function, CASContext& context, void* pThis )
+	: CASTCallable( function, context )
+	, m_pThis( pThis )
+{
+	assert( pThis );
+}
+
+inline bool CASMethod::IsValid() const
+{
+	return CASCallable::IsValid() && m_pThis;
+}
+
+inline bool CASMethod::PreSetArguments()
+{
+	auto pContext = GetContext().GetContext();
+
+	return pContext->SetObject( m_pThis ) >= 0;
+}
 
 namespace as
 {

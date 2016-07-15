@@ -282,7 +282,7 @@ public:
 	*	@copydoc CASCallable::CASCallable( asIScriptFunction& function, CASContext& context )
 	*	@param pThis Pointer to the object instance.
 	*/
-	CASMethod( asIScriptFunction& function, CASContext& context, void* pThis );
+	CASMethod( asIScriptFunction& function, CASContext& context, const void* pThis );
 
 	bool IsValid() const;
 
@@ -293,9 +293,9 @@ private:
 	void* m_pThis;
 };
 
-inline CASMethod::CASMethod( asIScriptFunction& function, CASContext& context, void* pThis )
+inline CASMethod::CASMethod( asIScriptFunction& function, CASContext& context, const void* pThis )
 	: CASTCallable( function, context )
-	, m_pThis( pThis )
+	, m_pThis( const_cast<void*>( pThis ) )
 {
 	assert( pThis );
 }

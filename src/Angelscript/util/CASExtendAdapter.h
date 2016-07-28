@@ -48,7 +48,7 @@ public:
 	*/
 	template<typename... ARGS>
 	CASExtendAdapter( CASObjPtr object, ARGS&&... args )
-		: BASECLASS( std::move( args ) )
+		: BASECLASS( std::move( args )... )
 		, m_Object( object )
 	{
 		assert( object );
@@ -100,7 +100,7 @@ if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( #retType " " #m
 																													\
 	CASMethod method( *pFunction, ctx, GetObject().Get() );															\
 																													\
-	if( method.Call( CallFlag::NONE, __VA_ARGS__ ) )																\
+	if( method.Call( CallFlag::NONE, ##__VA_ARGS__ ) )																\
 	{																												\
 		method.GetReturnValue( &result );																			\
 	}																												\
@@ -120,7 +120,7 @@ return result
 *	@param ... Arguments to pass.
 */
 #define CALL_EXTEND_FUNC_RET( retType, methodName, pszParams, ... )									\
-CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, BaseClass::methodName, pszParams, __VA_ARGS__ )
+CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, BaseClass::methodName, pszParams, ##__VA_ARGS__ )
 
 /**
 *	Calls a method that has a different C++ method name.
@@ -132,7 +132,7 @@ CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, BaseClass::methodName, pszPa
 #define CALL_EXTEND_FUNC_DIFFFUNC( methodName, baseMethodName, pszParams, ... )								\
 if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( "void " #methodName pszParams ) )			\
 {																											\
-	as::Call( GetObject().Get(), pFunction, __VA_ARGS__ );													\
+	as::Call( GetObject().Get(), pFunction, ##__VA_ARGS__ );												\
 }																											\
 else																										\
 {																											\
@@ -146,7 +146,7 @@ else																										\
 *	@param ... Arguments to pass.
 */
 #define CALL_EXTEND_FUNC( methodName, pszParams, ... )									\
-CALL_EXTEND_FUNC_DIFFFUNC( methodName, BaseClass::methodName, pszParams, __VA_ARGS__ )
+CALL_EXTEND_FUNC_DIFFFUNC( methodName, BaseClass::methodName, pszParams, ##__VA_ARGS__ )
 
 /** @} */
 

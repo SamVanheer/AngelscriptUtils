@@ -151,7 +151,7 @@ bool PODToString( char* pszBuffer, const size_t uiBufferSize, const void* pObjec
 
 	case asTYPEID_INT32:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%d", *reinterpret_cast<const long*>( pObject ) );
+			iResult = snprintf( pszBuffer, uiBufferSize, "%ld", *reinterpret_cast<const long*>( pObject ) );
 			break;
 		}
 
@@ -175,7 +175,7 @@ bool PODToString( char* pszBuffer, const size_t uiBufferSize, const void* pObjec
 
 	case asTYPEID_UINT32:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%u", *reinterpret_cast<const unsigned long*>( pObject ) );
+			iResult = snprintf( pszBuffer, uiBufferSize, "%lu", *reinterpret_cast<const unsigned long*>( pObject ) );
 			break;
 		}
 
@@ -308,7 +308,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 						else
 						{
 							if( pValue ) //Treat as dword
-								snprintf( szValueBuffer, sizeof( szValueBuffer ), "%d", *reinterpret_cast<long*>( pValue ) );
+								snprintf( szValueBuffer, sizeof( szValueBuffer ), "%ld", *reinterpret_cast<long*>( pValue ) );
 							else //Treat as pointer
 								snprintf( szValueBuffer, sizeof( szValueBuffer ), "%p", pValue );
 						}

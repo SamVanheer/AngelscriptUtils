@@ -14,6 +14,14 @@
 namespace ctx
 {
 /**
+*	Wrapper type used to pass around va_list. On some platforms va_list isn't a simple pointer, so this solves type issues.
+*/
+struct VAList final
+{
+	va_list list;
+};
+
+/**
 *	Sets arguments for a function call.
 *	@param targetFunc Target function.
 *	@param context Context.
@@ -61,7 +69,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 *	@param list Pointer to the argument.
 *	@return true on success, false otherwise.
 */
-bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, const asUINT uiIndex, va_list& list );
+bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, const asUINT uiIndex, VAList& list );
 
 /**
 *	Sets an argument on the context, taking the argument from an ArgumentValue_t.
@@ -87,7 +95,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 *	@param[ out ] pOutArgType Optional. Argument type.
 *	@return true on success, false otherwise.
 */
-bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlags, va_list& list, asDWORD* puiObjFlags = nullptr, ArgType::ArgType* pOutArgType = nullptr );
+bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlags, VAList& list, asDWORD* puiObjFlags = nullptr, ArgType::ArgType* pOutArgType = nullptr );
 
 /**
 *	Converts the input argument to either an asQWORD or double.

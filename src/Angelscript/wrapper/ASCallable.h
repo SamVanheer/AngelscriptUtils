@@ -327,7 +327,7 @@ namespace as
 *	@return true on success, false otherwise.
 */
 template<typename FUNCTOR, typename ARGS>
-inline bool VCall( FUNCTOR functor, asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, const ARGS& args )
+inline bool VCall( FUNCTOR functor, asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, ARGS& args )
 {
 	assert( pFunction );
 
@@ -450,7 +450,7 @@ struct CASMethodFunctor final
 *	@return true on success, false otherwise.
 */
 template<typename ARGS>
-inline bool VCallFunc( asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, const ARGS& args )
+inline bool VCallFunc( asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, ARGS& args )
 {
 	return VCall( CASFunctionFunctor(), pContext, flags, pFunction, args );
 }
@@ -467,7 +467,7 @@ inline bool VCallFunc( asIScriptContext* pContext, CallFlags_t flags, asIScriptF
 *	@return true on success, false otherwise.
 */
 template<typename ARGS>
-inline bool VCallFunc( void* pThis, asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, const ARGS& args )
+inline bool VCallFunc( void* pThis, asIScriptContext* pContext, CallFlags_t flags, asIScriptFunction* pFunction, ARGS& args )
 {
 	return VCall( CASMethodFunctor( pThis ), pContext, flags, pFunction, args );
 }

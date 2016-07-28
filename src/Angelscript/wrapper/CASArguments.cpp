@@ -273,6 +273,11 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 
 	ArgumentValue value;
 
+	ctx::VAList vaList;
+	
+	//GCC fails to copy the list if it's done any other way.
+	va_copy( vaList.list, list );
+
 	for( asUINT uiIndex = 0; uiIndex < uiArgCount && bSuccess; ++uiIndex )
 	{
 		if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
@@ -288,7 +293,7 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 		asDWORD uiObjFlags = pType->GetFlags();
 		ArgType::ArgType argType;
 
-		if( ( bSuccess = ctx::GetArgumentFromVarargs( value, iTypeId, uiFlags, list, &uiObjFlags, &argType ) ) )
+		if( ( bSuccess = ctx::GetArgumentFromVarargs( value, iTypeId, uiFlags, vaList, &uiObjFlags, &argType ) ) )
 		{
 			//Make copies of the input arguments; they won't exist anymore once this method has finished execution.
 			args[ uiIndex ].Set( *pEngine, iTypeId, argType, value, true );

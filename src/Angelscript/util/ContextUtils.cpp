@@ -51,9 +51,14 @@ bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& contex
 
 	asIScriptEngine& engine = *targetFunc.GetEngine();
 
+	VAList vaList;
+	
+	//GCC fails to copy the list if it's done any other way.
+	va_copy( vaList.list, list );
+
 	for( asUINT uiIndex = 0; uiIndex < uiArgCount && bSuccess; ++uiIndex )
 	{
-		bSuccess = SetContextArgument( engine, targetFunc, context, uiIndex, list );
+		bSuccess = SetContextArgument( engine, targetFunc, context, uiIndex, vaList );
 	}
 
 	return bSuccess;
@@ -79,7 +84,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 	return SetContextArgument( engine, targetFunc, context, uiIndex, arg.GetTypeId(), arg.GetArgumentValue(), false );
 }
 
-bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, const asUINT uiIndex, va_list& list )
+bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targetFunc, asIScriptContext& context, const asUINT uiIndex, VAList& list )
 {
 	int iTypeId;
 	asDWORD uiFlags;
@@ -280,7 +285,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 	return bSuccess;
 }
 
-bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlags, va_list& list, asDWORD* puiObjFlags, ArgType::ArgType* pOutArgType )
+bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlags, VAList& list, asDWORD* puiObjFlags, ArgType::ArgType* pOutArgType )
 {
 	if( pOutArgType && !puiObjFlags )
 		return false;
@@ -294,7 +299,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 	//Handles reference parameters automatically, source pointer must be correct type
 	if( iTypeId & ( asTYPEID_OBJHANDLE | asTYPEID_MASK_OBJECT ) )
 	{
-		value.pValue = va_arg( list, void* );
+		value.pValue = va_arg( list.list, void* );
 
 		//Set type if requested
 		if( pOutArgType )
@@ -318,7 +323,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 		//In/Out reference
 		if( as::IsPrimitive( iTypeId ) && ( uiTMFlags & ( asTM_INREF | asTM_OUTREF ) ) )
 		{
-			value.pValue = va_arg( list, void* );
+			value.pValue = va_arg( list.list, void* );
 		}
 		else
 		{
@@ -335,16 +340,16 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 
 			case asTYPEID_BOOL:
 			case asTYPEID_INT8:
-			case asTYPEID_UINT8:	value.byte = static_cast<asBYTE>( va_arg( list, long ) ); break; //Promoted to int
+			case asTYPEID_UINT8:	value.byte = static_cast<asBYTE>( va_arg( list.list, long ) ); break; //Promoted to int
 			case asTYPEID_INT16:
-			case asTYPEID_UINT16:	value.word = static_cast<asWORD>( va_arg( list, long ) ); break; //Promoted to int
+			case asTYPEID_UINT16:	value.word = static_cast<asWORD>( va_arg( list.list, long ) ); break; //Promoted to int
 			case asTYPEID_INT32:
-			case asTYPEID_UINT32:	value.dword = static_cast<asDWORD>( va_arg( list, long ) ); break;
+			case asTYPEID_UINT32:	value.dword = static_cast<asDWORD>( va_arg( list.list, long ) ); break;
 			case asTYPEID_INT64:
-			case asTYPEID_UINT64:	value.qword = va_arg( list, long long ); break;
+			case asTYPEID_UINT64:	value.qword = va_arg( list.list, long long ); break;
 
-			case asTYPEID_FLOAT:	value.flValue = static_cast<float>( va_arg( list, double ) ); break; //Promoted to double
-			case asTYPEID_DOUBLE:	value.dValue = va_arg( list, double ); break;
+			case asTYPEID_FLOAT:	value.flValue = static_cast<float>( va_arg( list.list, double ) ); break; //Promoted to double
+			case asTYPEID_DOUBLE:	value.dValue = va_arg( list.list, double ); break;
 
 			default:
 
@@ -356,7 +361,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 					if( pOutArgType )
 						*pOutArgType = ArgType::ENUM;
 
-					value.dword = va_arg( list, long );
+					value.dword = va_arg( list.list, long );
 				}
 				else
 				{

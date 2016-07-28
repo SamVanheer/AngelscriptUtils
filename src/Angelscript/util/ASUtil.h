@@ -11,6 +11,8 @@
 
 #include "Angelscript/wrapper/CASArguments.h"
 
+#include "Angelscript/util/ContextUtils.h"
+
 class CScriptAny;
 
 /**

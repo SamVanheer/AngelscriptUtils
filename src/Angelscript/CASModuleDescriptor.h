@@ -2,7 +2,7 @@
 #define ANGELSCRIPT_CASMODULEDESCRIPTOR_H
 
 #include <cstdint>
-
+#include <functional>
 #include <limits>
 
 #include <angelscript.h>

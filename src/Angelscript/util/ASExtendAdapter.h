@@ -8,6 +8,8 @@
 
 #include "ASUtil.h"
 
+#include "CASObjPtr.h"
+
 class IASExtendAdapter;
 
 /**

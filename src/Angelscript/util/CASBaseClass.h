@@ -180,7 +180,7 @@ void RegisterRefCountedBaseClass( asIScriptEngine* pEngine, const char* pszObjec
 template<typename CLASS>
 void RegisterGCRefCountedBaseClass( asIScriptEngine* pEngine, const char* pszObjectName )
 {
-	RegisterSCScriptRefCountedBaseClass<CLASS>( pEngine, pszObjectName );
+	RegisterRefCountedBaseClass<CLASS>( pEngine, pszObjectName );
 
 	pEngine->RegisterObjectBehaviour(
 		pszObjectName, asBEHAVE_GETREFCOUNT, "int GetRefCount() const",
@@ -198,7 +198,7 @@ void RegisterGCRefCountedBaseClass( asIScriptEngine* pEngine, const char* pszObj
 		pszObjectName, asBEHAVE_ENUMREFS, "void EnumReferences(int& in)",
 		asMETHOD( CLASS, EnumReferences ), asCALL_THISCALL );
 
-	pDocumentation->RegisterObjectBehaviour(
+	pEngine->RegisterObjectBehaviour(
 		pszObjectName, asBEHAVE_RELEASEREFS, "void ReleaseReferences(int& in)",
 		asMETHOD( CLASS, ReleaseReferences ), asCALL_THISCALL );
 }

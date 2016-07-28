@@ -199,7 +199,7 @@ const CASModule* CASModuleManager::FindModuleByName( const char* const pszModule
 	assert( pszModuleName );
 
 	if( !pszModuleName )
-		return false;
+		return nullptr;
 
 	auto it = std::find_if( m_Modules.begin(), m_Modules.end(), ModuleEqualByName( pszModuleName ) );
 

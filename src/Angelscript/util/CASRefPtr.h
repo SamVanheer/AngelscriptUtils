@@ -160,7 +160,7 @@ private:
 };
 
 template<typename T, typename ADAPTER>
-typename T* CASRefPtr<T, ADAPTER>::Set( T*& pPtr, T* const pSourcePtr, const bool bTransferOwnership )
+T* CASRefPtr<T, ADAPTER>::Set( T*& pPtr, T* const pSourcePtr, const bool bTransferOwnership )
 {
 	return as::SetRefPointer<T, ADAPTER>( pPtr, pSourcePtr, bTransferOwnership );
 }
@@ -236,19 +236,19 @@ constexpr CASRefPtr<T, ADAPTER>::operator bool() const
 }
 
 template<typename T, typename ADAPTER>
-constexpr const typename T* CASRefPtr<T, ADAPTER>::Get() const
+constexpr const T* CASRefPtr<T, ADAPTER>::Get() const
 {
 	return m_pPointer;
 }
 
 template<typename T, typename ADAPTER>
-typename T* CASRefPtr<T, ADAPTER>::Get()
+T* CASRefPtr<T, ADAPTER>::Get()
 {
 	return m_pPointer;
 }
 
 template<typename T, typename ADAPTER>
-typename T* CASRefPtr<T, ADAPTER>::ReleaseOwnership()
+T* CASRefPtr<T, ADAPTER>::ReleaseOwnership()
 {
 	if( !m_pPointer )
 		return nullptr;

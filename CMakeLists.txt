@@ -149,6 +149,14 @@ foreach(variable ${variables})
 endforeach()
 message(STATUS "")
 
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y" )
+
+if( UNIX )
+	set( LINUX_32BIT_FLAG "-m32" )
+else()
+	set( LINUX_32BIT_FLAG "" )
+endif()
+
 # Angelscript library
 
 add_definitions( -DAS_NO_EXCEPTIONS )
@@ -157,7 +165,15 @@ add_subdirectory( external/Angelscript )
 
 preprocess_sources()
 
-add_library( Angelscript ${PREP_SRCS} )
+add_library( Angelscript STATIC ${PREP_SRCS} )
+
+if( NOT WIN32 )
+	target_link_libraries( Angelscript
+		pthread
+	)
+endif()
+
+set_target_properties( Angelscript PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
 
 install( TARGETS Angelscript DESTINATION lib )
 install( FILES external/Angelscript/include/angelscript.h DESTINATION include )
@@ -178,7 +194,9 @@ include_directories( src external/Angelscript/include )
 
 preprocess_sources()
 
-add_library( AngelscriptUtils ${PREP_SRCS} )
+add_library( AngelscriptUtils STATIC ${PREP_SRCS} )
+
+set_target_properties( AngelscriptUtils PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
 
 #Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}/src" )
@@ -201,6 +219,8 @@ preprocess_sources()
 
 #indicate the entry point for the executable
 add_executable( AngelscriptUtilsTest ${PREP_SRCS} )
+
+set_target_properties( AngelscriptUtilsTest PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
 
 #Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}/src" )

@@ -58,3 +58,4 @@ Temporary Items
 *.cmake
 
 bin/*
+bin_*/*

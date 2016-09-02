@@ -157,6 +157,11 @@ else()
 	set( LINUX_32BIT_FLAG "" )
 endif()
 
+#Debug builds should have a distinct name.
+if( NOT CMAKE_DEBUG_POSTFIX )
+  set( CMAKE_DEBUG_POSTFIX d )
+endif()
+
 # Angelscript library
 
 add_definitions( -DAS_NO_EXCEPTIONS )

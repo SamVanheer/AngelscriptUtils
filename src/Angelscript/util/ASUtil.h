@@ -468,6 +468,8 @@ struct CASMethodIterator final
 *	@param funcIterator Function iterator.
 *	@param szFunctionName Name of the function.
 *	@param arguments Function arguments.
+*	@param bExplicitReturnType Whether the return type should be checked. Compared against iReturnTypeId.
+*	@param iReturnTypeId The return type id to match against if bExplicitReturnType is true.
 *	@return Function, or null if no function could be found.
 */
 template<typename FUNCITERATOR>
@@ -475,7 +477,9 @@ inline asIScriptFunction* FindFunction(
 	asIScriptEngine& engine,
 	const FUNCITERATOR& funcIterator,
 	const std::string& szFunctionName,
-	CASArguments& arguments )
+	CASArguments& arguments,
+	const bool bExplicitReturnType = true,
+	const int iReturnTypeId = asTYPEID_VOID )
 {
 	const auto& argList = arguments.GetArgumentList();
 
@@ -487,9 +491,11 @@ inline asIScriptFunction* FindFunction(
 		if( strcmp( pFunction->GetName(), szFunctionName.c_str() ) != 0 )
 			continue;
 
-		//Must be a void function (TODO: can be relaxed later)
-		if( pFunction->GetReturnTypeId() != asTYPEID_VOID )
-			continue;
+		if( bExplicitReturnType )
+		{
+			if( pFunction->GetReturnTypeId() != iReturnTypeId )
+				continue;
+		}
 
 		//Must match parameter count
 		if( pFunction->GetParamCount() != arguments.GetArgumentCount() )

@@ -92,13 +92,22 @@ CLASS* CreateExtensionClassInstance(
 {
 	assert( pszClassName );
 
-	//TODO: namespaces
+	const std::string szOldNS = module.GetDefaultNamespace();
+
+	const std::string szNS = as::ExtractNameFromName( pszClassName );
+
+	module.SetDefaultNamespace( szNS.c_str() );
+
+	CLASS* pInstance = nullptr;
+
 	if( auto pType = module.GetTypeInfoByName( pszClassName ) )
 	{
-		return CreateExtensionClassInstance<CLASS>( engine, *pType, pszCPPClassName, pszCPPBaseClassName );
+		pInstance = CreateExtensionClassInstance<CLASS>( engine, *pType, pszCPPClassName, pszCPPBaseClassName );
 	}
 
-	return nullptr;
+	module.SetDefaultNamespace( szOldNS.c_str() );
+
+	return pInstance;
 }
 }
 

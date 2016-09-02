@@ -1,5 +1,7 @@
 #include <cassert>
 
+#include "Angelscript/util/ASUtil.h"
+
 #include "CASEngineReflectionGroup.h"
 
 asIScriptFunction* CASEngineReflectionGroup::FindGlobalFunction( const std::string& szName, bool bSearchByDecl )
@@ -10,18 +12,28 @@ asIScriptFunction* CASEngineReflectionGroup::FindGlobalFunction( const std::stri
 
 	if( bSearchByDecl )
 	{
+		const std::string szOldNS = m_pEngine->GetDefaultNamespace();
+
+		const std::string szNS = as::ExtractNamespaceFromDecl( szName );
+
+		m_pEngine->SetDefaultNamespace( szNS.c_str() );
+
 		pFunction = m_pEngine->GetGlobalFunctionByDecl( szName.c_str() );
+
+		m_pEngine->SetDefaultNamespace( szOldNS.c_str() );
 	}
 	else
 	{
+		const std::string szNS = as::ExtractNamespaceFromName( szName );
+		const std::string szActualName = as::ExtractNameFromName( szName );
+
 		const asUINT uiCount = m_pEngine->GetGlobalFunctionCount();
 
 		for( asUINT uiIndex = 0; uiIndex < uiCount; ++uiIndex )
 		{
 			auto pFunc = m_pEngine->GetGlobalFunctionByIndex( uiIndex );
 
-			//TODO: namespaces
-			if( szName == pFunc->GetName() )
+			if( szActualName == pFunc->GetName() && szNS == pFunc->GetNamespace() )
 			{
 				pFunction = pFunc;
 				break;
@@ -59,10 +71,29 @@ asITypeInfo* CASEngineReflectionGroup::FindTypeInfo( const std::string& szName, 
 {
 	assert( m_pEngine );
 
-	//TODO: namespaces
-	auto pType = bSearchByDecl ?
-		m_pEngine->GetTypeInfoByDecl( szName.c_str() ) : 
-		m_pEngine->GetTypeInfoByName( szName.c_str() );
+	const std::string szOldNS = m_pEngine->GetDefaultNamespace();
+
+	asITypeInfo* pType;
+
+	if( bSearchByDecl )
+	{
+		const std::string szNS = as::ExtractNamespaceFromDecl( szName, false );
+
+		m_pEngine->SetDefaultNamespace( szNS.c_str() );
+
+		pType = m_pEngine->GetTypeInfoByDecl( szName.c_str() );
+	}
+	else
+	{
+		const std::string szNS = as::ExtractNamespaceFromName( szName );
+		const std::string szActualName = as::ExtractNameFromName( szName );
+
+		m_pEngine->SetDefaultNamespace( szNS.c_str() );
+
+		pType = m_pEngine->GetTypeInfoByName( szActualName.c_str() );
+	}
+
+	m_pEngine->SetDefaultNamespace( szOldNS.c_str() );
 
 	if( pType )
 		pType->AddRef();

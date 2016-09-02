@@ -101,6 +101,18 @@ void PrintReflection()
 	}
 }
 
+namespace Foo
+{
+int Bar()
+{
+	return 0;
+}
+
+class Baz
+{
+}
+}
+
 int main( const string& in szString )
 {
 	Print( "foo\nbar\n" );
@@ -122,6 +134,78 @@ int main( const string& in szString )
 	Scheduler.SetTimeout( "Func", 5, "what's going on" );
 	
 	//PrintReflection();
+	
+	//Find a function in a namespace (Module).
+	Reflect::Function@ pFunction = Reflect::Module.FindGlobalFunction( "Foo::Bar" );
+	
+	Print( "(Module) Found function by name: " + ( ( pFunction !is null ) ? "yes" : "no" ) + "\n" );
+	
+	@pFunction = Reflect::Module.FindGlobalFunction( "int Foo::Bar()", true );
+	
+	Print( "(Module) Found function by decl: " + ( ( pFunction !is null ) ? "yes" : "no" ) + "\n" );
+	
+	//Test for nonexistent.
+	@pFunction = Reflect::Module.FindGlobalFunction( "Foo2::Bar" );
+	
+	Print( "(Module) Didn't find function by name: " + ( ( pFunction is null ) ? "yes" : "no" ) + "\n" );
+	
+	@pFunction = Reflect::Module.FindGlobalFunction( "int Foo2::Bar()", true );
+	
+	Print( "(Module) Didn't find function by decl: " + ( ( pFunction is null ) ? "yes" : "no" ) + "\n" );
+	
+	//Find a type in a namespace (Module).
+	Reflect::TypeInfo@ pType = Reflect::Module.FindTypeInfo( "Foo::Baz" );
+	
+	Print( "(Module) Found type info by name: " + ( ( pType !is null ) ? "yes" : "no" ) + "\n" );
+	
+	@pType = Reflect::Module.FindTypeInfo( "Foo::Baz", true );
+	
+	Print( "(Module) Found type info by decl: " + ( ( pType !is null ) ? "yes" : "no" ) + "\n" );
+	
+	//Test for nonexistent.
+	@pType = Reflect::Module.FindTypeInfo( "Foo2::Baz" );
+	
+	Print( "(Module) Didn't find type info by name: " + ( ( pType is null ) ? "yes" : "no" ) + "\n" );
+	
+	@pType = Reflect::Module.FindTypeInfo( "Foo2::Baz", true );
+	
+	Print( "(Module) Didn't find type info by decl: " + ( ( pType is null ) ? "yes" : "no" ) + "\n" );
+	
+	//Find a function in a namespace (Engine).
+	@pFunction = Reflect::Engine.FindGlobalFunction( "NS::NSTest" );
+	
+	Print( "(Engine) Found function by name: " + ( ( pFunction !is null ) ? "yes" : "no" ) + "\n" );
+	
+	@pFunction = Reflect::Engine.FindGlobalFunction( "int NS::NSTest()", true );
+	
+	Print( "(Engine) Found function by decl: " + ( ( pFunction !is null ) ? "yes" : "no" ) + "\n" );
+	
+	//Test for nonexistent.
+	@pFunction = Reflect::Engine.FindGlobalFunction( "Foo2::Bar" );
+	
+	Print( "(Engine) Didn't find function by name: " + ( ( pFunction is null ) ? "yes" : "no" ) + "\n" );
+	
+	@pFunction = Reflect::Engine.FindGlobalFunction( "int Foo2::Bar()", true );
+	
+	Print( "(Engine) Didn't find function by decl: " + ( ( pFunction is null ) ? "yes" : "no" ) + "\n" );
+	
+	//Find a type in a namespace (Engine).
+	@pType = Reflect::Engine.FindTypeInfo( "Reflect::TypeInfo" );
+	
+	Print( "(Engine) Found type info by name: " + ( ( pType !is null ) ? "yes" : "no" ) + "\n" );
+	
+	@pType = Reflect::Engine.FindTypeInfo( "Reflect::TypeInfo", true );
+	
+	Print( "(Engine) Found type info by decl: " + ( ( pType !is null ) ? "yes" : "no" ) + "\n" );
+	
+	//Test for nonexistent.
+	@pType = Reflect::Engine.FindTypeInfo( "Foo2::Baz" );
+	
+	Print( "(Engine) Didn't find type info by name: " + ( ( pType is null ) ? "yes" : "no" ) + "\n" );
+	
+	@pType = Reflect::Engine.FindTypeInfo( "Foo2::Baz", true );
+	
+	Print( "(Engine) Didn't find type info by decl: " + ( ( pType is null ) ? "yes" : "no" ) + "\n" );
 	
 	return 1;
 }

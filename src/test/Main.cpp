@@ -69,6 +69,11 @@ void Print( const std::string& szString )
 	std::cout << szString;
 }
 
+int NSTest()
+{
+	return 0;
+}
+
 /*
 *	A hook to test out the hook system.
 *	Stops as soon as it's handled.
@@ -107,6 +112,15 @@ public:
 
 		//Printing function.
 		pEngine->RegisterGlobalFunction( "void Print(const string& in szString)", asFUNCTION( Print ), asCALL_CDECL );
+
+		pEngine->SetDefaultNamespace( "NS" );
+
+		pEngine->RegisterGlobalFunction( 
+			"int NSTest()", 
+			asFUNCTION( NSTest ),
+			asCALL_CDECL );
+
+		pEngine->SetDefaultNamespace( "" );
 
 		//Register the interface that all custom entities use. Allows you to take them as handles to functions.
 		pEngine->RegisterInterface( "IScriptEntity" );

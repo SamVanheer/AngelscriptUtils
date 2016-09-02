@@ -2,6 +2,7 @@
 #define UTIL_ASUTIL_H
 
 #include <cassert>
+#include <cctype>
 #include <cstring>
 #include <sstream>
 #include <string>
@@ -720,6 +721,103 @@ bool CreateFunctionSignature(
 	std::stringstream& function, const char* const pszReturnType, const char* const pszFunctionName,
 	const CASArguments& args,
 	const asUINT uiStartIndex, asIScriptGeneric& arguments );
+
+/**
+*	Extracts a namespace from a name.
+*	Namespaces are denoted by double colons. For example, "String::EMPTY_STRING"
+*	@param szName Name.
+*	@return If a namespace is contained in the name, returns a string containing that namespace. Otherwise, returns an empty string.
+*/
+inline std::string ExtractNamespaceFromName( const std::string& szName )
+{
+	if( szName.empty() )
+		return "";
+
+	size_t uiIndex = szName.rfind( "::" );
+
+	if( uiIndex == std::string::npos )
+		return "";
+
+	return szName.substr( 0, uiIndex );
+}
+
+/**
+*	Extracts a name from a name that may contain a namespace.
+*	Namespaces are denoted by double colons. For example, "String::EMPTY_STRING"
+*	@param szName Name.
+*	@return If a name is contained in the name, returns a string containing that name. Otherwise, returns an empty string.
+*/
+inline std::string ExtractNameFromName( const std::string& szName )
+{
+	if( szName.empty() )
+		return "";
+
+	size_t uiIndex = szName.rfind( "::" );
+
+	if( uiIndex == std::string::npos )
+		return "";
+
+	return szName.substr( uiIndex + 2 );
+}
+
+/**
+*	Extracts a namespace from a declaration.
+*	Namespaces are denoted by double colons. For example, "void String::Compare(const string& in lhs, const string& in rhs)"
+*	@param szName Name.
+*	@param bIsFunctionDecl Whether this is a function or a class declaration.
+*	@return If a namespace is contained in the declaration, returns a string containing that namespace. Otherwise, returns an empty string.
+*/
+inline std::string ExtractNamespaceFromDecl( const std::string& szDecl, const bool bIsFunctionDecl = true )
+{
+	if( szDecl.empty() )
+		return "";
+
+	size_t uiStart;
+
+	bool bFoundWhitespace = false;
+
+	for( uiStart = 0; uiStart < szDecl.length(); ++uiStart )
+	{
+		if( !bFoundWhitespace )
+		{
+			if( isspace( szDecl[ uiStart ] ) )
+			{
+				bFoundWhitespace = true;
+			}
+		}
+		else
+		{
+			if( !isspace( szDecl[ uiStart ] ) )
+			{
+				break;
+			}
+		}
+	}
+
+	if( uiStart >= szDecl.length() )
+		return "";
+
+	size_t uiEnd;
+	
+	if( bIsFunctionDecl )
+	{
+		uiEnd = szDecl.find( '(', uiStart + 1 );
+
+		if( uiEnd == std::string::npos )
+			return "";
+	}
+	else
+	{
+		uiEnd = std::string::npos;
+	}
+
+	size_t uiNSEnd = szDecl.rfind( "::", uiEnd );
+
+	if( uiNSEnd == std::string::npos || uiNSEnd <= uiStart )
+		return "";
+
+	return szDecl.substr( uiStart, uiNSEnd - uiStart );
+}
 }
 
 /** @} */

@@ -1,5 +1,7 @@
 #include "Angelscript/CASModule.h"
 
+#include "Angelscript/util/ASUtil.h"
+
 #include "CASModuleReflectionGroup.h"
 
 asIScriptFunction* CASModuleReflectionGroup::FindGlobalFunction( const std::string& szName, bool bSearchByDecl )
@@ -10,12 +12,37 @@ asIScriptFunction* CASModuleReflectionGroup::FindGlobalFunction( const std::stri
 
 	if( bSearchByDecl )
 	{
+		const std::string szOldNS = scriptModule.GetDefaultNamespace();
+
+		const std::string szNS = as::ExtractNamespaceFromDecl( szName );
+
+		scriptModule.SetDefaultNamespace( szNS.c_str() );
+
+		pFunction = scriptModule.GetFunctionByDecl( szName.c_str() );
+
+		scriptModule.SetDefaultNamespace( szOldNS.c_str() );
+
 		pFunction = scriptModule.GetFunctionByDecl( szName.c_str() );
 	}
 	else
 	{
-		//TODO: namespaces
 		pFunction = scriptModule.GetFunctionByName( szName.c_str() );
+
+		const std::string szNS = as::ExtractNamespaceFromName( szName );
+		const std::string szActualName = as::ExtractNameFromName( szName );
+
+		const asUINT uiCount = scriptModule.GetFunctionCount();
+
+		for( asUINT uiIndex = 0; uiIndex < uiCount; ++uiIndex )
+		{
+			auto pFunc = scriptModule.GetFunctionByIndex( uiIndex );
+
+			if( szActualName == pFunc->GetName() && szNS == pFunc->GetNamespace() )
+			{
+				pFunction = pFunc;
+				break;
+			}
+		}
 	}
 
 	if( pFunction )
@@ -48,10 +75,29 @@ asITypeInfo* CASModuleReflectionGroup::FindTypeInfo( const std::string& szName, 
 {
 	auto& scriptModule = *GetScriptModuleFromScriptContext( asGetActiveContext() );
 
-	//TODO: namespaces
-	auto pType = bSearchByDecl ?
-		scriptModule.GetTypeInfoByDecl( szName.c_str() ) :
-		scriptModule.GetTypeInfoByName( szName.c_str() );
+	const std::string szOldNS = scriptModule.GetDefaultNamespace();
+
+	asITypeInfo* pType;
+
+	if( bSearchByDecl )
+	{
+		const std::string szNS = as::ExtractNamespaceFromDecl( szName, false );
+
+		scriptModule.SetDefaultNamespace( szNS.c_str() );
+
+		pType = scriptModule.GetTypeInfoByDecl( szName.c_str() );
+	}
+	else
+	{
+		const std::string szNS = as::ExtractNamespaceFromName( szName );
+		const std::string szActualName = as::ExtractNameFromName( szName );
+
+		scriptModule.SetDefaultNamespace( szNS.c_str() );
+
+		pType = scriptModule.GetTypeInfoByName( szActualName.c_str() );
+	}
+
+	scriptModule.SetDefaultNamespace( szOldNS.c_str() );
 
 	if( pType )
 		pType->AddRef();

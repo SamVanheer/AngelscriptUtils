@@ -1,0 +1,91 @@
+# Use the C base
+language: c
+
+# Linux - use Ubuntu 14.04 Trusty Tahr instead of 12.04 Precise Pengolin, this
+# is required for the correct version of libsdl2-dev.
+sudo: required
+dist: trusty
+
+# Linux - add the Ubuntu restricted tool chain to install GCC 5 and 6, also to
+# install the development package for SDL2
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - libsdl2-dev
+    - linux-libc-dev
+    - gcc-5-multilib
+    - g++-5-multilib
+    - gcc-6-multilib
+    - g++-6-multilib
+
+matrix:
+  allow_failures:
+    # Mac OS X Mavericks 10.9.5 (Xcode 6.1)
+    - os: osx
+  include:
+    # Ubuntu 14.04 Trusty Tahr amd64 (Linux) GCC 5
+    # Everything disabled
+    - os: linux
+      env: COMPILER=gcc-5 BUILD_RULES=""
+    # Ubuntu 14.04 Trusty Tahr amd64 (Linux) GCC 6
+    # Everything disabled
+    - os: linux
+      env: COMPILER=gcc-6 BUILD_RULES=""
+    # Everything disabled
+    - os: osx
+      env: BUILD_RULES=""
+      osx_image: beta-xcode6.1
+    # Mac OS X Mavericks 10.9.5 (Xcode 6.1)
+    # Opposing Force
+    - os: osx
+      env: BUILD_RULES=""
+      osx_image: beta-xcode6.1
+
+before_install:
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      sudo dpkg --add-architecture i386
+      sudo apt-get -qq update
+      sudo apt-get install -y linux-libc-dev:i386
+    else
+      brew update
+    fi
+
+install:
+  # Prepare the dependencies, build and fake Steam common directories for Travis
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - INSTALL_DIR="${TRAVIS_BUILD_DIR}/AngelscriptUtils_Install"
+  - mkdir -p ${DEPS_DIR} && mkdir -p ${INSTALL_DIR} && mkdir -p ${INSTALL_DIR} && cd ${DEPS_DIR}
+  # Get the latest CMake version
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="http://www.cmake.org/files/v3.6/cmake-3.6.2-Linux-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    else
+      CMAKE_URL="http://www.cmake.org/files/v3.6/cmake-3.6.2-Darwin-x86_64.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/CMake.app/Contents/bin:${PATH}
+    fi
+
+before_script:
+  # Move to build directory
+  - cd ${TRAVIS_BUILD_DIR}
+  - mkdir build && cd build
+
+script:
+  # Just execute the cmake and make commands
+  - |
+    if [[ "${COMPILER}" == "gcc-5" ]]; then
+      cmake -DCMAKE_CXX_COMPILER="g++-5" -DCMAKE_C_COMPILER="gcc-5" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${BUILD_RULES} ..
+    elif [[ "${COMPILER}" == "gcc-6" ]]; then
+      cmake -DCMAKE_CXX_COMPILER="g++-6" -DCMAKE_C_COMPILER="gcc-6" -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${BUILD_RULES} ..
+    else
+      cmake -DCMAKE_INSTALL_PREFIX=${INSTALL_DIR} ${BUILD_RULES} ..
+    fi
+  - make
+
+notifications:
+  email: false

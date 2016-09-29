@@ -288,19 +288,32 @@ int main( int iArgc, char* pszArgV[] )
 				//Argument list.
 				as::CallArgs( pFunction, CASArguments() );
 
-				auto pFunc = [ = ]( CallFlags_t flags, ... )
+				struct Helper final
 				{
-					va_list list;
+				public:
+					Helper( asIScriptFunction* pFunction )
+						: pFunction( pFunction )
+					{
+					}
 
-					va_start( list, flags );
+					void Call( CallFlags_t flags, ... )
+					{
+						va_list list;
 
-					as::VCall( flags, pFunction, list );
+						va_start( list, flags );
 
-					va_end( list );
+						as::VCall( flags, pFunction, list );
+
+						va_end( list );
+					}
+
+				private:
+					asIScriptFunction* pFunction;
 				};
 
 				//va_list version.
-				pFunc( CallFlag::NONE );
+				Helper helper( pFunction );
+				helper.Call( CallFlag::NONE );
 			}
 
 			//Test the scheduler.

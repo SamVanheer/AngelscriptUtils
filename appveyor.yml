@@ -1,0 +1,42 @@
+# Use a VM with VS 2015
+os: Visual Studio 2015
+
+# Only target Windows 32 bits
+platform: Win32
+
+# Build in both Debug and Release configurations
+configuration:
+  - Debug
+  - Release
+
+# Build with all those possible configurations
+environment:
+  matrix:
+    - BUILD_RULES:
+
+before_build:
+  # Appveyor uses CMake 2.8, we require at least 3.6, so make the update
+  - ps: Write-Host "=== (1/4) Downloading CMake 3.6.2 ZIP for Windows 64 bits ===" -foregroundcolor green
+  - ps: wget https://cmake.org/files/v3.6/cmake-3.6.2-win64-x64.zip -OutFile cmake.zip
+  - ps: Write-Host "=== (2/4) Installing CMake ===" -foregroundcolor green
+  - cmd: 7z x cmake.zip -o"." -y
+  # Create the build directory and the install directory
+  - ps: Write-Host "=== (3/4) Creating build and fake Steam common directory ===" -foregroundcolor green
+  - md build
+  - md AngelscriptUtils_Install
+
+build_script:
+  - cd build
+  - ps: Write-Host "===  (4/4) Building ===" -foregroundcolor green
+  - ..\cmake-3.6.2-win64-x64\bin\cmake.exe -DCMAKE_INSTALL_DIR=..\AngelscriptUtils_Install %BUILD_RULES% -G"Visual Studio 14 2015" ..
+  - msbuild HLEnhanced.sln /t:Rebuild /p:Configuration=%CONFIGURATION% /m /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+
+# If one job fail, mark the build as failed
+matrix:
+  fast_finish: true
+
+# We don't have unit tests
+test: off
+
+# We don't do deploying yet
+deploy: off

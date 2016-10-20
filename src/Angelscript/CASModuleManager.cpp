@@ -72,27 +72,27 @@ static int CASModuleManager_IncludeCallback( const char* pszFileName, const char
 	return reinterpret_cast<IASModuleBuilder*>( pUserParam )->IncludeScript( *pBuilder, pszFileName, pszFrom ) ? 0 : -1;
 }
 
-CASModule* CASModuleManager::BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder )
+CASModule* CASModuleManager::BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder, void* pUserData )
 {
 	if( descriptor.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID || FindDescriptorByName( descriptor.GetName() ) != &descriptor )
 	{
 		return nullptr;
 	}
 
-	return BuildModuleInternal( descriptor, pszModuleName, builder );
+	return BuildModuleInternal( descriptor, pszModuleName, builder, pUserData );
 }
 
-CASModule* CASModuleManager::BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder )
+CASModule* CASModuleManager::BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder, void* pUserData )
 {
 	auto pDescriptor = FindDescriptorByName( pszName );
 
 	if( !pDescriptor )
 		return nullptr;
 
-	return BuildModuleInternal( *pDescriptor, pszModuleName, builder );
+	return BuildModuleInternal( *pDescriptor, pszModuleName, builder, pUserData );
 }
 
-CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder )
+CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder, void* pUserData )
 {
 	assert( pszModuleName );
 
@@ -161,7 +161,7 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 
 	if( bSuccess )
 	{
-		pModule = new CASModule( scriptBuilder.GetModule(), descriptor );
+		pModule = new CASModule( scriptBuilder.GetModule(), descriptor, pUserData );
 		cleanup.Release();
 	}
 

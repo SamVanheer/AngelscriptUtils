@@ -65,18 +65,20 @@ public:
 	*	@param descriptor Descriptor to use.
 	*	@param pszModuleName Name of the module. Must be unique.
 	*	@param builder Builder to use.
+	*	@param pUserData Optional. User data to associate with the module.
 	*	@return On successful build, the module. Otherwise, null.
 	*/
-	CASModule* BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder );
+	CASModule* BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder, void* pUserData = nullptr );
 
 	/**
 	*	Builds a module using the given descriptor.
 	*	@param pszName Name of the descriptor to use.
 	*	@param pszModuleName Name of the module. Must be unique.
 	*	@param builder Builder to use.
+	*	@param pUserData Optional. User data to associate with the module.
 	*	@return On successful build, the module. Otherwise, null.
 	*/
-	CASModule* BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder );
+	CASModule* BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder, void* pUserData = nullptr );
 
 private:
 	/**
@@ -84,9 +86,10 @@ private:
 	*	@param descriptor Descriptor to use.
 	*	@param pszModuleName Name of the module. Must be unique.
 	*	@param builder Builder to use.
+	*	@param pUserData Optional. User data to associate with the module.
 	*	@return On successful build, the module. Otherwise, null.
 	*/
-	CASModule* BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder );
+	CASModule* BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder, void* pUserData = nullptr );
 
 public:
 	/**

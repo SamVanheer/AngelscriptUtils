@@ -6,10 +6,11 @@
 
 #include "CASModule.h"
 
-CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor )
+CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, void* pUserData )
 	: m_pModule( pModule )
 	, m_pDescriptor( &descriptor )
 	, m_pScheduler( new CASScheduler( *this ) )
+	, m_pUserData( pUserData )
 {
 	assert( pModule );
 

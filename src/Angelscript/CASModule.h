@@ -33,7 +33,7 @@ public:
 	*	@param pModule Script module.
 	*	@param descriptor Descriptor for this module.
 	*/
-	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor );
+	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, void* pUserData = nullptr );
 
 	/**
 	*	Destructor.
@@ -67,12 +67,27 @@ public:
 	*/
 	CASScheduler* GetScheduler() { return m_pScheduler; }
 
+	/**
+	*	@return User data associated with this module.
+	*/
+	void* GetUserData() { return m_pUserData; }
+
+	/**
+	*	Sets the user data associated with this module.
+	*/
+	void SetUserData( void* pUserData )
+	{
+		m_pUserData = pUserData;
+	}
+
 private:
 	asIScriptModule* m_pModule;
 
 	const CASModuleDescriptor* m_pDescriptor;
 
 	CASScheduler* m_pScheduler;
+
+	void* m_pUserData = nullptr;
 
 private:
 	CASModule( const CASModule& ) = delete;

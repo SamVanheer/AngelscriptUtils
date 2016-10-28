@@ -761,7 +761,7 @@ inline std::string ExtractNameFromName( const std::string& szName )
 	size_t uiIndex = szName.rfind( "::" );
 
 	if( uiIndex == std::string::npos )
-		return "";
+		return szName;
 
 	return szName.substr( uiIndex + 2 );
 }

@@ -1,4 +1,6 @@
 add_sources(
+	CASBaseEvent.h
+	CASBaseEvent.cpp
 	CASEvent.h
 	CASEvent.cpp
 	CASEventManager.h

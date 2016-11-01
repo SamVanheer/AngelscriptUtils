@@ -139,21 +139,6 @@ void CASEventManager::DumpHookedFunctions() const
 	}
 }
 
-static void RegisterScriptHookReturnCode( asIScriptEngine& engine )
-{
-	const char* const pszObjectName = "HookReturnCode";
-
-	int result = engine.RegisterEnum( pszObjectName );
-
-	assert( result >= 0 );
-
-	result = engine.RegisterEnumValue( pszObjectName, "HOOK_CONTINUE", static_cast<int>( HookReturnCode::CONTINUE ) );
-	assert( result >= 0 );
-
-	result = engine.RegisterEnumValue( pszObjectName, "HOOK_HANDLED", static_cast<int>( HookReturnCode::HANDLED ) );
-	assert( result >= 0 );
-}
-
 static void RegisterScriptCEventManager( asIScriptEngine& engine )
 {
 	const char* const pszObjectName = "CEventManager";
@@ -170,6 +155,7 @@ void RegisterScriptEventAPI( asIScriptEngine& engine )
 	const asDWORD accessMask = engine.SetDefaultAccessMask( 0xFFFFFFFF );
 
 	RegisterScriptHookReturnCode( engine );
+	RegisterScriptCBaseEvent( engine );
 	RegisterScriptCEvent( engine );
 	RegisterScriptCEventManager( engine );
 

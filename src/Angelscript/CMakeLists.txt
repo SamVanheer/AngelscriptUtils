@@ -1,4 +1,8 @@
 add_sources(
+	CASEvent.h
+	CASEvent.cpp
+	CASEventManager.h
+	CASEventManager.cpp
 	CASManager.h
 	CASManager.cpp
 	CASModuleDescriptor.h
@@ -7,10 +11,6 @@ add_sources(
 	CASModule.cpp
 	CASModuleManager.h
 	CASModuleManager.cpp
-	CASHook.h
-	CASHook.cpp
-	CASHookManager.h
-	CASHookManager.cpp
 	IASModuleBuilder.h
 	IASInitializer.h
 )

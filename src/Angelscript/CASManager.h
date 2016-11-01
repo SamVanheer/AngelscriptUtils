@@ -2,7 +2,7 @@
 #define ANGELSCRIPT_CASMANAGER_H
 
 #include "CASModuleManager.h"
-#include "CASHookManager.h"
+#include "CASEventManager.h"
 
 class asIScriptEngine;
 struct asSMessageInfo;
@@ -16,7 +16,7 @@ class IASInitializer;
 */
 
 /**
-*	Manages the Angelscript engine instance, the module and hook managers.
+*	Manages the Angelscript engine instance, the module and event managers.
 *	Multiple instances of this class can exist. In that case, you will have to activate the manager before using it.
 *	Code that accesses the active manager will need it to be activated in order to work properly.
 */
@@ -66,9 +66,9 @@ public:
 	CASModuleManager& GetModuleManager() { return m_ModuleManager; }
 
 	/**
-	*	@return The hook manager.
+	*	@return The event manager.
 	*/
-	CASHookManager& GetHookManager() { return m_HookManager; }
+	CASEventManager& GetEventManager() { return m_EventManager; }
 
 	/**
 	*	Initializes the manager.
@@ -96,7 +96,7 @@ private:
 	asIScriptEngine* m_pScriptEngine = nullptr;
 
 	CASModuleManager m_ModuleManager;
-	CASHookManager m_HookManager;
+	CASEventManager m_EventManager;
 
 private:
 	CASManager( const CASManager& ) = delete;

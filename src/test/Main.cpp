@@ -3,7 +3,7 @@
 #include <angelscript.h>
 
 #include "Angelscript/CASManager.h"
-#include "Angelscript/CASHook.h"
+#include "Angelscript/CASEvent.h"
 #include "Angelscript/CASModule.h"
 #include "Angelscript/IASInitializer.h"
 #include "Angelscript/IASModuleBuilder.h"
@@ -75,11 +75,11 @@ int NSTest()
 }
 
 /*
-*	A hook to test out the hook system.
+*	An event to test out the event system.
 *	Stops as soon as it's handled.
-*	Can be hooked by calling g_Hooks.HookFunction( Hooks::Main, @MainHook( ... ) );
+*	Can be hooked by calling g_EventManager.HookFunction( Events::Main, @MainHook( ... ) );
 */
-CASHook hook( "Main", "const string& in", "", ModuleAccessMask::ALL, HookStopMode::ON_HANDLED );
+CASEvent event( "Main", "const string& in", "", ModuleAccessMask::ALL, EventStopMode::ON_HANDLED );
 
 class CASTestInitializer : public IASInitializer
 {
@@ -98,10 +98,10 @@ public:
 		return true;
 	}
 
-	bool AddHooks( CASManager& manager, CASHookManager& hookManager ) override
+	bool AddEvents( CASManager& manager, CASEventManager& eventManager ) override
 	{
-		//Add a hook. Scripts will be able to hook these, when it's invoked by C++ code all hooked functions are called.
-		hookManager.AddHook( &hook );
+		//Add an event. Scripts will be able to hook these, when it's invoked by C++ code all hooked functions are called.
+		eventManager.AddEvent( &event );
 
 		return true;
 	}
@@ -219,15 +219,15 @@ int main( int iArgc, char* pszArgV[] )
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "main" ) )
 			{
 				//Add main as a hook.
-				hook.AddFunction( pFunction );
+				event.AddFunction( pFunction );
 
 				std::string szString = "Hello World!\n";
 
 				//Note: main takes a const string& in, so pass the address here. References are handled as pointers.
 				as::Call( pFunction, &szString );
 
-				//Call the hook.
-				hook.Call( CallFlag::NONE, &szString );
+				//Trigger the event.
+				event.Call( CallFlag::NONE, &szString );
 			}
 
 			//Test the object pointer.

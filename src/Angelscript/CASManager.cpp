@@ -36,7 +36,7 @@ void CASManager::Deactivate()
 
 CASManager::CASManager()
 	: m_ModuleManager( *this )
-	, m_HookManager( *this )
+	, m_EventManager( *this )
 {
 }
 
@@ -77,11 +77,11 @@ bool CASManager::Initialize( IASInitializer& initializer )
 	if( !initializer.RegisterCoreAPI( *this ) )
 		return false;
 
-	if( !initializer.AddHooks( *this, m_HookManager ) )
+	if( !initializer.AddEvents( *this, m_EventManager ) )
 		return false;
 
-	//Registers all hooks. One-time event that happens on startup.
-	m_HookManager.RegisterHooks( *GetEngine() );
+	//Registers all events. One-time event that happens on startup.
+	m_EventManager.RegisterEvents( *GetEngine() );
 
 	if( !initializer.RegisterAPI( *this ) )
 		return false;
@@ -99,7 +99,7 @@ void CASManager::Shutdown()
 	Activate();
 
 	//Unhook all functions to prevent dangling pointers.
-	m_HookManager.UnhookAllFunctions();
+	m_EventManager.UnhookAllFunctions();
 
 	//Clear all modules and destroy all descriptors.
 	m_ModuleManager.Clear();

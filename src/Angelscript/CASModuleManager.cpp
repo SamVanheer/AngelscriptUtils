@@ -253,7 +253,7 @@ void CASModuleManager::RemoveModule( CASModule* pModule )
 		return;
 
 	//Unhook the functions that the module registered.
-	m_Manager.GetHookManager().UnhookModuleFunctions( pModule );
+	m_Manager.GetEventManager().UnhookModuleFunctions( pModule );
 
 	( *it )->Discard();
 	( *it )->Release();

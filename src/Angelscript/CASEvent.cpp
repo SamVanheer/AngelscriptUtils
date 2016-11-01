@@ -5,9 +5,9 @@
 
 #include "CASModule.h"
 
-#include "CASHook.h"
+#include "CASEvent.h"
 
-CASHook::CASHook( const char* const pszName, const char* pszArguments, const char* const pszCategory, const asDWORD accessMask, const HookStopMode stopMode )
+CASEvent::CASEvent( const char* const pszName, const char* pszArguments, const char* const pszCategory, const asDWORD accessMask, const EventStopMode stopMode )
 	: m_pszName( pszName )
 	, m_pszArguments( pszArguments )
 	, m_pszCategory( pszCategory )
@@ -20,23 +20,23 @@ CASHook::CASHook( const char* const pszName, const char* pszArguments, const cha
 	assert( accessMask != 0 );
 }
 
-size_t CASHook::GetFunctionCount() const
+size_t CASEvent::GetFunctionCount() const
 {
 	return m_Functions.size();
 }
 
-asIScriptFunction* CASHook::GetFunctionByIndex( const size_t uiIndex ) const
+asIScriptFunction* CASEvent::GetFunctionByIndex( const size_t uiIndex ) const
 {
 	assert( uiIndex < m_Functions.size() );
 
 	return m_Functions[ uiIndex ];
 }
 
-bool CASHook::AddFunction( asIScriptFunction* pFunction )
+bool CASEvent::AddFunction( asIScriptFunction* pFunction )
 {
 	assert( pFunction );
 
-	//Don't add functions while this hook is being invoked.
+	//Don't add functions while this event is being invoked.
 	if( m_iInCallCount != 0 )
 	{
 		//TODO: log error
@@ -64,9 +64,9 @@ bool CASHook::AddFunction( asIScriptFunction* pFunction )
 	return true;
 }
 
-void CASHook::RemoveFunction( asIScriptFunction* pFunction )
+void CASEvent::RemoveFunction( asIScriptFunction* pFunction )
 {
-	//Don't remove functions while this hook is being invoked.
+	//Don't remove functions while this event is being invoked.
 	if( m_iInCallCount != 0 )
 	{
 		//TODO: log error
@@ -86,14 +86,14 @@ void CASHook::RemoveFunction( asIScriptFunction* pFunction )
 	m_Functions.erase( it );
 }
 
-void CASHook::RemoveFunctionsOfModule( CASModule* pModule )
+void CASEvent::RemoveFunctionsOfModule( CASModule* pModule )
 {
 	assert( pModule );
 
-	//This method should never be called while in a hook invocation.
+	//This method should never be called while in a event invocation.
 	if( m_iInCallCount != 0 )
 	{
-		assert( !"CASHook::RemoveFunctionsOfModule: Module hooks should not be removed while invoking hooks!" );
+		assert( !"CASEvent::RemoveFunctionsOfModule: Module hooks should not be removed while invoking events!" );
 		//TODO: log error
 		return;
 	}
@@ -115,12 +115,12 @@ void CASHook::RemoveFunctionsOfModule( CASModule* pModule )
 	m_Functions.erase( it, m_Functions.end() );
 }
 
-void CASHook::RemoveAllFunctions()
+void CASEvent::RemoveAllFunctions()
 {
-	//This method should never be called while in a hook invocation.
+	//This method should never be called while in a event invocation.
 	if( m_iInCallCount != 0 )
 	{
-		assert( !"CASHook::RemoveAllFunctions: Hooks should not be removed while invoking hooks!" );
+		assert( !"CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!" );
 		//TODO: log error
 		return;
 	}
@@ -136,7 +136,7 @@ void CASHook::RemoveAllFunctions()
 	m_Functions.clear();
 }
 
-HookCallResult CASHook::VCall( asIScriptContext* pContext, CallFlags_t flags, va_list list )
+HookCallResult CASEvent::VCall( asIScriptContext* pContext, CallFlags_t flags, va_list list )
 {
 	assert( pContext );
 
@@ -155,7 +155,7 @@ HookCallResult CASHook::VCall( asIScriptContext* pContext, CallFlags_t flags, va
 
 	for( auto pFunc : m_Functions )
 	{
-		if( m_StopMode == HookStopMode::MODULE_HANDLED && returnCode == HookReturnCode::HANDLED )
+		if( m_StopMode == EventStopMode::MODULE_HANDLED && returnCode == HookReturnCode::HANDLED )
 		{
 			//A hook in the last module handled it, so stop.
 			if( pLastModule && pLastModule != pFunc->GetModule() )
@@ -178,7 +178,7 @@ HookCallResult CASHook::VCall( asIScriptContext* pContext, CallFlags_t flags, va
 
 		if( returnCode == HookReturnCode::HANDLED )
 		{
-			if( m_StopMode == HookStopMode::ON_HANDLED )
+			if( m_StopMode == EventStopMode::ON_HANDLED )
 				break;
 		}
 	}
@@ -193,12 +193,12 @@ HookCallResult CASHook::VCall( asIScriptContext* pContext, CallFlags_t flags, va
 	return returnCode == HookReturnCode::HANDLED ? HookCallResult::HANDLED : HookCallResult::NONE_HANDLED;
 }
 
-HookCallResult CASHook::VCall( asIScriptContext* pContext, va_list list )
+HookCallResult CASEvent::VCall( asIScriptContext* pContext, va_list list )
 {
 	return VCall( pContext, CallFlag::NONE, list );
 }
 
-HookCallResult CASHook::VCall( CallFlags_t flags, va_list list )
+HookCallResult CASEvent::VCall( CallFlags_t flags, va_list list )
 {
 	if( m_Functions.empty() )
 		return HookCallResult::NONE_HANDLED;
@@ -213,7 +213,7 @@ HookCallResult CASHook::VCall( CallFlags_t flags, va_list list )
 	return success;
 }
 
-HookCallResult CASHook::Call( asIScriptContext* pContext, CallFlags_t flags, ... )
+HookCallResult CASEvent::Call( asIScriptContext* pContext, CallFlags_t flags, ... )
 {
 	va_list list;
 
@@ -226,7 +226,7 @@ HookCallResult CASHook::Call( asIScriptContext* pContext, CallFlags_t flags, ...
 	return success;
 }
 
-HookCallResult CASHook::Call( asIScriptContext* pContext, ... )
+HookCallResult CASEvent::Call( asIScriptContext* pContext, ... )
 {
 	va_list list;
 
@@ -239,7 +239,7 @@ HookCallResult CASHook::Call( asIScriptContext* pContext, ... )
 	return success;
 }
 
-HookCallResult CASHook::Call( CallFlags_t flags, ... )
+HookCallResult CASEvent::Call( CallFlags_t flags, ... )
 {
 	va_list list;
 

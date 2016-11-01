@@ -42,7 +42,7 @@ const DescriptorID_t LAST_DESCRIPTOR_ID = std::numeric_limits<DescriptorID_t>::m
 }
 
 /**
-*	Describes a module. This includes its name, access mask, and priority in hook/function call execution.
+*	Describes a module. This includes its name, access mask, and priority in event/function call execution.
 */
 class CASModuleDescriptor final
 {
@@ -51,7 +51,7 @@ public:
 	*	Constructor.
 	*	@param pszName Name of the module descriptor.
 	*	@param accessMask Access mask.
-	*	@param priority Hook/function call execution priority.
+	*	@param priority Event/function call execution priority.
 	*	@param descriptorID ID assigned to this descriptor.
 	*/
 	CASModuleDescriptor( const char* const pszName, const asDWORD accessMask, const as::ModulePriority_t priority, const as::DescriptorID_t descriptorID );

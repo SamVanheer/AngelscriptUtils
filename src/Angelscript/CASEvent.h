@@ -1,5 +1,5 @@
-#ifndef ANGELSCRIPT_CASHOOK_H
-#define ANGELSCRIPT_CASHOOK_H
+#ifndef ANGELSCRIPT_CASEVENT_H
+#define ANGELSCRIPT_CASEVENT_H
 
 #include <cstdarg>
 #include <cstdint>
@@ -13,15 +13,15 @@
 class CASModule;
 
 /**
-*	@defgroup ASHooks Angelscript Hooks
+*	@defgroup ASEvents Angelscript Events
 *
 *	@{
 */
 
 /**
-*	Stop modes for hooks. Allows you to specify whether hooks should continue executing after a function has handled it.
+*	Stop modes for events. Allows you to specify whether events should continue executing after a function has handled it.
 */
-enum class HookStopMode
+enum class EventStopMode
 {
 	/**
 	*	Call all functions no matter what.
@@ -29,7 +29,7 @@ enum class HookStopMode
 	CALL_ALL,
 
 	/**
-	*	If any function in a module has handled the hook, stop after executing the last function in that module.
+	*	If any function in a module has handled the event, stop after executing the last function in that module.
 	*/
 	MODULE_HANDLED,
 
@@ -40,7 +40,7 @@ enum class HookStopMode
 };
 
 /**
-*	Return codes for functions that hook into a hook.
+*	Return codes for functions that hook into an event.
 */
 enum class HookReturnCode
 {
@@ -50,7 +50,7 @@ enum class HookReturnCode
 	CONTINUE,
 
 	/**
-	*	The function handled the hook, stop.
+	*	The function handled the event, stop.
 	*/
 	HANDLED
 };
@@ -79,30 +79,30 @@ enum class HookCallResult
 namespace as
 {
 /**
-*	Type used for hook IDs.
+*	Type used for event IDs.
 */
-typedef uint32_t HookID_t;
+typedef uint32_t EventID_t;
 
 /**
-*	Invalid hook identifier.
+*	Invalid event identifier.
 */
-const HookID_t INVALID_HOOK_ID = 0;
+const EventID_t INVALID_EVENT_ID = 0;
 
 /**
-*	First valid hook ID.
+*	First valid event ID.
 */
-const HookID_t FIRST_HOOK_ID = 1;
+const EventID_t FIRST_EVENT_ID = 1;
 
 /**
-*	Last valid hook ID.
+*	Last valid event ID.
 */
-const HookID_t LAST_HOOK_ID = std::numeric_limits<HookID_t>::max();
+const EventID_t LAST_EVENT_ID = std::numeric_limits<EventID_t>::max();
 }
 
 /**
 *	Represents an event that script functions can hook into.
 */
-class CASHook final
+class CASEvent final
 {
 private:
 	typedef std::vector<asIScriptFunction*> Functions_t;
@@ -110,14 +110,14 @@ private:
 public:
 	/**
 	*	Constructor.
-	*	@param pszName Name of this hook.
+	*	@param pszName Name of this event.
 	*	@param pszArguments The arguments passed to hooked functions. This is a comma delimited list of argument types, e.g. "const string& in, bool& out".
 	*	@param pszCategory Which category this hook is in. This is a double colon delimited list, e.g. "Game::Player".
 	*	@param accessMask Access mask. Which module types this hook is available to.
 	*	@param stopMode Stop mode.
-	*	@see HookStopMode
+	*	@see EventStopMode
 	*/
-	CASHook( const char* const pszName, const char* pszArguments, const char* const pszCategory, const asDWORD accessMask, const HookStopMode stopMode );
+	CASEvent( const char* const pszName, const char* pszArguments, const char* const pszCategory, const asDWORD accessMask, const EventStopMode stopMode );
 
 	/**
 	*	@return Hook name.
@@ -142,34 +142,34 @@ public:
 	/**
 	*	@return Stop mode.
 	*/
-	HookStopMode GetStopMode() const { return m_StopMode; }
+	EventStopMode GetStopMode() const { return m_StopMode; }
 
 	/**
-	*	@return Hook ID.
+	*	@return Event ID.
 	*/
-	as::HookID_t GetHookID() const { return m_HookID; }
+	as::EventID_t GetEventID() const { return m_EventID; }
 
 	/**
-	*	@return Mutable hook ID. Only used by the hook manager.
+	*	@return Mutable Event ID. Only used by the event manager.
 	*/
-	as::HookID_t& GetMutableHookID() { return m_HookID; }
+	as::EventID_t& GetMutableEventID() { return m_EventID; }
 
 	/**
-	*	Sets the hook ID. Only used by the hook manager.
-	*	@param hookID Hook ID.
+	*	Sets the event ID. Only used by the event manager.
+	*	@param eventID Event ID.
 	*/
-	void SetHookID( const as::HookID_t hookID )
+	void SetEventID( const as::EventID_t eventID )
 	{
-		m_HookID = hookID;
+		m_EventID = eventID;
 	}
 
 	/**
-	*	@return The funcdef that represents this hook.
+	*	@return The funcdef that represents this event.
 	*/
 	asIScriptFunction* GetFuncDef() const { return m_pFuncDef; }
 
 	/**
-	*	Sets the funcdef that represents this hook.
+	*	Sets the funcdef that represents this event.
 	*	@param pFuncDef Funcdef.
 	*/
 	void SetFuncDef( asIScriptFunction* pFuncDef )
@@ -190,15 +190,15 @@ public:
 	asIScriptFunction* GetFunctionByIndex( const size_t uiIndex ) const;
 
 	/**
-	*	Adds a new function. Cannot be called while this hook is being called.
-	*	Warning: if the function does not match the hook parameters and return type, this will cause problems.
+	*	Adds a new function. Cannot be called while this event is being called.
+	*	Warning: if the function does not match the event parameters and return type, this will cause problems.
 	*	@param pFunction Function to add.
 	*	@return true if the function was either added or already added before, false otherwise.
 	*/
 	bool AddFunction( asIScriptFunction* pFunction );
 
 	/**
-	*	Removes a function. Cannot be called while this hook is being called.
+	*	Removes a function. Cannot be called while this event is being called.
 	*	@param pFunction Function to remove.
 	*/
 	void RemoveFunction( asIScriptFunction* pFunction );
@@ -256,9 +256,9 @@ private:
 	const char* const m_pszArguments;
 	const char* const m_pszCategory;
 	const asDWORD m_AccessMask;
-	const HookStopMode m_StopMode;
+	const EventStopMode m_StopMode;
 
-	as::HookID_t m_HookID = as::INVALID_HOOK_ID;
+	as::EventID_t m_EventID = as::INVALID_EVENT_ID;
 
 	asIScriptFunction* m_pFuncDef = nullptr;
 
@@ -268,10 +268,10 @@ private:
 	int m_iInCallCount = 0;
 
 private:
-	CASHook( const CASHook& ) = delete;
-	CASHook& operator=( const CASHook& ) = delete;
+	CASEvent( const CASEvent& ) = delete;
+	CASEvent& operator=( const CASEvent& ) = delete;
 };
 
 /** @} */
 
-#endif //ANGELSCRIPT_CASHOOK_H
+#endif //ANGELSCRIPT_CASEVENT_H

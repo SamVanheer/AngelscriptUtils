@@ -118,8 +118,8 @@ int main( const string& in szString )
 	Print( "foo\nbar\n" );
 	Print( szString );
 	
-	g_HookManager.HookFunction( Hooks::Main, MainFunc );
-	g_HookManager.HookFunction( Hooks::Main, @MainHook( Foo().Func ) );
+	g_EventManager.HookFunction( Events::Main, MainFunc );
+	g_EventManager.HookFunction( Events::Main, @MainHook( Foo().Func ) );
 	
 	dictionary foo;
 	

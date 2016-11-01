@@ -10,7 +10,7 @@
 */
 
 class CASManager;
-class CASHookManager;
+class CASEventManager;
 
 /**
 *	Used by the manager to initialize itself.
@@ -40,12 +40,12 @@ public:
 	virtual bool RegisterCoreAPI( CASManager& manager ) = 0;
 
 	/**
-	*	Should register hooks.
+	*	Should register events.
 	*	@param manager Manager.
-	*	@param hookManager Hook manager.
+	*	@param eventManager Event manager.
 	*	@return true on success, false otherwise.
 	*/
-	virtual bool AddHooks( CASManager& manager, CASHookManager& hookManager ) { return true; }
+	virtual bool AddEvents( CASManager& manager, CASEventManager& eventManager ) { return true; }
 
 	/**
 	*	Should register the remainder of the API.

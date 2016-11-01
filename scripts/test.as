@@ -118,8 +118,12 @@ int main( const string& in szString )
 	Print( "foo\nbar\n" );
 	Print( szString );
 	
-	g_EventManager.HookFunction( Events::Main, MainFunc );
-	g_EventManager.HookFunction( Events::Main, @MainHook( Foo().Func ) );
+	Events::Main.Hook( MainFunc );
+	Events::Main.Hook( @MainHook( Foo().Func ) );
+	
+	CEvent@ pEvent = g_EventManager.FindEventByName( "Main" );
+	
+	Print( "Event was found: " + ( pEvent !is null ? "yes" : "no" ) + "\n" );
 	
 	dictionary foo;
 	

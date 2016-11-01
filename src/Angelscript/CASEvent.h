@@ -3,7 +3,6 @@
 
 #include <cstdarg>
 #include <cstdint>
-#include <limits>
 #include <vector>
 
 #include <angelscript.h>
@@ -76,29 +75,6 @@ enum class HookCallResult
 	HANDLED
 };
 
-namespace as
-{
-/**
-*	Type used for event IDs.
-*/
-typedef uint32_t EventID_t;
-
-/**
-*	Invalid event identifier.
-*/
-const EventID_t INVALID_EVENT_ID = 0;
-
-/**
-*	First valid event ID.
-*/
-const EventID_t FIRST_EVENT_ID = 1;
-
-/**
-*	Last valid event ID.
-*/
-const EventID_t LAST_EVENT_ID = std::numeric_limits<EventID_t>::max();
-}
-
 /**
 *	Represents an event that script functions can hook into.
 */
@@ -145,25 +121,6 @@ public:
 	EventStopMode GetStopMode() const { return m_StopMode; }
 
 	/**
-	*	@return Event ID.
-	*/
-	as::EventID_t GetEventID() const { return m_EventID; }
-
-	/**
-	*	@return Mutable Event ID. Only used by the event manager.
-	*/
-	as::EventID_t& GetMutableEventID() { return m_EventID; }
-
-	/**
-	*	Sets the event ID. Only used by the event manager.
-	*	@param eventID Event ID.
-	*/
-	void SetEventID( const as::EventID_t eventID )
-	{
-		m_EventID = eventID;
-	}
-
-	/**
 	*	@return The funcdef that represents this event.
 	*/
 	asIScriptFunction* GetFuncDef() const { return m_pFuncDef; }
@@ -198,10 +155,27 @@ public:
 	bool AddFunction( asIScriptFunction* pFunction );
 
 	/**
+	*	Hooks a function to an event.
+	*	Used by scripts only.
+	*	@param pValue Function pointer.
+	*	@param iTypeId Function pointer type id.
+	*	@return true on success, false otherwise.
+	*/
+	bool Hook( void* pValue, const int iTypeId );
+
+	/**
 	*	Removes a function. Cannot be called while this event is being called.
 	*	@param pFunction Function to remove.
 	*/
 	void RemoveFunction( asIScriptFunction* pFunction );
+
+	/**
+	*	Unhooks a function from an event.
+	*	Used by scripts only.
+	*	@param pValue Function pointer.
+	*	@param iTypeId Function pointer type id.
+	*/
+	void Unhook( void* pValue, const int iTypeId );
 
 	/**
 	*	Removes all of the functions that belong to the given module.
@@ -213,6 +187,13 @@ public:
 	*/
 	void RemoveAllFunctions();
 
+private:
+	/**
+	*	Validates the given hook function.
+	*/
+	bool ValidateHookFunction( const int iTypeId, void* pObject, const char* const pszScope, asIScriptFunction*& pOutFunction ) const;
+
+public:
 	/**
 	*	Calls the given function using the given context.
 	*	@param pContext Context to use.
@@ -251,14 +232,17 @@ public:
 	*/
 	HookCallResult Call( CallFlags_t flags, ... );
 
+	/**
+	*	Dumps all hooked functions to stdout.
+	*/
+	void DumpHookedFunctions() const;
+
 private:
 	const char* const m_pszName;
 	const char* const m_pszArguments;
 	const char* const m_pszCategory;
 	const asDWORD m_AccessMask;
 	const EventStopMode m_StopMode;
-
-	as::EventID_t m_EventID = as::INVALID_EVENT_ID;
 
 	asIScriptFunction* m_pFuncDef = nullptr;
 
@@ -271,6 +255,12 @@ private:
 	CASEvent( const CASEvent& ) = delete;
 	CASEvent& operator=( const CASEvent& ) = delete;
 };
+
+/**
+*	Registers the CASEvent class.
+*	@param engine Script engine.
+*/
+void RegisterScriptCEvent( asIScriptEngine& engine );
 
 /** @} */
 

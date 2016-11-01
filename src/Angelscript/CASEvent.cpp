@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 
 #include "wrapper/CASContext.h"
 
@@ -64,6 +65,23 @@ bool CASEvent::AddFunction( asIScriptFunction* pFunction )
 	return true;
 }
 
+bool CASEvent::Hook( void* pValue, const int iTypeId )
+{
+	assert( pValue );
+
+	if( !pValue )
+		return false;
+
+	asIScriptFunction* pFunction = nullptr;
+
+	if( !ValidateHookFunction( iTypeId, pValue, "HookFunction", pFunction ) )
+	{
+		return false;
+	}
+
+	return AddFunction( pFunction );
+}
+
 void CASEvent::RemoveFunction( asIScriptFunction* pFunction )
 {
 	//Don't remove functions while this event is being invoked.
@@ -86,11 +104,28 @@ void CASEvent::RemoveFunction( asIScriptFunction* pFunction )
 	m_Functions.erase( it );
 }
 
+void CASEvent::Unhook(void* pValue, const int iTypeId )
+{
+	assert( pValue );
+
+	if( !pValue )
+		return;
+
+	asIScriptFunction* pFunction = nullptr;
+
+	if( !ValidateHookFunction( iTypeId, pValue, "UnhookFunction", pFunction ) )
+	{
+		return;
+	}
+
+	RemoveFunction( pFunction );
+}
+
 void CASEvent::RemoveFunctionsOfModule( CASModule* pModule )
 {
 	assert( pModule );
 
-	//This method should never be called while in a event invocation.
+	//This method should never be called while in an event invocation.
 	if( m_iInCallCount != 0 )
 	{
 		assert( !"CASEvent::RemoveFunctionsOfModule: Module hooks should not be removed while invoking events!" );
@@ -117,7 +152,7 @@ void CASEvent::RemoveFunctionsOfModule( CASModule* pModule )
 
 void CASEvent::RemoveAllFunctions()
 {
-	//This method should never be called while in a event invocation.
+	//This method should never be called while in an event invocation.
 	if( m_iInCallCount != 0 )
 	{
 		assert( !"CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!" );
@@ -134,6 +169,89 @@ void CASEvent::RemoveAllFunctions()
 	}
 
 	m_Functions.clear();
+}
+
+bool CASEvent::ValidateHookFunction( const int iTypeId, void* pObject, const char* const pszScope, asIScriptFunction*& pOutFunction ) const
+{
+	auto pEngine = asGetActiveContext()->GetEngine();
+
+	pOutFunction = nullptr;
+
+	asITypeInfo* pObjectType = pEngine->GetTypeInfoById( iTypeId );
+
+	if( !pObjectType )
+	{
+		//TODO
+		//gASLog()->Error( ASLOG_CRITICAL, "CASEventManager::%s: unknown type!\n", pszScope );
+		return false;
+	}
+
+	if( !( pObjectType->GetFlags() & asOBJ_FUNCDEF ) )
+	{
+		//TODO
+		//gASLog()->Error( ASLOG_CRITICAL, "CASEventManager::%s: Object is not a function or delegate!\n", pszScope );
+		return false;
+	}
+
+	if( !pObject )
+	{
+		//TODO
+		//gASLog()->Error( ASLOG_CRITICAL, "CASEventManager::%s: Object is null!\n", pszScope );
+		return false;
+	}
+
+	//pObjectType->GetTypeId() is -1 for some reason
+	if( iTypeId & asTYPEID_OBJHANDLE )
+	{
+		pObject = *reinterpret_cast<void**>( pObject );
+	}
+
+	if( !pObject )
+	{
+		//TODO
+		//gASLog()->Error( ASLOG_CRITICAL, "CASEventManager::%s: Object is null!\n", pszScope );
+		return false;
+	}
+
+	asIScriptFunction* pFunction = reinterpret_cast<asIScriptFunction*>( pObject );
+
+	if( !pFunction )
+	{
+		//TODO
+		//gASLog()->Error( ASLOG_CRITICAL, "CASEventManager::%s: Null function passed!\n", pszScope );
+		return false;
+	}
+
+	asIScriptFunction* const pFuncDef = GetFuncDef();
+
+	//Verify the function format
+	if( !pFuncDef->IsCompatibleWithTypeId( pFunction->GetTypeId() ) )
+	{
+		if( asIScriptFunction* pDelegate = pFunction->GetDelegateFunction() )
+		{
+			asITypeInfo* pDelegateTypeInfo = pFunction->GetDelegateObjectType();
+
+			//TODO
+			/*
+			gASLog()->Error( ASLOG_CRITICAL, "CASEventManager::%s: Method '%s::%s::%s' is incompatible with event '%s'!\n",
+			pszScope, pDelegateObjectType->GetNamespace(), pDelegateObjectType->GetName(), pDelegate->GetName(), pFuncDef->GetName() );
+			*/
+		}
+		else
+		{
+			//TODO
+			/*
+			gASLog()->Error( ASLOG_CRITICAL, "CASEventManager::%s: Function '%s::%s' is incompatible with event '%s'!\n",
+			pszScope, pFunction->GetNamespace(), pFunction->GetName(), pFuncDef->GetName() );
+			*/
+		}
+
+		return false;
+	}
+
+	pOutFunction = pFunction;
+
+	return true;
 }
 
 HookCallResult CASEvent::VCall( asIScriptContext* pContext, CallFlags_t flags, va_list list )
@@ -250,4 +368,60 @@ HookCallResult CASEvent::Call( CallFlags_t flags, ... )
 	va_end( list );
 
 	return success;
+}
+
+void CASEvent::DumpHookedFunctions() const
+{
+	std::cout << "Event \"" << GetCategory() << "::" << GetName() << "(" << GetArguments() << ")\"" << std::endl;
+
+	for( size_t uiIndex = 0; uiIndex < GetFunctionCount(); ++uiIndex )
+	{
+		auto pFunc = GetFunctionByIndex( uiIndex );
+
+		auto pModule = pFunc->GetModule();
+
+		decltype( pFunc ) pActualFunc = pFunc;
+
+		if( !pModule )
+		{
+			auto pDelegate = pFunc->GetDelegateFunction();
+
+			if( pDelegate )
+			{
+				pActualFunc = pDelegate;
+				pModule = pDelegate->GetModule();
+			}
+		}
+
+		if( !pActualFunc )
+		{
+			std::cout << "Null function!" << std::endl;
+		}
+
+		if( !pModule )
+		{
+			std::cout << "Null module!" << std::endl;
+			continue;
+		}
+
+		std::cout << "Module \"" << pModule->GetName() << "\", \"" << pActualFunc->GetNamespace() << "::" << pActualFunc->GetName() << "\"" << std::endl;
+	}
+
+	std::cout << "End functions" << std::endl;
+}
+
+void RegisterScriptCEvent( asIScriptEngine& engine )
+{
+	const char* const pszObjectName = "CEvent";
+
+	engine.RegisterObjectType(
+		pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT );
+
+	engine.RegisterObjectMethod(
+		pszObjectName, "bool Hook(?& in pFunction)",
+		asMETHOD( CASEvent, Hook ), asCALL_THISCALL );
+
+	engine.RegisterObjectMethod(
+		pszObjectName, "void Unhook(?& in pFunction)",
+		asMETHOD( CASEvent, Unhook ), asCALL_THISCALL );
 }

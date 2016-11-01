@@ -77,7 +77,7 @@ int NSTest()
 /*
 *	An event to test out the event system.
 *	Stops as soon as it's handled.
-*	Can be hooked by calling g_EventManager.HookFunction( Events::Main, @MainHook( ... ) );
+*	Can be hooked by calling Events::Main.Hook( @MainHook( ... ) );
 */
 CASEvent event( "Main", "const string& in", "", ModuleAccessMask::ALL, EventStopMode::ON_HANDLED );
 
@@ -92,6 +92,8 @@ public:
 		RegisterScriptAny( manager.GetEngine() );
 		RegisterScriptScheduler( manager.GetEngine() );
 		RegisterScriptReflection( *manager.GetEngine() );
+
+		RegisterScriptEventAPI( *manager.GetEngine() );
 
 		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
 

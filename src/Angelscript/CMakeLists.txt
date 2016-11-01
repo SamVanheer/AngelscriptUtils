@@ -18,12 +18,13 @@ add_sources(
 )
 
 add_includes(
+	CASBaseEvent.h
+	CASEvent.h
+	CASEventManager.h
 	CASManager.h
 	CASModuleDescriptor.h
 	CASModule.h
 	CASModuleManager.h
-	CASHook.h
-	CASHookManager.h
 	IASModuleBuilder.h
 	IASInitializer.h
 )

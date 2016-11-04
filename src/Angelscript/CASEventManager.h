@@ -39,7 +39,7 @@ public:
 
 	/**
 	*	Finds an event by its name. The given name must specify its category if it has one.
-	*	Format: <Category>::<Name>
+	*	Format: \<Category\>::\<Name\>
 	*	May optionally specify Events:: as the start of the category.
 	*	@return If found, the event. Otherwise, null.
 	*/

@@ -81,8 +81,11 @@ CLASS* CreateExtensionClassInstance(
 
 /**
 *	Creates an instance of an extension class.
+*	@param engine Script engine.
 *	@param module Script module that contains the class.
 *	@param pszClassName Name of the script class to instantiate.
+*	@param pszCPPClassName
+*	@param pszCPPBaseClassName
 *	@see CreateExtensionClassInstance( asIScriptEngine& engine, asITypeInfo& typeInfo, const char* const pszCPPClassName, const char* const pszCPPBaseClassName )
 */
 template<typename CLASS>

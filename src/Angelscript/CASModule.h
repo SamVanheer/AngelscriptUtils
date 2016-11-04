@@ -32,6 +32,7 @@ public:
 	*	Constructor.
 	*	@param pModule Script module.
 	*	@param descriptor Descriptor for this module.
+	*	@param pUserData Optional. User data to associate with this module.
 	*/
 	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, void* pUserData = nullptr );
 

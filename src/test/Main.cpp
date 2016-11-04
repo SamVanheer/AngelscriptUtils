@@ -185,6 +185,25 @@ private:
 	std::string m_szDecl;
 };
 
+class CASModuleUserData : public IASModuleUserData
+{
+public:
+	CASModuleUserData()
+	{
+		std::cout << "Creating user data" << std::endl;
+	}
+
+	~CASModuleUserData()
+	{
+		std::cout << "Destroying user data" << std::endl;
+	}
+
+	void Release() const override
+	{
+		delete this;
+	}
+};
+
 int main( int iArgc, char* pszArgV[] )
 {
 	std::cout << "Hello World!" << std::endl;
@@ -213,7 +232,7 @@ int main( int iArgc, char* pszArgV[] )
 		//Make a map script.
 		CASTestModuleBuilder builder( szDecl );
 
-		auto pModule = manager.GetModuleManager().BuildModule( "MapScript", "MapModule", builder );
+		auto pModule = manager.GetModuleManager().BuildModule( "MapScript", "MapModule", builder, new CASModuleUserData() );
 
 		if( pModule )
 		{

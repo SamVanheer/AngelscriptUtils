@@ -17,6 +17,24 @@ class CASScheduler;
 */
 
 /**
+*	Interface that user data assigned to modules must implement.
+*/
+class IASModuleUserData
+{
+public:
+	virtual ~IASModuleUserData();
+
+	/**
+	*	Called by the module when user data is being released. The module no longer references this user data after this call.
+	*/
+	virtual void Release() const = 0;
+};
+
+inline IASModuleUserData::~IASModuleUserData()
+{
+}
+
+/**
 *	The user data ID for the CASModule instance in asIScriptModule.
 */
 #define CASMODULE_USER_DATA_ID 10001
@@ -34,7 +52,7 @@ public:
 	*	@param descriptor Descriptor for this module.
 	*	@param pUserData Optional. User data to associate with this module.
 	*/
-	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, void* pUserData = nullptr );
+	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, IASModuleUserData* pUserData = nullptr );
 
 	/**
 	*	Destructor.
@@ -71,13 +89,16 @@ public:
 	/**
 	*	@return User data associated with this module.
 	*/
-	void* GetUserData() { return m_pUserData; }
+	IASModuleUserData* GetUserData() { return m_pUserData; }
 
 	/**
 	*	Sets the user data associated with this module.
 	*/
-	void SetUserData( void* pUserData )
+	void SetUserData( IASModuleUserData* pUserData )
 	{
+		if( m_pUserData )
+			m_pUserData->Release();
+
 		m_pUserData = pUserData;
 	}
 
@@ -88,7 +109,7 @@ private:
 
 	CASScheduler* m_pScheduler;
 
-	void* m_pUserData = nullptr;
+	IASModuleUserData* m_pUserData = nullptr;
 
 private:
 	CASModule( const CASModule& ) = delete;

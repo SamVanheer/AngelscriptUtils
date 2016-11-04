@@ -6,7 +6,7 @@
 
 #include "CASModule.h"
 
-CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, void* pUserData )
+CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, IASModuleUserData* pUserData )
 	: m_pModule( pModule )
 	, m_pDescriptor( &descriptor )
 	, m_pScheduler( new CASScheduler( *this ) )
@@ -19,6 +19,8 @@ CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descr
 
 CASModule::~CASModule()
 {
+	SetUserData( nullptr );
+
 	//Discard should've been called first.
 	assert( !m_pModule );
 

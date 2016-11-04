@@ -57,5 +57,8 @@ Temporary Items
 *.opendb
 *.cmake
 
+Doxyfile
+
 bin/*
 bin_*/*
+docs/*

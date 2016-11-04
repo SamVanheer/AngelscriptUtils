@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <limits>
 #include <string>
 
 #include "util/ASUtil.h"
@@ -19,6 +20,14 @@ CASEventManager::CASEventManager( CASManager& manager )
 CASEventManager::~CASEventManager()
 {
 	UnhookAllFunctions();
+}
+
+CASEvent* CASEventManager::GetEventByIndex( const uint32_t uiIndex )
+{
+	if( uiIndex < GetEventCount() )
+		return m_Events[ uiIndex ];
+
+	return nullptr;
 }
 
 CASEvent* CASEventManager::FindEventByName( const std::string& szName )
@@ -53,6 +62,10 @@ bool CASEventManager::AddEvent( CASEvent* pEvent )
 
 	if( std::find( m_Events.begin(), m_Events.end(), pEvent ) != m_Events.end() )
 		return true;
+
+	//Hit maximum number of events.
+	if( GetEventCount() >= std::numeric_limits<uint32_t>::max() )
+		return false;
 
 	m_Events.push_back( pEvent );
 
@@ -144,6 +157,14 @@ static void RegisterScriptCEventManager( asIScriptEngine& engine )
 	const char* const pszObjectName = "CEventManager";
 
 	engine.RegisterObjectType( pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT );
+
+	engine.RegisterObjectMethod(
+		pszObjectName, "uint32 GetEventCount() const",
+		asMETHOD( CASEventManager, GetEventCount ), asCALL_THISCALL );
+
+	engine.RegisterObjectMethod(
+		pszObjectName, "CEvent@ GetEventByIndex(const uint32 uiIndex)",
+		asMETHOD( CASEventManager, GetEventByIndex ), asCALL_THISCALL );
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "CEvent@ FindEventByName(const string& in szName)",

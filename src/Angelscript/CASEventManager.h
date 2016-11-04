@@ -1,6 +1,7 @@
 #ifndef ANGELSCRIPT_CASEVENTMANAGER_H
 #define ANGELSCRIPT_CASEVENTMANAGER_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,7 @@ class CASModule;
 
 /**
 *	Manages the list of events.
+*	Can store a maximum of UINT32_MAX events.
 */
 class CASEventManager final
 {
@@ -38,6 +40,18 @@ public:
 	~CASEventManager();
 
 	/**
+	*	@return The number of events.
+	*/
+	uint32_t GetEventCount() const { return static_cast<uint32_t>( m_Events.size() ); }
+
+	/**
+	*	Gets an event by index.
+	*	@param uiIndex Event index. Must be smaller than GetEventCount().
+	*	@return If the index is valid, the event. Otherwise, null.
+	*/
+	CASEvent* GetEventByIndex( const uint32_t uiIndex );
+
+	/**
 	*	Finds an event by its name. The given name must specify its category if it has one.
 	*	Format: \<Category\>::\<Name\>
 	*	May optionally specify Events:: as the start of the category.
@@ -53,7 +67,7 @@ public:
 	bool AddEvent( CASEvent* pEvent );
 
 	/**
-	*	Registers required types, this class and all events.
+	*	Registers this class instance and all events.
 	*/
 	void RegisterEvents( asIScriptEngine& engine );
 

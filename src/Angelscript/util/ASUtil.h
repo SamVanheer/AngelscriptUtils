@@ -769,7 +769,7 @@ inline std::string ExtractNameFromName( const std::string& szName )
 /**
 *	Extracts a namespace from a declaration.
 *	Namespaces are denoted by double colons. For example, "void String::Compare(const string& in lhs, const string& in rhs)"
-*	@param szName Name.
+*	@param szDecl Name.
 *	@param bIsFunctionDecl Whether this is a function or a class declaration.
 *	@return If a namespace is contained in the declaration, returns a string containing that namespace. Otherwise, returns an empty string.
 */

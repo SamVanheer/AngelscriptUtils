@@ -27,11 +27,12 @@ add_includes(
 	ASUtil.h
 	ContextUtils.h
 	CASBaseClass.h
+	CASBaseLogger.h
 	CASExtendAdapter.h
-	CASLog.h
+	CASFileLogger.h
 	CASRefPtr.h
 	CASObjPtr.h
 	IASExtendAdapter.h
-	IASLog.h
+	IASLogger.h
 	StringUtils.h
 )

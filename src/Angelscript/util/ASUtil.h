@@ -39,7 +39,7 @@ const char* PrimitiveTypeIdToString( const int iTypeId );
 *	@param iTypeId Type Id.
 *	@return true if it is void, false otherwise.
 */
-inline constexpr bool IsVoid( const int iTypeId )
+inline bool IsVoid( const int iTypeId )
 {
 	return asTYPEID_VOID == iTypeId;
 }
@@ -49,7 +49,7 @@ inline constexpr bool IsVoid( const int iTypeId )
 *	@param iTypeId Type Id.
 *	@return true if it is a primitive type, false otherwise.
 */
-inline constexpr bool IsPrimitive( const int iTypeId )
+inline bool IsPrimitive( const int iTypeId )
 {
 	return asTYPEID_BOOL <= iTypeId && iTypeId <= asTYPEID_DOUBLE;
 }
@@ -59,7 +59,7 @@ inline constexpr bool IsPrimitive( const int iTypeId )
 *	@param iTypeId Type Id.
 *	@return true if it is an enum type, false otherwise.
 */
-inline constexpr bool IsEnum( const int iTypeId )
+inline bool IsEnum( const int iTypeId )
 {
 	return ( iTypeId > asTYPEID_DOUBLE && ( iTypeId & asTYPEID_MASK_OBJECT ) == 0 );
 }
@@ -69,7 +69,7 @@ inline constexpr bool IsEnum( const int iTypeId )
 *	@param iTypeId Type Id.
 *	@return true if it is an integer type, false otherwise.
 */
-inline constexpr bool IsInteger( const int iTypeId )
+inline bool IsInteger( const int iTypeId )
 {
 	return ( ( iTypeId >= asTYPEID_INT8 ) && ( iTypeId <= asTYPEID_UINT64 ) );
 }
@@ -79,7 +79,7 @@ inline constexpr bool IsInteger( const int iTypeId )
 *	@param iTypeId Type Id.
 *	@return true if it is a float type, false otherwise.
 */
-inline constexpr bool IsFloat( const int iTypeId )
+inline bool IsFloat( const int iTypeId )
 {
 	return ( ( iTypeId >= asTYPEID_FLOAT ) && ( iTypeId <= asTYPEID_DOUBLE ) );
 }
@@ -89,7 +89,7 @@ inline constexpr bool IsFloat( const int iTypeId )
 *	@param iTypeId Type Id.
 *	@return true if it is a primitive type, false otherwise.
 */
-inline constexpr bool IsObject( const int iTypeId )
+inline bool IsObject( const int iTypeId )
 {
 	return ( iTypeId & asTYPEID_MASK_OBJECT ) != 0;
 }

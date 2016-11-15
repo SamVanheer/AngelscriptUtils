@@ -3,7 +3,6 @@
 
 #include <cstdint>
 #include <functional>
-#include <limits>
 
 #include <angelscript.h>
 
@@ -25,10 +24,10 @@ namespace ModulePriority
 enum ModulePriority : ModulePriority_t
 {
 	NORMAL	= 0,
-	HIGH	= std::numeric_limits<ModulePriority_t>::max() / 2,
-	HIGHEST = std::numeric_limits<ModulePriority_t>::max(),
-	LOW		= std::numeric_limits<ModulePriority_t>::min() / 2,
-	LOWEST	= std::numeric_limits<ModulePriority_t>::min()
+	HIGH	= INT32_MAX / 2,
+	HIGHEST = INT32_MAX,
+	LOW		= INT_MIN / 2,
+	LOWEST	= INT_MIN
 };
 }
 
@@ -38,7 +37,7 @@ const DescriptorID_t INVALID_DESCRIPTOR_ID = 0;
 
 const DescriptorID_t FIRST_DESCRIPTOR_ID = 1;
 
-const DescriptorID_t LAST_DESCRIPTOR_ID = std::numeric_limits<DescriptorID_t>::max();
+const DescriptorID_t LAST_DESCRIPTOR_ID = UINT32_MAX;
 }
 
 /**
@@ -84,7 +83,7 @@ private:
 *	@param rhs Right hand descriptor.
 *	@return true if they are equal, false otherwise.
 */
-inline constexpr bool operator==( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs )
+inline bool operator==( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs )
 {
 	//Since each descriptor has a unique name, they can only be equal if they are the same object.
 	return &lhs == &rhs;
@@ -96,7 +95,7 @@ inline constexpr bool operator==( const CASModuleDescriptor& lhs, const CASModul
 *	@param rhs Right hand descriptor.
 *	@return true if they are not equal, false otherwise.
 */
-inline constexpr bool operator!=( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs )
+inline bool operator!=( const CASModuleDescriptor& lhs, const CASModuleDescriptor& rhs )
 {
 	return !( lhs == rhs );
 }

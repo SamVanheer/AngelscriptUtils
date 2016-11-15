@@ -77,7 +77,7 @@ bool CASEventManager::AddEvent( CASEvent* pEvent )
 		return true;
 
 	//Hit maximum number of events.
-	if( GetEventCount() >= std::numeric_limits<uint32_t>::max() )
+	if( GetEventCount() >= UINT32_MAX )
 		return false;
 
 	m_Events.push_back( pEvent );

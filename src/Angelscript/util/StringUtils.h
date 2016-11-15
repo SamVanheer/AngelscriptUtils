@@ -49,7 +49,7 @@ struct Hash_C_String final : public std::unary_function<STR*, size_t>
 template<typename STR, int( *COMPARE )( STR lhs, STR rhs ) = strcmp>
 struct EqualTo_C_String final
 {
-	constexpr bool operator()( STR lhs, STR rhs ) const
+	bool operator()( STR lhs, STR rhs ) const
 	{
 		return COMPARE( lhs, rhs ) == 0;
 	}

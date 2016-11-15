@@ -76,12 +76,12 @@ public:
 	/**
 	*	@return Whether this points to an object or not.
 	*/
-	constexpr operator bool() const;
+	operator bool() const;
 
 	/**
 	*	@return Pointer to the object. The reference count is not incremented.
 	*/
-	constexpr const T* Get() const;
+	const T* Get() const;
 
 	/**
 	*	@copydoc Get() const
@@ -230,13 +230,13 @@ CASRefPtr<T, ADAPTER>::~CASRefPtr()
 }
 
 template<typename T, typename ADAPTER>
-constexpr CASRefPtr<T, ADAPTER>::operator bool() const
+CASRefPtr<T, ADAPTER>::operator bool() const
 {
 	return m_pPointer != nullptr;
 }
 
 template<typename T, typename ADAPTER>
-constexpr const T* CASRefPtr<T, ADAPTER>::Get() const
+const T* CASRefPtr<T, ADAPTER>::Get() const
 {
 	return m_pPointer;
 }

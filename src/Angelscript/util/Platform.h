@@ -2,8 +2,11 @@
 #define ANGELSCRIPT_UTIL_PLATFORM_H
 
 #ifdef WIN32
+//Some projects might manage their Windows dependencies differenly.
+#ifndef ASUTILS_DISABLE_WINDOWS_INCLUDES
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+#endif
 
 #if _MSC_VER < 1900
 #define snprintf _snprintf

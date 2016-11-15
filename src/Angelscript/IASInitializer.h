@@ -30,9 +30,14 @@ public:
 	virtual bool GetMessageCallback( asSFuncPtr& outFuncPtr, void*& pOutObj, asDWORD& outCallConv ) { return false; }
 
 	/**
+	*	@return Whether to create an event manager.
+	*/
+	virtual bool UseEventManager() { return false; }
+
+	/**
 	*	Gets the namespace in which events should be registered. Default "Events".
 	*/
-	virtual const char* GetEventNamespace() const { return "Events"; }
+	virtual const char* GetEventNamespace() { return "Events"; }
 
 	/**
 	*	Should register the core API, including the following types:

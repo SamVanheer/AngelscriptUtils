@@ -3,7 +3,7 @@
 
 #include "add_on/scriptbuilder.h"
 
-#include "CASManager.h"
+#include "CASEventManager.h"
 
 #include "CASModule.h"
 
@@ -11,9 +11,16 @@
 
 #include "CASModuleManager.h"
 
-CASModuleManager::CASModuleManager( CASManager& manager )
-	: m_Manager( manager )
+CASModuleManager::CASModuleManager( asIScriptEngine& engine, const std::shared_ptr<CASEventManager>& eventManager )
+	: m_Engine( engine )
+	, m_EventManager( eventManager )
 {
+	m_Engine.AddRef();
+}
+
+CASModuleManager::~CASModuleManager()
+{
+	m_Engine.Release();
 }
 
 const CASModuleDescriptor* CASModuleManager::FindDescriptorByName( const char* const pszName ) const
@@ -137,7 +144,7 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 
 	scriptBuilder.SetIncludeCallback( &::CASModuleManager_IncludeCallback, &builder );
 
-	auto result = scriptBuilder.StartNewModule( m_Manager.GetEngine(), pszModuleName );
+	auto result = scriptBuilder.StartNewModule( &m_Engine, pszModuleName );
 
 	if( result < 0 )
 	{
@@ -282,8 +289,11 @@ void CASModuleManager::RemoveModule( CASModule* pModule )
 	if( it == m_Modules.end() )
 		return;
 
-	//Unhook the functions that the module registered.
-	m_Manager.GetEventManager().UnhookModuleFunctions( pModule );
+	if( m_EventManager )
+	{
+		//Unhook the functions that the module registered.
+		m_EventManager->UnhookModuleFunctions( pModule );
+	}
 
 	( *it )->Discard();
 	( *it )->Release();

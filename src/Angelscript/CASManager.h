@@ -65,7 +65,7 @@ public:
 	/**
 	*	@return The module manager.
 	*/
-	CASModuleManager& GetModuleManager() { return m_ModuleManager; }
+	CASModuleManager& GetModuleManager() { return *m_ModuleManager; }
 
 	/**
 	*	@return The event manager.
@@ -97,8 +97,8 @@ private:
 
 	asIScriptEngine* m_pScriptEngine = nullptr;
 
-	CASModuleManager m_ModuleManager;
-	std::unique_ptr<CASEventManager> m_EventManager;
+	std::unique_ptr<CASModuleManager> m_ModuleManager;
+	std::shared_ptr<CASEventManager> m_EventManager;
 
 private:
 	CASManager( const CASManager& ) = delete;

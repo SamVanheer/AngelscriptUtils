@@ -74,6 +74,8 @@ int NSTest()
 	return 0;
 }
 
+const bool USE_EVENT_MANAGER = true;
+
 /*
 *	An event to test out the event system.
 *	Stops as soon as it's handled.
@@ -84,6 +86,8 @@ CASEvent event( "Main", "const string& in", "", ModuleAccessMask::ALL, EventStop
 class CASTestInitializer : public IASInitializer
 {
 public:
+	bool UseEventManager() override { return USE_EVENT_MANAGER; }
+
 	bool RegisterCoreAPI( CASManager& manager ) override
 	{
 		RegisterStdString( manager.GetEngine() );
@@ -239,16 +243,19 @@ int main( int iArgc, char* pszArgV[] )
 			//Call the main function.
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "main" ) )
 			{
-				//Add main as a hook.
-				event.AddFunction( pFunction );
-
 				std::string szString = "Hello World!\n";
 
 				//Note: main takes a const string& in, so pass the address here. References are handled as pointers.
 				as::Call( pFunction, &szString );
 
-				//Trigger the event.
-				event.Call( CallFlag::NONE, &szString );
+				if( USE_EVENT_MANAGER )
+				{
+					//Add main as a hook.
+					event.AddFunction( pFunction );
+
+					//Trigger the event.
+					event.Call( CallFlag::NONE, &szString );
+				}
 			}
 
 			//Test the object pointer.

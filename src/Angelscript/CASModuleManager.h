@@ -12,7 +12,7 @@
 
 #include "CASModuleDescriptor.h"
 
-class CASManager;
+class CASEventManager;
 class CASModule;
 class IASModuleBuilder;
 class IASModuleUserData;
@@ -24,7 +24,7 @@ class IASModuleUserData;
 */
 
 /**
-*	Manages the list of module descriptors and modules.
+*	Manages a list of module descriptors and modules.
 */
 class CASModuleManager final
 {
@@ -35,14 +35,25 @@ private:
 public:
 	/**
 	*	Constructor.
-	*	@param manager Manager.
+	*	@param engine Script engine.
+	*	@param eventManager Optional. The event manager that manages the global events that modules use.
 	*/
-	CASModuleManager( CASManager& manager );
+	CASModuleManager( asIScriptEngine& engine, const std::shared_ptr<CASEventManager>& eventManager = nullptr );
 
 	/**
 	*	Destructor.
 	*/
-	~CASModuleManager() = default;
+	~CASModuleManager();
+
+	/**
+	*	@return The script engine.
+	*/
+	asIScriptEngine& GetEngine() { return m_Engine; }
+
+	/**
+	*	@return The event manager, if this manager has one.
+	*/
+	CASEventManager* GetEventManager() { return m_EventManager.get(); }
 
 	/**
 	*	Finds a descriptor by name.
@@ -149,7 +160,9 @@ public:
 	void Clear();
 
 private:
-	CASManager& m_Manager;
+	asIScriptEngine& m_Engine;
+
+	std::shared_ptr<CASEventManager> m_EventManager;
 
 	Descriptors_t m_Descriptors;
 

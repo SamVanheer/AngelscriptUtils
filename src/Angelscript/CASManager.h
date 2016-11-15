@@ -70,7 +70,7 @@ public:
 	/**
 	*	@return The event manager.
 	*/
-	CASEventManager& GetEventManager() { return *m_EventManager; }
+	CASEventManager* GetEventManager() { return m_EventManager.get(); }
 
 	/**
 	*	Initializes the manager.

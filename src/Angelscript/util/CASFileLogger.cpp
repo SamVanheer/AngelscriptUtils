@@ -1,7 +1,16 @@
 #include <cassert>
+#include <cstring>
 #include <ctime>
 
+#if _MSC_VER >= 1900
 #include <experimental/filesystem>
+#else
+#ifdef WIN32
+#include <direct.h>
+#endif
+#endif
+
+#include "Platform.h"
 
 #include "CASFileLogger.h"
 
@@ -84,7 +93,11 @@ bool CASFileLogger::OpenFile( const char* pszFilename, const bool bUseDatestamp 
 
 	Close();
 
+	if( !( *pszFilename ) )
+		return false;
+
 	//Create the directory hierarchy.
+#if _MSC_VER >= 1900
 	std::experimental::filesystem::path path( pszFilename );
 
 	path.remove_filename();
@@ -95,9 +108,41 @@ bool CASFileLogger::OpenFile( const char* pszFilename, const bool bUseDatestamp 
 
 	if( error )
 		return false;
+#else
+	char szPath[ MAX_PATH ];
 
-	//TODO: shouldn't use the MAX_PATH definition directly. - Solokiller
-	char szBaseFilename[ 260 ];
+	strncpy( szPath, pszFilename, sizeof( szPath ) );
+	szPath[ sizeof( szPath ) - 1 ];
+
+	for( auto pszNext = szPath; *pszNext; ++pszNext )
+	{
+		if( *pszNext == '\\' )
+			*pszNext = '/';
+	}
+
+	auto pszDelim = strrchr( szPath, '/' );
+
+	if( pszDelim )
+	{
+		*pszDelim = '\0';
+
+		//Make each directory.
+		for( auto pszNext = szPath; *pszNext; ++pszNext )
+		{
+			if( *pszNext == '/' )
+			{
+				*pszNext = '\0';
+				mkdir( szPath );
+				*pszNext = '/';
+			}
+		}
+
+		//Make last directory.
+		mkdir( szPath );
+	}
+#endif
+
+	char szBaseFilename[ MAX_PATH ];
 
 	const char* pszFile;
 
@@ -121,8 +166,7 @@ bool CASFileLogger::OpenFile( const char* pszFilename, const bool bUseDatestamp 
 		pszFile = szBaseFilename;
 	}
 
-	//TODO
-	char szFullFilename[ 260 ];
+	char szFullFilename[ MAX_PATH ];
 
 	const int iResult = snprintf( szFullFilename, sizeof( szFullFilename ), "%s%s", pszFile, m_szExtension.c_str() );
 

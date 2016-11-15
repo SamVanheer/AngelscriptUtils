@@ -14,7 +14,10 @@ public:
 	typedef CScriptBaseEntity ThisClass;
 
 public:
-	using BaseClass::BaseClass;
+	CScriptBaseEntity( CASObjPtr object )
+		: CASExtendAdapter( object )
+	{
+	}
 
 	void Spawn() override
 	{

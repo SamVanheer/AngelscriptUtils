@@ -18,6 +18,7 @@ add_sources(
 	IASExtendAdapter.h
 	IASLogger.h
 	IASLogger.cpp
+	Platform.h
 	StringUtils.h
 )
 
@@ -34,5 +35,6 @@ add_includes(
 	CASObjPtr.h
 	IASExtendAdapter.h
 	IASLogger.h
+	Platform.h
 	StringUtils.h
 )

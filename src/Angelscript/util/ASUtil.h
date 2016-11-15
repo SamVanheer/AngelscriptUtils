@@ -16,6 +16,8 @@
 
 #include "ASLogging.h"
 
+#include "Platform.h"
+
 class CScriptAny;
 
 /**

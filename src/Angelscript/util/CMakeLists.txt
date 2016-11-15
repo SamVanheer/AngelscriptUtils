@@ -1,27 +1,37 @@
 add_sources(
+	ASExtendAdapter.h
+	ASExtendAdapter.cpp
+	ASLogging.h
+	ASLogging.cpp
 	ASUtil.h
 	ASUtil.cpp
-	StringUtils.h
 	ContextUtils.h
 	ContextUtils.cpp
 	CASBaseClass.h
 	CASBaseClass.cpp
+	CASBaseLogger.h
+	CASExtendAdapter.h
+	CASFileLogger.h
+	CASFileLogger.cpp
 	CASRefPtr.h
 	CASObjPtr.h
 	IASExtendAdapter.h
-	CASExtendAdapter.h
-	ASExtendAdapter.h
-	ASExtendAdapter.cpp
+	IASLogger.h
+	IASLogger.cpp
+	StringUtils.h
 )
 
 add_includes(
+	ASExtendAdapter.h
+	ASLogging.h
 	ASUtil.h
-	StringUtils.h
 	ContextUtils.h
 	CASBaseClass.h
+	CASExtendAdapter.h
+	CASLog.h
 	CASRefPtr.h
 	CASObjPtr.h
 	IASExtendAdapter.h
-	CASExtendAdapter.h
-	ASExtendAdapter.h
+	IASLog.h
+	StringUtils.h
 )

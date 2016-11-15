@@ -18,8 +18,10 @@
 #include "Angelscript/ScriptAPI/Reflection/ASReflection.h"
 
 #include "Angelscript/util/ASExtendAdapter.h"
+#include "Angelscript/util/ASLogging.h"
 #include "Angelscript/util/ASUtil.h"
 #include "Angelscript/util/CASExtendAdapter.h"
+#include "Angelscript/util/CASFileLogger.h"
 #include "Angelscript/util/CASRefPtr.h"
 #include "Angelscript/util/CASObjPtr.h"
 
@@ -208,8 +210,45 @@ public:
 	}
 };
 
+/**
+*	Logger that logs to a file and the console.
+*/
+class CASLogger : public CASBaseLogger<IASLogger>
+{
+public:
+	CASLogger( const char* pszFilename, const CASFileLogger::Flags_t flags = CASFileLogger::Flag::NONE )
+		: m_FileLogger( pszFilename, flags )
+	{
+	}
+
+	void Release() override
+	{
+		//Do nothing
+	}
+
+	void VLog( LogLevel_t logLevel, const char* pszFormat, va_list list ) override
+	{
+		m_FileLogger.VLog( logLevel, pszFormat, list );
+
+		char szBuffer[ 4096 ];
+
+		const int iResult = vsnprintf( szBuffer, sizeof( szBuffer ), pszFormat, list );
+
+		if( iResult < 0 || static_cast<size_t>( iResult ) >= sizeof( szBuffer ) )
+			return;
+
+		std::cout << szBuffer;
+	}
+
+	CASFileLogger m_FileLogger;
+};
+
+CASLogger g_Logger( "logs/L", CASFileLogger::Flag::USE_DATESTAMP | CASFileLogger::Flag::USE_TIMESTAMP | CASFileLogger::Flag::OUTPUT_LOG_LEVEL );
+
 int main( int iArgc, char* pszArgV[] )
 {
+	as::SetLogger( &g_Logger );
+
 	std::cout << "Hello World!" << std::endl;
 
 	CASManager manager;

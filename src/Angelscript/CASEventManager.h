@@ -9,7 +9,7 @@
 
 #include "CASEvent.h"
 
-class CASManager;
+class asIScriptEngine;
 class CASModule;
 
 /**
@@ -30,14 +30,19 @@ private:
 public:
 	/**
 	*	Constructor.
-	*	@param manager Manager.
+	*	@param engine Engine.
 	*/
-	CASEventManager( CASManager& manager );
+	CASEventManager( asIScriptEngine& engine );
 
 	/**
 	*	Destructor.
 	*/
 	~CASEventManager();
+
+	/**
+	*	@return The script engine.
+	*/
+	asIScriptEngine& GetEngine() { return m_Engine; }
 
 	/**
 	*	@return The number of events.
@@ -88,7 +93,7 @@ public:
 	void DumpHookedFunctions() const;
 
 private:
-	CASManager& m_Manager;
+	asIScriptEngine& m_Engine;
 
 	Events_t m_Events;
 

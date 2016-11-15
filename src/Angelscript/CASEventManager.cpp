@@ -6,19 +6,20 @@
 
 #include "util/ASUtil.h"
 
-#include "CASManager.h"
-
 #include "CASEvent.h"
 
 #include "CASEventManager.h"
 
-CASEventManager::CASEventManager( CASManager& manager )
-	: m_Manager( manager )
+CASEventManager::CASEventManager( asIScriptEngine& engine )
+	: m_Engine( engine )
 {
+	m_Engine.AddRef();
 }
 
 CASEventManager::~CASEventManager()
 {
+	m_Engine.Release();
+
 	UnhookAllFunctions();
 }
 

@@ -36,7 +36,6 @@ void CASManager::Deactivate()
 
 CASManager::CASManager()
 	: m_ModuleManager( *this )
-	, m_EventManager( *this )
 {
 }
 
@@ -59,6 +58,8 @@ bool CASManager::Initialize( IASInitializer& initializer )
 		return false;
 	}
 
+	m_EventManager = std::make_unique<CASEventManager>( *m_pScriptEngine );
+
 	asSFuncPtr msgCallback;
 	void* pObj;
 	asDWORD callConv;
@@ -77,11 +78,11 @@ bool CASManager::Initialize( IASInitializer& initializer )
 	if( !initializer.RegisterCoreAPI( *this ) )
 		return false;
 
-	if( !initializer.AddEvents( *this, m_EventManager ) )
+	if( !initializer.AddEvents( *this, *m_EventManager ) )
 		return false;
 
 	//Registers all events. One-time event that happens on startup.
-	m_EventManager.RegisterEvents( *GetEngine() );
+	m_EventManager->RegisterEvents( *GetEngine() );
 
 	if( !initializer.RegisterAPI( *this ) )
 		return false;
@@ -98,8 +99,13 @@ void CASManager::Shutdown()
 
 	Activate();
 
-	//Unhook all functions to prevent dangling pointers.
-	m_EventManager.UnhookAllFunctions();
+	if( m_EventManager )
+	{
+		//Unhook all functions to prevent dangling pointers.
+		m_EventManager->UnhookAllFunctions();
+
+		m_EventManager.reset();
+	}
 
 	//Clear all modules and destroy all descriptors.
 	m_ModuleManager.Clear();

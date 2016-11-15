@@ -18,10 +18,14 @@
 #undef VOID
 #endif
 
+#define MakeDirectory( pszDirectory ) CreateDirectoryA( pszDirectory, nullptr )
+
 #else
 #include <linux/limits.h>
 
 #define MAX_PATH PATH_MAX
+
+#define MakeDirectory( pszDirectory ) mkdir( pszDirectory, 0777 )
 #endif
 
 #endif //ANGELSCRIPT_UTIL_PLATFORM_H

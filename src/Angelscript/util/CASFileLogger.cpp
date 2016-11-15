@@ -134,13 +134,13 @@ bool CASFileLogger::OpenFile( const char* pszFilename, const bool bUseDatestamp 
 			if( *pszNext == '/' )
 			{
 				*pszNext = '\0';
-				mkdir( szPath );
+				MakeDirectory( szPath );
 				*pszNext = '/';
 			}
 		}
 
 		//Make last directory.
-		mkdir( szPath );
+		MakeDirectory( szPath );
 	}
 #endif
 

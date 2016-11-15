@@ -5,15 +5,22 @@
 #include <string>
 
 #include "util/ASUtil.h"
+#include "util/StringUtils.h"
 
 #include "CASEvent.h"
 
 #include "CASEventManager.h"
 
-CASEventManager::CASEventManager( asIScriptEngine& engine )
+CASEventManager::CASEventManager( asIScriptEngine& engine, const char* const pszNamespace )
 	: m_Engine( engine )
 {
+	assert( pszNamespace );
+
 	m_Engine.AddRef();
+
+	m_szNamespace = pszNamespace;
+
+	Trim( m_szNamespace );
 }
 
 CASEventManager::~CASEventManager()
@@ -36,12 +43,17 @@ CASEvent* CASEventManager::FindEventByName( const std::string& szName )
 	auto szNamespace = as::ExtractNamespaceFromName( szName );
 	const auto szEventName = as::ExtractNameFromName( szName );
 
-	const auto index = szNamespace.find( "Events::" );
-
-	//If the user specified Events:: as the namespace, strip it.
-	if( index != std::string::npos )
+	if( !m_szNamespace.empty() )
 	{
-		szNamespace = szNamespace.substr( strlen( "Events::" ) );
+		const auto szPrefix = m_szNamespace + "::";
+
+		const auto index = szNamespace.find( szPrefix );
+
+		//If the user specified the event namespace as the namespace, strip it.
+		if( index != std::string::npos )
+		{
+			szNamespace = szNamespace.substr( szPrefix.length() );
+		}
 	}
 
 	for( auto pEvent : m_Events )
@@ -90,7 +102,7 @@ void CASEventManager::RegisterEvents( asIScriptEngine& engine )
 
 	for( auto pEvent : m_Events )
 	{
-		szNS = "Events";
+		szNS = m_szNamespace;
 
 		if( *pEvent->GetCategory() )
 		{

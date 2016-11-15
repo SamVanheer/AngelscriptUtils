@@ -58,7 +58,7 @@ bool CASManager::Initialize( IASInitializer& initializer )
 		return false;
 	}
 
-	m_EventManager = std::make_unique<CASEventManager>( *m_pScriptEngine );
+	m_EventManager = std::make_unique<CASEventManager>( *m_pScriptEngine, initializer.GetEventNamespace() );
 
 	asSFuncPtr msgCallback;
 	void* pObj;

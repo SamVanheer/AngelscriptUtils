@@ -1,6 +1,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "util/ASLogging.h"
+
 #include "CASModule.h"
 
 #include "CASBaseEvent.h"
@@ -36,7 +38,19 @@ bool CASBaseEvent::AddFunction( asIScriptFunction* pFunction )
 	//Don't add functions while this event is being invoked.
 	if( m_iInCallCount != 0 )
 	{
-		//TODO: log error
+		const char* pszFile = nullptr;
+		int iLine = 0;
+		int iColumn = 0;
+
+		if( auto pContext = asGetActiveContext() )
+		{
+			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+		}
+
+		if( !pszFile )
+			pszFile = "Unknown";
+
+		as::Critical( "CBaseEvent::AddFunction: %s(%d, %d): Cannot add function while invoking event!\n", pszFile, iLine, iColumn );
 		return false;
 	}
 
@@ -83,7 +97,19 @@ void CASBaseEvent::RemoveFunction( asIScriptFunction* pFunction )
 	//Don't remove functions while this event is being invoked.
 	if( m_iInCallCount != 0 )
 	{
-		//TODO: log error
+		const char* pszFile = nullptr;
+		int iLine = 0;
+		int iColumn = 0;
+
+		if( auto pContext = asGetActiveContext() )
+		{
+			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+		}
+
+		if( !pszFile )
+			pszFile = "Unknown";
+
+		as::Critical( "CBaseEvent::RemoveFunction: %s(%d, %d): Cannot remove function while invoking event!\n", pszFile, iLine, iColumn );
 		return;
 	}
 
@@ -124,8 +150,21 @@ void CASBaseEvent::RemoveFunctionsOfModule( CASModule* pModule )
 	//This method should never be called while in an event invocation.
 	if( m_iInCallCount != 0 )
 	{
-		assert( !"CASEvent::RemoveFunctionsOfModule: Module hooks should not be removed while invoking events!" );
-		//TODO: log error
+		assert( !"CBaseEvent::RemoveFunctionsOfModule: Module hooks should not be removed while invoking events!" );
+
+		const char* pszFile = nullptr;
+		int iLine = 0;
+		int iColumn = 0;
+
+		if( auto pContext = asGetActiveContext() )
+		{
+			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+		}
+
+		if( !pszFile )
+			pszFile = "Unknown";
+
+		as::Critical( "CBaseEvent::RemoveFunctionsOfModule: %s(%d, %d): Module hooks should not be removed while invoking events!\n", pszFile, iLine, iColumn );
 		return;
 	}
 
@@ -152,7 +191,7 @@ void CASBaseEvent::RemoveAllFunctions()
 	if( m_iInCallCount != 0 )
 	{
 		assert( !"CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!" );
-		//TODO: log error
+		as::Critical( "CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!\n" );
 		return;
 	}
 
@@ -177,22 +216,19 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 
 	if( !pObjectType )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASBaseEvent::%s: unknown type!\n", pszScope );
+		as::Critical( "CBaseEvent::%s: unknown type!\n", pszScope );
 		return false;
 	}
 
 	if( !( pObjectType->GetFlags() & asOBJ_FUNCDEF ) )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASBaseEvent::%s: Object is not a function or delegate!\n", pszScope );
+		as::Critical( "CBaseEvent::%s: Object is not a function or delegate!\n", pszScope );
 		return false;
 	}
 
 	if( !pObject )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASBaseEvent::%s: Object is null!\n", pszScope );
+		as::Critical( "CBaseEvent::%s: Object is null!\n", pszScope );
 		return false;
 	}
 
@@ -204,8 +240,7 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 
 	if( !pObject )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASBaseEvent::%s: Object is null!\n", pszScope );
+		as::Critical( "CBaseEvent::%s: Object is null!\n", pszScope );
 		return false;
 	}
 
@@ -213,8 +248,7 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 
 	if( !pFunction )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASBaseEvent::%s: Null function passed!\n", pszScope );
+		as::Critical( "CBaseEvent::%s: Null function passed!\n", pszScope );
 		return false;
 	}
 
@@ -224,7 +258,7 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 
 	if( !pFuncDef )
 	{
-		//TODO: log error - Solokiller
+		as::Critical( "CBaseEvent::%s: No funcdef for event!\n", pszScope );
 		return false;
 	}
 
@@ -235,19 +269,13 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 		{
 			asITypeInfo* pDelegateTypeInfo = pFunction->GetDelegateObjectType();
 
-			//TODO
-			/*
-			gASLog()->Error( ASLOG_CRITICAL, "CASBaseEvent::%s: Method '%s::%s::%s' is incompatible with event '%s'!\n",
-			pszScope, pDelegateObjectType->GetNamespace(), pDelegateObjectType->GetName(), pDelegate->GetName(), pFuncDef->GetName() );
-			*/
+			as::Critical( "CBaseEvent::%s: Method '%s::%s::%s' is incompatible with event '%s'!\n",
+				pszScope, pDelegateTypeInfo->GetNamespace(), pDelegateTypeInfo->GetName(), pDelegate->GetName(), pFuncDef->GetName() );
 		}
 		else
 		{
-			//TODO
-			/*
-			gASLog()->Error( ASLOG_CRITICAL, "CASBaseEvent::%s: Function '%s::%s' is incompatible with event '%s'!\n",
-			pszScope, pFunction->GetNamespace(), pFunction->GetName(), pFuncDef->GetName() );
-			*/
+			as::Critical( "CBaseEvent::%s: Function '%s::%s' is incompatible with event '%s'!\n",
+				pszScope, pFunction->GetNamespace(), pFunction->GetName(), pFuncDef->GetName() );
 		}
 
 		return false;

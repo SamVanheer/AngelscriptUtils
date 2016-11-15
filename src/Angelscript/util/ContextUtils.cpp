@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdarg>
 
+#include "Angelscript/util/ASLogging.h"
 #include "Angelscript/util/ASUtil.h"
 
 #include "Angelscript/wrapper/CASContext.h"
@@ -16,11 +17,16 @@ bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& contex
 
 	if( uiArgCount != arguments.GetArgumentCount() )
 	{
-		//TODO
-		/*
-		gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetArguments: argument count for function '%s::%s' is incorrect: expected %u, got %u!\n",
-						 pTargetFunc->GetNamespace(), pTargetFunc->GetName(), uiArgCount, arguments.GetCount() );
-						 */
+		if( auto pType = targetFunc.GetObjectType() )
+		{
+			as::Critical( "ctx::SetArguments: argument count for method '%s::%s::%s' is incorrect: expected %u, got %u!\n",
+						  pType->GetNamespace(), pType->GetName(), targetFunc.GetName(), uiArgCount, arguments.GetArgumentCount() );
+		}
+		else
+		{
+			as::Critical( "ctx::SetArguments: argument count for function '%s::%s' is incorrect: expected %u, got %u!\n",
+							 targetFunc.GetNamespace(), targetFunc.GetName(), uiArgCount, arguments.GetArgumentCount() );
+		}
 		return false;
 	}
 
@@ -91,8 +97,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 
 	if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: an error occurred while getting function parameter information, aborting!\n" );
+		as::Critical( "ctx::SetContextArgument: An error occurred while getting function parameter information, aborting!\n" );
 		return false;
 	}
 
@@ -118,8 +123,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 
 	if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: an error occurred while getting function parameter information, aborting!\n" );
+		as::Critical( "ctx::SetContextArgument: An error occurred while getting function parameter information, aborting!\n" );
 		return false;
 	}
 
@@ -146,11 +150,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 					//Functions are incompatible, can't set
 					if( !pSourceFunc->IsCompatibleWithTypeId( iTypeId ) )
 					{
-						//TODO
-						/*
-						gASLog()->Error( ASLOG_CRITICAL,
-										 "CASCPPReflection::SetContextArgument: Could not set argument %u, argument function signatures are different, aborting!\n", uiIndex );
-										 */
+						as::Critical( "ctx::SetContextArgument: Could not set argument %u, argument function signatures are different, aborting!\n", uiIndex );
 						bCanSet = false;
 					}
 				}
@@ -162,8 +162,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 						engine.ReleaseScriptObject( pObject, pType );
 					else
 					{
-						//TODO
-						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: source argument is incompatible with target, aborting!\n" );
+						as::Critical( "ctx::SetContextArgument: Source argument is incompatible with target, aborting!\n" );
 						bCanSet = false;
 					}
 				}
@@ -175,15 +174,13 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 			}
 			else
 			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Could not get object type for argument %u, aborting!\n", uiIndex );
+				as::Critical( "ctx::SetContextArgument: Could not get object type for argument %u, aborting!\n", uiIndex );
 				bSuccess = false;
 			}
 		}
 		else
 		{
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: source argument is incompatible with target, aborting!\n" );
+			as::Critical( "ctx::SetContextArgument: Source argument is incompatible with target, aborting!\n" );
 			bSuccess = false;
 		}
 	}
@@ -223,8 +220,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 				case asTYPEID_VOID:
 					{
 						//Impossible
-						//TODO
-						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: the impossible happened: a void argument, aborting!\n" );
+						as::Critical( "ctx::SetContextArgument: the impossible happened: a void argument, aborting!\n" );
 						bSuccess = false;
 						break;
 					}
@@ -259,8 +255,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 					}
 					else
 					{
-						//TODO
-						//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Attempted to set parameter of unknown type, aborting!\n" );
+						as::Critical( "ctx::SetContextArgument: Attempted to set parameter of unknown type, aborting!\n" );
 						bSuccess = false;
 					}
 					break;
@@ -270,11 +265,8 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 				{
 					if( iTypeId != iSourceTypeId )
 					{
-						//TODO
-						/*
-						gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Attempted to set primitive value of type '%s' to value of type '%s', aborting!\n",
-										 PrimitiveTypeIdToString( iTypeId ), PrimitiveTypeIdToString( iSourceTypeId ) );
-										 */
+						as::Critical( "ctx::SetContextArgument: Attempted to set primitive value of type '%s' to value of type '%s', aborting!\n",
+										 as::PrimitiveTypeIdToString( iTypeId ), as::PrimitiveTypeIdToString( iSourceTypeId ) );
 						bSuccess = false;
 					}
 				}
@@ -310,8 +302,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 				*pOutArgType = ArgType::VALUE;
 			else
 			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetArgumentFromVarargs: unknown object type, cannot convert!\n" );
+				as::Critical( "ctx::GetArgumentFromVarargs: Unknown object type, cannot convert!\n" );
 				bSuccess = false;
 			}
 		}
@@ -332,8 +323,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 			case asTYPEID_VOID:
 				{
 					//Impossible
-					//TODO
-					//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: the impossible happened: a void argument\n" );
+					as::Critical( "ctx::SetContextArgument: The impossible happened: a void argument\n" );
 					bSuccess = false;
 					break;
 				}
@@ -365,8 +355,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 				}
 				else
 				{
-					//TODO
-					//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::SetContextArgument: Attempted to set parameter of unknown type, aborting!\n" );
+					as::Critical( "ctx::SetContextArgument: Attempted to set parameter of unknown type, aborting!\n" );
 					bSuccess = false;
 				}
 				break;
@@ -396,8 +385,7 @@ bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue& value, asINT64&
 	case asTYPEID_VOID:
 		{
 			//Impossible
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::ConvertInputArgToLargest: the impossible happened: a void argument, aborting!\n" );
+			as::Critical( "ctx::ConvertInputArgToLargest: The impossible happened: a void argument, aborting!\n" );
 			bSuccess = false;
 			break;
 		}
@@ -486,8 +474,7 @@ bool ConvertEnumToPrimitive( const CASArgument& arg, const int iTypeId, Argument
 			{
 				if( arg.GetArgumentValue().dword > UINT8_MAX )
 				{
-					//TODO
-					//gASLog()->Warning( ASLOG_CRITICAL, "Truncating enum value to 1 byte!\n" );
+					as::Critical( "Truncating enum value to 1 byte!\n" );
 				}
 
 				outValue.byte = static_cast<asBYTE>( arg.GetArgumentValue().dword );
@@ -499,8 +486,7 @@ bool ConvertEnumToPrimitive( const CASArgument& arg, const int iTypeId, Argument
 			{
 				if( arg.GetArgumentValue().dword > UINT16_MAX )
 				{
-					//TODO
-					//gASLog()->Warning( ASLOG_CRITICAL, "Truncating enum value to 2 bytes!\n" );
+					as::Critical( "Truncating enum value to 2 bytes!\n" );
 				}
 
 				outValue.word = static_cast<asWORD>( arg.GetArgumentValue().dword );
@@ -546,8 +532,7 @@ bool ConvertPrimitiveToEnum( const CASArgument& arg, ArgumentValue& outValue )
 		{
 			if( arg.GetArgumentValue().qword > UINT32_MAX )
 			{
-				//TODO
-				//gASLog()->Warning( ASLOG_CRITICAL, "Truncating 8 byte value to 4 bytes!\n" );
+				as::Critical( "Truncating 8 byte value to 4 bytes!\n" );
 			}
 
 			outValue.dword = static_cast<asDWORD>( arg.GetArgumentValue().qword );
@@ -561,8 +546,7 @@ bool ConvertPrimitiveToEnum( const CASArgument& arg, ArgumentValue& outValue )
 			//TODO: is this correct?
 			if( arg.GetArgumentValue().dValue > UINT32_MAX )
 			{
-				//TODO
-				//gASLog()->Warning( ASLOG_CRITICAL, "Truncating 8 byte value to 4 bytes!\n" );
+				as::Critical( "Truncating 8 byte value to 4 bytes!\n" );
 			}
 
 			outValue.dword = static_cast<asDWORD>( arg.GetArgumentValue().dValue );
@@ -698,8 +682,7 @@ bool SetObjectArgument( asIScriptEngine& engine, void* pObject, int iTypeId, CAS
 		{
 			//I don't know what this is.
 			bSuccess = false;
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "CASArguments: unknown type '%s', aborting!\n", pType->GetName() );
+			as::Critical( "ctx::SetObjectArgument: unknown type '%s', aborting!\n", pType->GetName() );
 		}
 	}
 	else
@@ -713,8 +696,7 @@ bool SetObjectArgument( asIScriptEngine& engine, void* pObject, int iTypeId, CAS
 		else //I don't know what this is.
 		{
 			bSuccess = false;
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "CASArguments: unknown type '%s'(%d), aborting!\n", pEngine->GetTypeDeclaration( iTypeId, true ), iTypeId );
+			as::Critical( "ctx::SetObjectArgument: unknown type '%s'(%d), aborting!\n", engine.GetTypeDeclaration( iTypeId, true ), iTypeId );
 		}
 	}
 
@@ -773,15 +755,13 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 			}
 			else
 			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: unknown object type, cannot convert!\n" );
+				as::Critical( "ctx::GetReturnValue: unknown object type, cannot convert!\n" );
 				bSuccess = false;
 			}
 		}
 		else
 		{
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: failed to get object type!\n" );
+			as::Critical( "ctx::GetReturnValue: failed to get object type!\n" );
 			bSuccess = false;
 		}
 	}
@@ -798,8 +778,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 		{
 			if( !SetPrimitiveArgument( context.GetReturnAddress(), iTypeId, value, bWasPrimitive ) )
 			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: Something went wrong while trying to convert the return value to a usable type!\n" );
+				as::Critical( "ctx::GetReturnValue: Something went wrong while trying to convert the return value to a usable type!\n" );
 				bSuccess = false;
 			}
 		}
@@ -844,8 +823,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 				}
 				else
 				{
-					//TODO
-					//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: unknown primitive return type, cannot convert!\n" );
+					as::Critical( "ctx::GetReturnValue: Unknown primitive return type, cannot convert!\n" );
 					bSuccess = false;
 				}
 			}
@@ -922,24 +900,19 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, vo
 			if( uiIndex == uiCount )
 			{
 				bSuccess = false;
-				//TODO
-				/*
-				gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: no assignment operator found for type '%s::%s', cannot convert!\n",
+				as::Critical( "ctx::GetReturnValue: No assignment operator found for type '%s::%s', cannot convert!\n",
 								 pType->GetNamespace(), pType->GetName() );
-								 */
 			}
 		}
 		else
 		{
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: failed to get object type!\n" );
+			as::Critical( "ctx::GetReturnValue: Failed to get object type!\n" );
 			bSuccess = false;
 		}
 	}
 	else if( iTypeId == asTYPEID_VOID )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: type is null!\n" );
+		as::Critical( "ctx::GetReturnValue: Type is null!\n" );
 	}
 	else //Primitive type (including enum)
 	{
@@ -988,8 +961,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, vo
 				}
 				else
 				{
-					//TODO
-					//gASLog()->Error( ASLOG_CRITICAL, "CASCPPReflection::GetReturnValue: unknown primitive return type, cannot convert!\n" );
+					as::Critical( "ctx::GetReturnValue: Unknown primitive return type, cannot convert!\n" );
 					bSuccess = false;
 				}
 			}

@@ -4,6 +4,7 @@
 #include <angelscript.h>
 
 #include "Angelscript/CASManager.h"
+#include "Angelscript/util/ASLogging.h"
 #include "Angelscript/util/ASUtil.h"
 #include "Angelscript/util/ContextUtils.h"
 
@@ -75,8 +76,7 @@ bool CASArgument::Set( asIScriptEngine& engine, const int iTypeId, const ArgType
 			}
 			else
 			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CASArgument::Set: failed to get object type!\n" );
+				as::Critical( "CASArgument::Set: Failed to get object type!\n" );
 				bSuccess = false;
 			}
 		}
@@ -126,8 +126,7 @@ void CASArgument::Reset()
 				pEngine->ReleaseScriptObject( m_Value.pValue, pType );
 			else
 			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CASArgument::Reset: failed to get object type!\n" );
+				as::Critical( "CASArgument::Reset: Failed to get object type!\n" );
 			}
 		}
 
@@ -223,8 +222,7 @@ bool CASArguments::SetArguments( asIScriptGeneric& arguments, size_t uiStartInde
 	//If true, an internal error occured
 	if( uiStartIndex > uiArgCount )
 	{
-		//TODO
-		//gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments: start index is greater than argument count!\n" );
+		as::Critical( "CASArguments::SetArguments: Start index is greater than argument count!\n" );
 		return false;
 	}
 
@@ -282,8 +280,7 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 	{
 		if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
 		{
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments(va_list): an error occurred while getting function parameter information, aborting!\n" );
+			as::Critical( "CASArguments::SetArguments(va_list): An error occurred while getting function parameter information, aborting!\n" );
 			bSuccess = false;
 			break;
 		}
@@ -300,11 +297,16 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 		}
 		else
 		{
-			//TODO
-			/*
-			gASLog()->Error( ASLOG_CRITICAL, "CASArguments::SetArguments(va_list): Function '%s::%s': failed to set argument %u, aborting!\n", 
-				pTargetFunc->GetNamespace(), pTargetFunc->GetName(), uiIndex );
-				*/
+			if( auto pType = targetFunc.GetObjectType() )
+			{
+				as::Critical( "CASArguments::SetArguments(va_list): Method '%s::%s::%s': failed to set argument %u, aborting!\n",
+							  pType->GetNamespace(), pType->GetName(), targetFunc.GetName(), uiIndex );
+			}
+			else
+			{
+				as::Critical( "CASArguments::SetArguments(va_list): Function '%s::%s': failed to set argument %u, aborting!\n",
+					targetFunc.GetNamespace(), targetFunc.GetName(), uiIndex );
+			}
 		}
 	}
 

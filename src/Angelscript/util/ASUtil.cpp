@@ -254,8 +254,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 				//If the index is invalid, stop.
 				if( uiIndex == 0 || uiIndex > uiArgCount )
 				{
-					//TODO
-					//gASLog()->Warning( ASLOG_CRITICAL, "ASSPrintf: format parameter index is out of range!\n" );
+					as::Critical( "as::SPrintf: format parameter index is out of range!\n" );
 					bSuccess = false;
 					break;
 				}
@@ -289,8 +288,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 								//Check to make sure it can fit, stop otherwise.
 								if( uiValueLength >= static_cast<size_t>( pszBufferEnd - pszBufferDest ) )
 								{
-									//TODO
-									//gASLog()->Error( ASLOG_CRITICAL, "as::SPrintf: could not fit data in buffer\n" );
+									as::Critical( "as::SPrintf: could not fit data in buffer\n" );
 									bSuccess = false;
 									break;
 								}
@@ -322,8 +320,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 					//Check to make sure it can fit, stop otherwise.
 					if( uiValueLength >= static_cast<size_t>( pszBufferEnd - pszBufferDest ) )
 					{
-						//TODO
-						//gASLog()->Error( ASLOG_CRITICAL, "as::SPrintf: could not fit data in buffer\n" );
+						as::Critical( "as::SPrintf: could not fit data in buffer\n" );
 						bSuccess = false;
 						break;
 					}
@@ -344,8 +341,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 
 			if( pszBufferDest == pszBufferEnd )
 			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "as::SPrintf: could not fit data in buffer\n" );
+				as::Critical( "as::SPrintf: could not fit data in buffer\n" );
 				bSuccess = false;
 				break;
 			}
@@ -416,8 +412,7 @@ bool CreateFunctionSignature(
 		case ArgType::VOID:
 			{
 				//This should never occur, unless the argument parser fails without returning false
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CScheduler: invalid input argument!\n" );
+				as::Critical( "as::CreateFunctionSignature: invalid input argument!\n" );
 				bSuccess = false;
 				break;
 			}

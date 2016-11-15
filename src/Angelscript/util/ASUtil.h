@@ -14,6 +14,8 @@
 
 #include "Angelscript/util/ContextUtils.h"
 
+#include "ASLogging.h"
+
 class CScriptAny;
 
 /**
@@ -513,8 +515,7 @@ inline asIScriptFunction* FindFunction(
 
 			if( pFunction->GetParam( uiParamIndex, &iTypeId, &uiFlags ) < 0 )
 			{
-				//TODO
-				//gASLog()->Warning( ASLOG_CRITICAL, "CScheduler::FindFunction: Failed to retrieve parameter %u for function %s!\n", uiParamIndex, pFunction->GetName() );
+				as::Critical( "as::FindFunction: Failed to retrieve parameter %u for function %s!\n", uiParamIndex, pFunction->GetName() );
 				break;
 			}
 
@@ -545,9 +546,8 @@ inline asIScriptFunction* FindFunction(
 					//Change the type to match
 					if( !arg.Set( iTypeId, arg.GetArgumentType(), value, false ) )
 					{
-					//TODO
-					//gASLog()->Error( ASLOG_CRITICAL, "CScheduler: Failed to convert enum value!\n" );
-					break;
+						as::Critical( "as::FindFunction: Failed to convert enum value!\n" );
+						break;
 					}
 					*/
 				}
@@ -686,8 +686,7 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 		}
 		else
 		{
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "Failed to format string for implicit cast for class '%s'!\n", pszSubType );
+			as::Critical( "as::RegisterCasts: Failed to format string for implicit cast for class '%s'!\n", pszSubType );
 			return false;
 		}
 
@@ -702,8 +701,7 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 		}
 		else
 		{
-			//TODO
-			//gASLog()->Error( ASLOG_CRITICAL, "Failed to format string for explicit cast for class '%s'!\n", pszSubType );
+			as::Critical( "as::RegisterCasts: Failed to format string for explicit cast for class '%s'!\n", pszSubType );
 			return false;
 		}
 	}

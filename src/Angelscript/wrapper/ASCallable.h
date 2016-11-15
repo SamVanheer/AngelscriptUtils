@@ -98,7 +98,7 @@ protected:
 	template<typename CALLABLE, typename ARGS>
 	friend bool as::CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args );
 
-protected:
+public:
 	/**
 	*	Constructor.
 	*	@param function Function to call.
@@ -106,7 +106,6 @@ protected:
 	*/
 	CASCallable( asIScriptFunction& function, CASContext& context );
 
-public:
 	/**
 	*	@return The function.
 	*/
@@ -190,7 +189,10 @@ template<typename SUBCLASS>
 class CASTCallable : public CASCallable
 {
 public:
-	using CASCallable::CASCallable;
+	CASTCallable( asIScriptFunction& function, CASContext& context )
+		: CASCallable( function, context )
+	{
+	}
 
 	/**
 	*	Calls the function.

@@ -26,8 +26,8 @@ enum ModulePriority : ModulePriority_t
 	NORMAL	= 0,
 	HIGH	= INT32_MAX / 2,
 	HIGHEST = INT32_MAX,
-	LOW		= INT_MIN / 2,
-	LOWEST	= INT_MIN
+	LOW		= INT32_MIN / 2,
+	LOWEST	= INT32_MIN
 };
 }
 

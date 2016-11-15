@@ -5,6 +5,7 @@
 
 #include "Angelscript/add_on/scriptany.h"
 
+#include "Angelscript/util/ASLogging.h"
 #include "Angelscript/util/ASUtil.h"
 #include "Angelscript/util/ContextUtils.h"
 
@@ -76,12 +77,9 @@ void CASScheduler::SetIntervalHandler( asIScriptGeneric* pArguments )
 
 	if( !iRepeatCount || iRepeatCount < CASScheduler::REPEAT_INF_TIMES )
 	{
-		//TODO
-		/*
-		gASLog()->Warning( ASLOG_CRITICAL,
-		"CScheduler::SetInterval: can only add function '%s' if repeat count is positive and non-zero, or REPEAT_INFINITE_TIMES!\n",
-		szFunctionName.CStr() );
-		*/
+		as::Critical(
+			"Error: CScheduler::SetInterval: can only add function '%s' if repeat count is positive and non-zero, or REPEAT_INFINITE_TIMES!\n",
+			szFunctionName.c_str() );
 		pArguments->SetReturnAddress( nullptr );
 		return;
 	}
@@ -126,12 +124,9 @@ void CASScheduler::SetIntervalObj( asIScriptGeneric* pArguments )
 
 	if( !iRepeatCount || iRepeatCount < CASScheduler::REPEAT_INF_TIMES )
 	{
-		//TODO
-		/*
-		gASLog()->Warning( ASLOG_CRITICAL,
-		"CScheduler::SetInterval: can only add function '%s' if repeat count is positive and non-zero, or REPEAT_INFINITE_TIMES!\n",
-		szFunctionName.CStr() );
-		*/
+		as::Critical(
+			"Error: CScheduler::SetInterval: can only add function '%s' if repeat count is positive and non-zero, or REPEAT_INFINITE_TIMES!\n",
+			szFunctionName.c_str() );
 		pArguments->SetReturnAddress( nullptr );
 		return;
 	}
@@ -161,10 +156,7 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 {
 	if( flRepeatTime < 0.0f )
 	{
-		//TODO
-		/*
-		gASLog()->Error( ASLOG_CRITICAL, "CScheduler: negative repeat time or delay is not allowed!\n" );
-		*/
+		as::Critical( "Error: CScheduler::SetInterval: negative repeat time or delay is not allowed!\n" );
 		arguments.SetReturnAddress( nullptr );
 		return;
 	}
@@ -196,17 +188,13 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 				}
 				else
 				{
-					//TODO
-					/*
-					gASLog()->Error( ASLOG_CRITICAL, "CScheduler: could not add '%s::%s::%s', object type must be a reference!\n", 
-						pType->GetNamespace(), pType->GetName(), szFunctionName.CStr() );
-						*/
+					as::Critical( "Error: CScheduler::SetInterval: could not add '%s::%s::%s', object type must be a reference!\n", 
+						pType->GetNamespace(), pType->GetName(), szFunctionName.c_str() );
 				}
 			}
 			else
 			{
-				//TODO
-				//gASLog()->Error( ASLOG_CRITICAL, "CScheduler: could not add function '%s', object type for this pointer not found!\n", szFunctionName.CStr() );
+				as::Critical( "Error: CScheduler::SetInterval: could not add function '%s', object type for this pointer not found!\n", szFunctionName.c_str() );
 			}
 		}
 		else
@@ -244,19 +232,13 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 		else
 		{
 			delete pArgs;
-			//TODO
-			/*
-			gASLog()->Warning( ASLOG_CRITICAL, "CScheduler: could not add function '%s', function not found\n", szFunctionName.CStr() );
-			*/
+			as::Critical( "Error: CScheduler::SetInterval: could not add function '%s', function not found\n", szFunctionName.c_str() );
 			bSuccess = false;
 		}
 	}
 	else
 	{
-		//TODO
-		/*
-		gASLog()->Error( ASLOG_CRITICAL, "CScheduler: could not add function '%s', failed to parse arguments\n", szFunctionName.CStr() );
-		*/
+		as::Critical( "Error: CScheduler::SetInterval: could not add function '%s', failed to parse arguments\n", szFunctionName.c_str() );
 		bSuccess = false;
 	}
 
@@ -354,22 +336,27 @@ void CASScheduler::Think( const float flCurrentTime )
 					{
 						CASMethod method( *pFunction, context, pThis );
 
-						method.CallArgs( CallFlag::NONE, *pNext->GetArguments() );
+						bSuccess = method.CallArgs( CallFlag::NONE, *pNext->GetArguments() );
 					}
 					else
 					{
 						CASFunction function( *pFunction, context );
 
-						function.CallArgs( CallFlag::NONE, *pNext->GetArguments() );
+						bSuccess = function.CallArgs( CallFlag::NONE, *pNext->GetArguments() );
 					}
 
 					if( !bSuccess )
 					{
-						//TODO
-						/*
-						gASLog()->Error( ASLOG_CRITICAL, "CScheduler::Think: execution of function %s::%s failed!\n", 
-							pFunction->GetFunction()->GetNamespace(), pFunction->GetFunction()->GetName() );
-							*/
+						if( auto pType = pFunction->GetObjectType() )
+						{
+							as::Critical( "Error: CScheduler::Think: execution of method %s::%s::%s failed!\n",
+										  pType->GetNamespace(), pType->GetName(), pFunction->GetName() );
+						}
+						else
+						{
+							as::Critical( "Error: CScheduler::Think: execution of function %s::%s failed!\n", 
+								pFunction->GetNamespace(), pFunction->GetName() );
+						}
 					}
 
 					//Could've been flagged for removal during the call.

@@ -20,7 +20,7 @@ public:
 
 		va_start( list, pszFormat );
 
-		VLog( logLevel, pszFormat, list );
+		this->VLog( logLevel, pszFormat, list );
 
 		va_end( list );
 	}
@@ -31,14 +31,14 @@ public:
 
 		va_start( list, pszFormat );
 
-		VLog( ASLog::CRITICAL, pszFormat, list );
+		this->VLog( ASLog::CRITICAL, pszFormat, list );
 
 		va_end( list );
 	}
 
 	void VCritical( const char* pszFormat, va_list list ) override
 	{
-		VLog( ASLog::CRITICAL, pszFormat, list );
+		this->VLog( ASLog::CRITICAL, pszFormat, list );
 	}
 
 	void Msg( const char* pszFormat, ... ) override
@@ -47,14 +47,14 @@ public:
 
 		va_start( list, pszFormat );
 
-		VLog( ASLog::NORMAL, pszFormat, list );
+		this->VLog( ASLog::NORMAL, pszFormat, list );
 
 		va_end( list );
 	}
 
 	void VMsg( const char* pszFormat, va_list list ) override
 	{
-		VLog( ASLog::NORMAL, pszFormat, list );
+		this->VLog( ASLog::NORMAL, pszFormat, list );
 	}
 
 	void Verbose( const char* pszFormat, ... ) override
@@ -63,14 +63,14 @@ public:
 
 		va_start( list, pszFormat );
 
-		VLog( ASLog::VERBOSE, pszFormat, list );
+		this->VLog( ASLog::VERBOSE, pszFormat, list );
 
 		va_end( list );
 	}
 
 	void VVerbose( const char* pszFormat, va_list list ) override
 	{
-		VLog( ASLog::VERBOSE, pszFormat, list );
+		this->VLog( ASLog::VERBOSE, pszFormat, list );
 	}
 
 	void Diagnostic( const char* pszFormat, ... ) override
@@ -79,14 +79,14 @@ public:
 
 		va_start( list, pszFormat );
 
-		VLog( ASLog::DIAGNOSTIC, pszFormat, list );
+		this->VLog( ASLog::DIAGNOSTIC, pszFormat, list );
 
 		va_end( list );
 	}
 
 	void VDiagnostic( const char* pszFormat, va_list list ) override
 	{
-		VLog( ASLog::DIAGNOSTIC, pszFormat, list );
+		this->VLog( ASLog::DIAGNOSTIC, pszFormat, list );
 	}
 
 private:

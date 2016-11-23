@@ -45,7 +45,7 @@
 
 BEGIN_AS_NAMESPACE
 
-void RegisterStdString(asIScriptEngine *engine);
+void RegisterStdString(asIScriptEngine *engine, const bool bIsPrimaryStringType = true);
 void RegisterStdStringUtils(asIScriptEngine *engine);
 
 END_AS_NAMESPACE

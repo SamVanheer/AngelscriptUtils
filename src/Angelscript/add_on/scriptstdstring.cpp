@@ -726,7 +726,7 @@ static bool StringEquals(const std::string& lhs, const std::string& rhs)
 	return lhs == rhs;
 }
 
-void RegisterStdString_Native(asIScriptEngine *engine)
+void RegisterStdString_Native(asIScriptEngine *engine, const bool bIsPrimaryStringType )
 {
 	const char* const pszObjectName = AS_STRING_OBJNAME;
 	int r = 0;
@@ -740,16 +740,19 @@ void RegisterStdString_Native(asIScriptEngine *engine)
 	r = engine->RegisterObjectType(pszObjectName, sizeof(string), asOBJ_VALUE | asOBJ_APP_CLASS_CDAK); assert( r >= 0 );
 #endif
 
+	if( bIsPrimaryStringType )
+	{
 #if AS_USE_STRINGPOOL == 1
-	// Register the string factory
-	r = engine->RegisterStringFactory("const " AS_STRING_OBJNAME " &", asFUNCTION(StringFactory), asCALL_CDECL); assert( r >= 0 );
+		// Register the string factory
+		r = engine->RegisterStringFactory("const " AS_STRING_OBJNAME " &", asFUNCTION(StringFactory), asCALL_CDECL); assert( r >= 0 );
 
-	// Register the cleanup callback for the string pool
-	engine->SetEngineUserDataCleanupCallback(CleanupEngineStringPool, STRING_POOL);
+		// Register the cleanup callback for the string pool
+		engine->SetEngineUserDataCleanupCallback(CleanupEngineStringPool, STRING_POOL);
 #else
-	// Register the string factory
-	r = engine->RegisterStringFactory(pszObjectName, asFUNCTION(StringFactory), asCALL_CDECL); assert( r >= 0 );
+		// Register the string factory
+		r = engine->RegisterStringFactory(pszObjectName, asFUNCTION(StringFactory), asCALL_CDECL); assert( r >= 0 );
 #endif
+	}
 
 	// Register the object operator overloads
 	r = engine->RegisterObjectBehaviour(pszObjectName, asBEHAVE_CONSTRUCT,  "void f()",                    asFUNCTION(ConstructString), asCALL_CDECL_OBJLAST); assert( r >= 0 );
@@ -1281,7 +1284,7 @@ static void StringSubString_Generic(asIScriptGeneric *gen)
 	new(gen->GetAddressOfReturnLocation()) string(StringSubString(start, count, *str));
 }
 
-void RegisterStdString_Generic(asIScriptEngine *engine)
+void RegisterStdString_Generic(asIScriptEngine *engine, const bool bIsPrimaryStringType)
 {
 	const char* const pszObjectName = AS_STRING_OBJNAME;
 
@@ -1291,16 +1294,19 @@ void RegisterStdString_Generic(asIScriptEngine *engine)
 	// Register the string type
 	r = engine->RegisterObjectType(pszObjectName, sizeof(string), asOBJ_VALUE | asOBJ_APP_CLASS_CDAK); assert( r >= 0 );
 
+	if( bIsPrimaryStringType )
+	{
 #if AS_USE_STRINGPOOL == 1
-	// Register the string factory
-	r = engine->RegisterStringFactory("const " AS_STRING_OBJNAME " &", asFUNCTION(StringFactoryGeneric), asCALL_GENERIC); assert( r >= 0 );
+		// Register the string factory
+		r = engine->RegisterStringFactory("const " AS_STRING_OBJNAME " &", asFUNCTION(StringFactoryGeneric), asCALL_GENERIC); assert( r >= 0 );
 
-	// Register the cleanup callback for the string pool
-	engine->SetEngineUserDataCleanupCallback(CleanupEngineStringPool, STRING_POOL);
+		// Register the cleanup callback for the string pool
+		engine->SetEngineUserDataCleanupCallback(CleanupEngineStringPool, STRING_POOL);
 #else
-	// Register the string factory
-	r = engine->RegisterStringFactory(AS_STRING_OBJNAME, asFUNCTION(StringFactoryGeneric), asCALL_GENERIC); assert( r >= 0 );
+		// Register the string factory
+		r = engine->RegisterStringFactory(AS_STRING_OBJNAME, asFUNCTION(StringFactoryGeneric), asCALL_GENERIC); assert( r >= 0 );
 #endif
+	}
 
 	// Register the object operator overloads
 	r = engine->RegisterObjectBehaviour(pszObjectName, asBEHAVE_CONSTRUCT,  "void f()",                    asFUNCTION(ConstructStringGeneric), asCALL_GENERIC); assert( r >= 0 );
@@ -1369,12 +1375,12 @@ void RegisterStdString_Generic(asIScriptEngine *engine)
 	r = engine->RegisterGlobalFunction("double parseFloat(const " AS_STRING_OBJNAME " &in, uint &out byteCount = 0)", asFUNCTION(parseFloat_Generic), asCALL_GENERIC); assert(r >= 0);
 }
 
-void RegisterStdString(asIScriptEngine * engine)
+void RegisterStdString(asIScriptEngine * engine, const bool bIsPrimaryStringType )
 {
 	if (strstr(asGetLibraryOptions(), "AS_MAX_PORTABILITY"))
-		RegisterStdString_Generic(engine);
+		RegisterStdString_Generic(engine, bIsPrimaryStringType);
 	else
-		RegisterStdString_Native(engine);
+		RegisterStdString_Native(engine, bIsPrimaryStringType);
 }
 
 END_AS_NAMESPACE

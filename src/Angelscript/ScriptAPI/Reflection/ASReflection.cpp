@@ -78,19 +78,19 @@ static void RegisterScriptReflectionCallable( asIScriptEngine& engine, const cha
 		asFUNCTION( Function_GetObjectType ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "string GetObjectName() const",
+		pszObjectName, AS_STRING_OBJNAME " GetObjectName() const",
 		asFUNCTION( Function_GetObjectName ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "string GetNamespace() const",
+		pszObjectName, AS_STRING_OBJNAME " GetNamespace() const",
 		asFUNCTION( Function_GetNamespace ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "string GetName() const",
+		pszObjectName, AS_STRING_OBJNAME " GetName() const",
 		asFUNCTION( Function_GetName ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "string GetDeclaration(const bool bIncludeObjectName = true, const bool bIncludeNamespace = false, const bool bIncludeParamNames = false) const",
+		pszObjectName, AS_STRING_OBJNAME " GetDeclaration(const bool bIncludeObjectName = true, const bool bIncludeNamespace = false, const bool bIncludeParamNames = false) const",
 		asFUNCTION( Function_GetDeclaration ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
@@ -194,11 +194,11 @@ static void RegisterScriptReflectionTypeInfo( asIScriptEngine& engine )
 		asFUNCTION( TypeInfo_Release ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "string GetNamespace() const",
+		pszObjectName, AS_STRING_OBJNAME " GetNamespace() const",
 		asFUNCTION( TypeInfo_GetNamespace ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "string GetName() const",
+		pszObjectName, AS_STRING_OBJNAME " GetName() const",
 		asFUNCTION( TypeInfo_GetName ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
@@ -210,11 +210,11 @@ static void RegisterScriptReflectionTypeInfo( asIScriptEngine& engine )
 		asFUNCTION( TypeInfo_GetMethodByIndex ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "Method@ GetMethodByDecl(const string& in szDecl, const bool bGetVirtual = true) const",
+		pszObjectName, "Method@ GetMethodByDecl(const " AS_STRING_OBJNAME "& in szDecl, const bool bGetVirtual = true) const",
 		asFUNCTION( TypeInfo_GetMethodByDecl ), asCALL_CDECL_OBJFIRST );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "Method@ GetMethodByName(const string& in szName, const bool bGetVirtual = true) const",
+		pszObjectName, "Method@ GetMethodByName(const " AS_STRING_OBJNAME "& in szName, const bool bGetVirtual = true) const",
 		asFUNCTION( TypeInfo_GetMethodByName ), asCALL_CDECL_OBJFIRST );
 }
 
@@ -225,7 +225,7 @@ static void RegisterScriptReflectionGroup( asIScriptEngine& engine )
 	engine.RegisterObjectType( pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "Function@ FindGlobalFunction(const string& in szName, bool fSearchByDecl = false)",
+		pszObjectName, "Function@ FindGlobalFunction(const " AS_STRING_OBJNAME "& in szName, bool fSearchByDecl = false)",
 		asMETHOD( IASReflectionGroup, FindGlobalFunction ), asCALL_THISCALL );
 
 	engine.RegisterObjectMethod(
@@ -237,7 +237,7 @@ static void RegisterScriptReflectionGroup( asIScriptEngine& engine )
 		asMETHOD( IASReflectionGroup, GetGlobalFunctionByIndex ), asCALL_THISCALL );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "TypeInfo@ FindTypeInfo(const string& in szName, bool fSearchByDecl = false)",
+		pszObjectName, "TypeInfo@ FindTypeInfo(const " AS_STRING_OBJNAME "& in szName, bool fSearchByDecl = false)",
 		asMETHOD( IASReflectionGroup, FindTypeInfo ), asCALL_THISCALL );
 
 	engine.RegisterObjectMethod(

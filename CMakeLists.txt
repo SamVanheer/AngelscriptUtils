@@ -164,6 +164,8 @@ endif()
 
 # Angelscript library
 
+set( AS_STRING_OBJNAME "string" CACHE STRING "The name of the object type used to represent strings" )
+
 add_definitions( -DAS_NO_EXCEPTIONS )
 
 add_subdirectory( external/Angelscript )
@@ -201,6 +203,10 @@ preprocess_sources()
 
 add_library( AngelscriptUtils STATIC ${PREP_SRCS} )
 
+target_compile_definitions( AngelscriptUtils PRIVATE
+	AS_STRING_OBJNAME="${AS_STRING_OBJNAME}"
+)
+
 set_target_properties( AngelscriptUtils PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
 
 #Create filters
@@ -224,6 +230,10 @@ preprocess_sources()
 
 #indicate the entry point for the executable
 add_executable( AngelscriptUtilsTest ${PREP_SRCS} )
+
+target_compile_definitions( AngelscriptUtilsTest PRIVATE
+	AS_STRING_OBJNAME="${AS_STRING_OBJNAME}"
+)
 
 set_target_properties( AngelscriptUtilsTest PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
 

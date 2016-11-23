@@ -180,7 +180,7 @@ static void RegisterScriptCEventManager( asIScriptEngine& engine )
 		asMETHOD( CASEventManager, GetEventByIndex ), asCALL_THISCALL );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "CEvent@ FindEventByName(const string& in szName)",
+		pszObjectName, "CEvent@ FindEventByName(const " AS_STRING_OBJNAME "& in szName)",
 		asMETHOD( CASEventManager, FindEventByName ), asCALL_THISCALL );
 }
 

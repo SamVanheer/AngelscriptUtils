@@ -279,7 +279,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 						if( pType )
 						{
 							//It's a string
-							if( strcmp( pType->GetName(), "string" ) == 0 )
+							if( strcmp( pType->GetName(), AS_STRING_OBJNAME ) == 0 )
 							{
 								const auto& szString = *reinterpret_cast<const std::string*>( pValue );
 

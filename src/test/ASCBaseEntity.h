@@ -52,7 +52,7 @@ void RegisterScriptBaseEntity( asIScriptEngine& engine, const char* const pszObj
 
 	engine.RegisterObjectMethod( pszObjectName, "void Spawn()", asFUNCTION( BaseEntity_Spawn<BASECLASS> ), asCALL_CDECL_OBJFIRST );
 
-	engine.RegisterObjectMethod( pszObjectName, "int ScheduleOfType(const string& in szName)", asFUNCTION( BaseEntity_ScheduleOfType<BASECLASS> ), asCALL_CDECL_OBJFIRST );
+	engine.RegisterObjectMethod( pszObjectName, "int ScheduleOfType(const " AS_STRING_OBJNAME "& in szName)", asFUNCTION( BaseEntity_ScheduleOfType<BASECLASS> ), asCALL_CDECL_OBJFIRST );
 }
 
 /**

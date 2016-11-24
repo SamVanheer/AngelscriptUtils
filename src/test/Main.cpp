@@ -286,7 +286,7 @@ int main( int iArgc, char* pszArgV[] )
 				std::string szString = "Hello World!\n";
 
 				//Note: main takes a const string& in, so pass the address here. References are handled as pointers.
-				as::Call( pFunction, &szString );
+				as::Call( pFunction, &szString, false );
 
 				if( USE_EVENT_MANAGER )
 				{
@@ -296,7 +296,7 @@ int main( int iArgc, char* pszArgV[] )
 					//Trigger the event.
 					CASEventCaller caller;
 
-					caller.Call( event, pEngine, &szString );
+					caller.Call( event, pEngine, &szString, true );
 				}
 			}
 

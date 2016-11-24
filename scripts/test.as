@@ -113,13 +113,16 @@ class Baz
 }
 }
 
-int main( const string& in szString )
+int main( const string& in szString, const bool bInEvent )
 {
 	Print( "foo\nbar\n" );
 	Print( szString );
 	
-	Events::Main.Hook( MainFunc );
-	Events::Main.Hook( @MainHook( Foo().Func ) );
+	if( !bInEvent )
+	{
+		Events::Main.Hook( MainFunc );
+		Events::Main.Hook( @MainHook( Foo().Func ) );
+	}
 	
 	CEvent@ pEvent = g_EventManager.FindEventByName( "Main" );
 	

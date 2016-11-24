@@ -36,7 +36,7 @@ public:
 	/**
 	*	Type of the return value.
 	*/
-	typedef typename RETURNTYPE ReturnType_t;
+	typedef RETURNTYPE ReturnType_t;
 
 public:
 	//Can be instanced and have member vars for call specific state.

@@ -20,6 +20,64 @@ class CASModule;
 */
 
 /**
+*	Stop modes for events. Allows you to specify whether events should continue executing after a function has handled it.
+*/
+enum class EventStopMode
+{
+	/**
+	*	Call all functions no matter what.
+	*/
+	CALL_ALL,
+
+	/**
+	*	If any function in a module has handled the event, stop after executing the last function in that module.
+	*/
+	MODULE_HANDLED,
+
+	/**
+	*	Stop as soon as a function has handled it.
+	*/
+	ON_HANDLED
+};
+
+/**
+*	Return codes for functions that hook into an event.
+*/
+enum class HookReturnCode
+{
+	/**
+	*	Continue executing.
+	*/
+	CONTINUE,
+
+	/**
+	*	The function handled the event, stop.
+	*/
+	HANDLED
+};
+
+/**
+*	Result codes for hook invocation.
+*/
+enum class HookCallResult
+{
+	/**
+	*	An error occurred while executing the hook.
+	*/
+	FAILED,
+
+	/**
+	*	No functions handled the hook.
+	*/
+	NONE_HANDLED,
+
+	/**
+	*	One or more functions handled the hook.
+	*/
+	HANDLED
+};
+
+/**
 *	Represents an event that script functions can hook into.
 */
 class CASEvent final : public CASBaseEvent
@@ -52,6 +110,11 @@ public:
 	const char* GetCategory() const { return m_pszCategory; }
 
 	/**
+	*	@return Stop mode.
+	*/
+	EventStopMode GetStopMode() const { return m_StopMode; }
+
+	/**
 	*	Dumps all hooked functions to stdout.
 	*/
 	void DumpHookedFunctions() const;
@@ -61,10 +124,18 @@ private:
 	const char* const m_pszArguments;
 	const char* const m_pszCategory;
 
+	const EventStopMode m_StopMode;
+
 private:
 	CASEvent( const CASEvent& ) = delete;
 	CASEvent& operator=( const CASEvent& ) = delete;
 };
+
+/**
+*	Registers the HookReturnCode enum.
+*	@param engine Script engine.
+*/
+void RegisterScriptHookReturnCode( asIScriptEngine& engine );
 
 /**
 *	Registers the CASEvent class.

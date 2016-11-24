@@ -7,9 +7,8 @@
 
 #include "CASBaseEvent.h"
 
-CASBaseEvent::CASBaseEvent( const asDWORD accessMask, const EventStopMode stopMode )
+CASBaseEvent::CASBaseEvent( const asDWORD accessMask )
 	: m_AccessMask( accessMask )
-	, m_StopMode( stopMode )
 {
 	assert( accessMask != 0 );
 }
@@ -45,6 +44,8 @@ bool CASBaseEvent::AddFunction( asIScriptFunction* pFunction )
 		if( auto pContext = asGetActiveContext() )
 		{
 			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+
+			pContext->SetException( "Cannot add event hooks during the event's invocation" );
 		}
 
 		if( !pszFile )
@@ -104,6 +105,8 @@ void CASBaseEvent::RemoveFunction( asIScriptFunction* pFunction )
 		if( auto pContext = asGetActiveContext() )
 		{
 			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+
+			pContext->SetException( "Cannot remove event hooks during the event's invocation" );
 		}
 
 		if( !pszFile )
@@ -159,6 +162,8 @@ void CASBaseEvent::RemoveFunctionsOfModule( CASModule* pModule )
 		if( auto pContext = asGetActiveContext() )
 		{
 			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+
+			pContext->SetException( "Cannot remove event hooks during the event's invocation" );
 		}
 
 		if( !pszFile )
@@ -192,6 +197,12 @@ void CASBaseEvent::RemoveAllFunctions()
 	{
 		assert( !"CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!" );
 		as::Critical( "CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!\n" );
+
+		if( auto pContext = asGetActiveContext() )
+		{
+			pContext->SetException( "Cannot remove event hooks during the event's invocation" );
+		}
+
 		return;
 	}
 
@@ -286,122 +297,6 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 	return true;
 }
 
-HookCallResult CASBaseEvent::VCall( asIScriptContext* pContext, CallFlags_t flags, va_list list )
-{
-	assert( pContext );
-
-	if( !pContext )
-		return HookCallResult::FAILED;
-
-	CASContext ctx( *pContext );
-
-	bool bSuccess = true;
-
-	HookReturnCode returnCode = HookReturnCode::CONTINUE;
-
-	asIScriptModule* pLastModule = nullptr;
-
-	++m_iInCallCount;
-
-	for( auto pFunc : m_Functions )
-	{
-		if( m_StopMode == EventStopMode::MODULE_HANDLED && returnCode == HookReturnCode::HANDLED )
-		{
-			//A hook in the last module handled it, so stop.
-			if( pLastModule && pLastModule != pFunc->GetModule() )
-				break;
-		}
-
-		pLastModule = pFunc->GetModule();
-
-		CASFunction func( *pFunc, ctx );
-
-		const auto successCall = func.VCall( flags, list );
-
-		bSuccess = successCall && bSuccess;
-
-		//Only check if a HANDLED value was returned if we're still continuing.
-		if( successCall && returnCode == HookReturnCode::CONTINUE )
-		{
-			bSuccess = func.GetReturnValue( &returnCode ) && bSuccess;
-		}
-
-		if( returnCode == HookReturnCode::HANDLED )
-		{
-			if( m_StopMode == EventStopMode::ON_HANDLED )
-				break;
-		}
-	}
-
-	--m_iInCallCount;
-
-	assert( m_iInCallCount >= 0 );
-
-	if( !bSuccess )
-		return HookCallResult::FAILED;
-
-	return returnCode == HookReturnCode::HANDLED ? HookCallResult::HANDLED : HookCallResult::NONE_HANDLED;
-}
-
-HookCallResult CASBaseEvent::VCall( asIScriptContext* pContext, va_list list )
-{
-	return VCall( pContext, CallFlag::NONE, list );
-}
-
-HookCallResult CASBaseEvent::VCall( CallFlags_t flags, va_list list )
-{
-	if( m_Functions.empty() )
-		return HookCallResult::NONE_HANDLED;
-
-	auto pEngine = m_Functions[ 0 ]->GetEngine();
-	auto pContext = pEngine->RequestContext();
-
-	auto success = VCall( pContext, flags, list );
-
-	pEngine->ReturnContext( pContext );
-
-	return success;
-}
-
-HookCallResult CASBaseEvent::Call( asIScriptContext* pContext, CallFlags_t flags, ... )
-{
-	va_list list;
-
-	va_start( list, flags );
-
-	auto success = VCall( pContext, flags, list );
-
-	va_end( list );
-
-	return success;
-}
-
-HookCallResult CASBaseEvent::Call( asIScriptContext* pContext, ... )
-{
-	va_list list;
-
-	va_start( list, pContext );
-
-	auto success = VCall( pContext, list );
-
-	va_end( list );
-
-	return success;
-}
-
-HookCallResult CASBaseEvent::Call( CallFlags_t flags, ... )
-{
-	va_list list;
-
-	va_start( list, flags );
-
-	auto success = VCall( flags, list );
-
-	va_end( list );
-
-	return success;
-}
-
 void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 {
 	if( pszName )
@@ -413,7 +308,7 @@ void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 
 		auto pModule = pFunc->GetModule();
 
-		decltype( pFunc ) pActualFunc = pFunc;
+		auto pActualFunc = pFunc;
 
 		if( !pModule )
 		{
@@ -442,21 +337,6 @@ void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 	}
 
 	std::cout << "End functions" << std::endl;
-}
-
-void RegisterScriptHookReturnCode( asIScriptEngine& engine )
-{
-	const char* const pszObjectName = "HookReturnCode";
-
-	int result = engine.RegisterEnum( pszObjectName );
-
-	assert( result >= 0 );
-
-	result = engine.RegisterEnumValue( pszObjectName, "HOOK_CONTINUE", static_cast<int>( HookReturnCode::CONTINUE ) );
-	assert( result >= 0 );
-
-	result = engine.RegisterEnumValue( pszObjectName, "HOOK_HANDLED", static_cast<int>( HookReturnCode::HANDLED ) );
-	assert( result >= 0 );
 }
 
 void RegisterScriptCBaseEvent( asIScriptEngine& engine )

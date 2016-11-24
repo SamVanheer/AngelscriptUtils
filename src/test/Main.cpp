@@ -4,6 +4,7 @@
 
 #include "Angelscript/CASManager.h"
 #include "Angelscript/CASEvent.h"
+#include "Angelscript/CASEventCaller.h"
 #include "Angelscript/CASModule.h"
 #include "Angelscript/IASInitializer.h"
 #include "Angelscript/IASModuleBuilder.h"
@@ -293,7 +294,9 @@ int main( int iArgc, char* pszArgV[] )
 					event.AddFunction( pFunction );
 
 					//Trigger the event.
-					event.Call( CallFlag::NONE, &szString );
+					CASEventCaller caller;
+
+					caller.Call( event, pEngine, &szString );
 				}
 			}
 

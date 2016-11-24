@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "CASModuleManager.h"
-#include "CASEventManager.h"
+#include "event/CASEventManager.h"
 
 class asIScriptEngine;
 struct asSMessageInfo;

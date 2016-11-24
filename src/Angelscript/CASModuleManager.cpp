@@ -3,7 +3,7 @@
 
 #include "add_on/scriptbuilder.h"
 
-#include "CASEventManager.h"
+#include "event/CASEventManager.h"
 
 #include "CASModule.h"
 

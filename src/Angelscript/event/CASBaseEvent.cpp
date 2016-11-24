@@ -1,9 +1,10 @@
 #include <algorithm>
+#include <cassert>
 #include <iostream>
 
-#include "util/ASLogging.h"
+#include "Angelscript/util/ASLogging.h"
 
-#include "CASModule.h"
+#include "Angelscript/CASModule.h"
 
 #include "CASBaseEvent.h"
 

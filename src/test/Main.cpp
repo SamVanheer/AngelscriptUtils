@@ -3,8 +3,8 @@
 #include <angelscript.h>
 
 #include "Angelscript/CASManager.h"
-#include "Angelscript/CASEvent.h"
-#include "Angelscript/CASEventCaller.h"
+#include "Angelscript/event/CASEvent.h"
+#include "Angelscript/event/CASEventCaller.h"
 #include "Angelscript/CASModule.h"
 #include "Angelscript/IASInitializer.h"
 #include "Angelscript/IASModuleBuilder.h"

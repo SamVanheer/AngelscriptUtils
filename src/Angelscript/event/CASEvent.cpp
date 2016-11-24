@@ -2,9 +2,9 @@
 #include <cassert>
 #include <iostream>
 
-#include "wrapper/CASContext.h"
+#include "Angelscript/wrapper/CASContext.h"
 
-#include "CASModule.h"
+#include "Angelscript/CASModule.h"
 
 #include "CASEvent.h"
 

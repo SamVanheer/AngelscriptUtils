@@ -7,7 +7,7 @@
 
 #include <angelscript.h>
 
-#include "wrapper/ASCallable.h"
+#include "Angelscript/wrapper/ASCallable.h"
 
 #include "CASBaseEvent.h"
 

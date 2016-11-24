@@ -1,13 +1,4 @@
 add_sources(
-	CASBaseEvent.h
-	CASBaseEvent.cpp
-	CASBaseEventCaller.h
-	CASEvent.h
-	CASEvent.cpp
-	CASEventCaller.h
-	CASEventCaller.cpp
-	CASEventManager.h
-	CASEventManager.cpp
 	CASManager.h
 	CASManager.cpp
 	CASModuleDescriptor.h
@@ -21,11 +12,6 @@ add_sources(
 )
 
 add_includes(
-	CASBaseEvent.h
-	CASBaseEventCaller.h
-	CASEvent.h
-	CASEventCaller.h
-	CASEventManager.h
 	CASManager.h
 	CASModuleDescriptor.h
 	CASModule.h
@@ -35,6 +21,7 @@ add_includes(
 )
 
 add_subdirectory( add_on )
+add_subdirectory( event )
 add_subdirectory( ScriptAPI )
 add_subdirectory( util )
 add_subdirectory( wrapper )

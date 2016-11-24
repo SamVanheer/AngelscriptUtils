@@ -4,8 +4,8 @@
 #include <limits>
 #include <string>
 
-#include "util/ASUtil.h"
-#include "util/StringUtils.h"
+#include "Angelscript/util/ASUtil.h"
+#include "Angelscript/util/StringUtils.h"
 
 #include "CASEvent.h"
 

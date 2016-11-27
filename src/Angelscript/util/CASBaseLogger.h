@@ -15,6 +15,12 @@ public:
 	CASBaseLogger() = default;
 	virtual ~CASBaseLogger() = default;
 
+	CASBaseLogger( const CASBaseLogger& other ) = default;
+	CASBaseLogger& operator=( const CASBaseLogger& other ) = default;
+
+	CASBaseLogger( CASBaseLogger&& other ) = default;
+	CASBaseLogger& operator=( CASBaseLogger&& other ) = default;
+
 	//Overridden so the correct implementation is called.
 	void AddRef() const override
 	{
@@ -101,10 +107,6 @@ public:
 	{
 		this->VLog( ASLog::DIAGNOSTIC, pszFormat, list );
 	}
-
-private:
-	CASBaseLogger( const CASBaseLogger& ) = delete;
-	CASBaseLogger& operator=( const CASBaseLogger& ) = delete;
 };
 
 #endif //ANGELSCRIPT_UTIL_CASBASELOGGER_H

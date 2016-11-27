@@ -458,6 +458,8 @@ int main( int iArgc, char* pszArgV[] )
 
 			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
 
+			manager.GetEventManager()->DumpHookedFunctions();
+
 			//Remove the module.
 			manager.GetModuleManager().RemoveModule( pModule );
 		}

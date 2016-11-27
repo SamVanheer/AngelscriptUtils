@@ -22,7 +22,7 @@ CASEvent::CASEvent( const char* const pszName, const char* pszArguments, const c
 
 void CASEvent::DumpHookedFunctions() const
 {
-	CASBaseEvent::DumpHookedFunctions( ( std::string( "Event\"" ) + GetCategory() + "::" + GetName() + '(' + GetArguments() + ")\"" ).c_str() );
+	CASBaseEvent::DumpHookedFunctions( ( std::string( "Event \"" ) + GetCategory() + "::" + GetName() + '(' + GetArguments() + ")\"" ).c_str() );
 }
 
 void RegisterScriptHookReturnCode( asIScriptEngine& engine )

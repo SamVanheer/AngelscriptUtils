@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 
 #include "Angelscript/util/ASLogging.h"
 
@@ -290,7 +289,7 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 {
 	if( pszName )
-		std::cout << pszName << std::endl;
+		as::Msg( "%s\n", pszName );
 
 	for( size_t uiIndex = 0; uiIndex < GetFunctionCount(); ++uiIndex )
 	{
@@ -313,20 +312,20 @@ void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 
 		if( !pActualFunc )
 		{
-			std::cout << "Null function!" << std::endl;
+			as::Msg( "Null function!\n" );
 			continue;
 		}
 
 		if( !pModule )
 		{
-			std::cout << "Null module!" << std::endl;
+			as::Msg( "Null module!\n" );
 			continue;
 		}
 
-		std::cout << "Module \"" << pModule->GetName() << "\", \"" << pActualFunc->GetNamespace() << "::" << pActualFunc->GetName() << "\"" << std::endl;
+		as::Msg( "Module \"%s\", \"%s::%s\"\n", pModule->GetName(), pActualFunc->GetNamespace(), pActualFunc->GetName() );
 	}
 
-	std::cout << "End functions" << std::endl;
+	as::Msg( "End functions\n" );
 }
 
 void CASBaseEvent::ClearRemovedHooks()

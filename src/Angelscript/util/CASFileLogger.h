@@ -16,7 +16,7 @@
 *	Timestamp mode will prepend a timestamp to each message.
 *	Both modes can be activated separately and used together.
 *	The default extension is ".log".
-*	Should be heap allocated, override Release if you want to use a stack allocated version.
+*	Should be heap allocated, override AddRef and Release if you want to use a stack allocated version.
 */
 class CASFileLogger : public CASBaseLogger<IASLogger>
 {
@@ -27,7 +27,7 @@ public:
 	{
 		enum LogFlag : Flags_t
 		{
-			NONE			= 0,
+			NONE				= 0,
 
 			/**
 			*	Append a datestamp to the filename.
@@ -55,11 +55,6 @@ public:
 	CASFileLogger( const char* pszFilename, const Flags_t flags = Flag::NONE );
 
 	~CASFileLogger() = default;
-
-	void Release() override
-	{
-		delete this;
-	}
 
 	/**
 	*	@return The filename.

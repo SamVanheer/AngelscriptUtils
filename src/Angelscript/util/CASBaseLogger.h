@@ -2,17 +2,30 @@
 #define ANGELSCRIPT_UTIL_CASBASELOGGER_H
 
 #include "IASLogger.h"
+#include "CASBaseClass.h"
 
 /**
 *	Base class for logger implementations that forwards message calls to the main messager handler method.
-*	@tparam BASECLASS Class to inherit from. Usually IASLog, but can be another interface.
+*	@tparam BASECLASS Class to inherit from. Usually IASLogger, but can be another interface.
 */
 template<typename BASECLASS>
-class CASBaseLogger : public BASECLASS
+class CASBaseLogger : public BASECLASS, CASAtomicRefCountedBaseClass
 {
 public:
 	CASBaseLogger() = default;
 	virtual ~CASBaseLogger() = default;
+
+	//Overridden so the correct implementation is called.
+	void AddRef() const override
+	{
+		CASAtomicRefCountedBaseClass::AddRef();
+	}
+
+	void Release() const override
+	{
+		if( CASAtomicRefCountedBaseClass::InternalRelease() )
+			delete this;
+	}
 
 	void Log( LogLevel_t logLevel, const char* pszFormat, ... ) override
 	{

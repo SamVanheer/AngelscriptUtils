@@ -222,7 +222,12 @@ public:
 	{
 	}
 
-	void Release() override
+	void AddRef() const override
+	{
+		//Do nothing
+	}
+
+	void Release() const override
 	{
 		//Do nothing
 	}
@@ -241,6 +246,7 @@ public:
 		std::cout << szBuffer;
 	}
 
+	//No need to call Release on this because it'll destruct in this class's destructor.
 	CASFileLogger m_FileLogger;
 };
 

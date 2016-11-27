@@ -206,16 +206,11 @@ inline T* SetRefPointer( T*& pPointer, T* const pObj, const bool bTransferOwners
 		ADAPTER::Release( pPointer );
 	}
 
-	if( pObj )
-	{
-		pPointer = pObj;
+	pPointer = pObj;
 
-		if( !bTransferOwnership )
-			ADAPTER::AddRef( pPointer );
-	}
-	else
+	if( pPointer && !bTransferOwnership )
 	{
-		pPointer = nullptr;
+		ADAPTER::AddRef( pPointer );
 	}
 
 	return pPointer;

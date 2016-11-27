@@ -1,3 +1,5 @@
+#include "Angelscript/util/ASUtil.h"
+
 #include "ASLogging.h"
 
 namespace as
@@ -14,10 +16,7 @@ IASLogger* GetLogger()
 
 void SetLogger( IASLogger* pLogger )
 {
-	if( g_pLogger )
-		g_pLogger->Release();
-
-	g_pLogger = pLogger;
+	as::SetRefPointer( g_pLogger, pLogger );
 }
 
 void Log( LogLevel_t logLevel, const char* pszFormat, ... )

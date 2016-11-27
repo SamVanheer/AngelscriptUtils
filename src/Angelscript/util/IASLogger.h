@@ -49,9 +49,14 @@ public:
 	virtual ~IASLogger() = 0;
 
 	/**
-	*	Called when the logger is being removed.
+	*	Call this when you store a strong reference to this logger.
 	*/
-	virtual void Release() = 0;
+	virtual void AddRef() const = 0;
+
+	/**
+	*	Call this when you release a strong reference to this logger.
+	*/
+	virtual void Release() const = 0;
 
 	/**
 	*	Logs a message if the given log level is enabled.

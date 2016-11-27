@@ -11,12 +11,12 @@
 namespace as
 {
 /**
-*	Gets the current logger, if any.
+*	Gets the current logger, if any. Does not increment the reference count.
 */
 IASLogger* GetLogger();
 
 /**
-*	Sets the current logger. Can be null.
+*	Sets the current logger. Can be null. Adds a reference to the logger.
 */
 void SetLogger( IASLogger* pLogger );
 

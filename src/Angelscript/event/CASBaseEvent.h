@@ -23,7 +23,7 @@ class CASModule;
 class CASBaseEvent
 {
 protected:
-	template<typename SUBCLASS, typename EVENTTYPE, typename RETURNTYPE>
+	template<typename SUBCLASS, typename EVENTTYPE, typename RETURNTYPE, RETURNTYPE FAILEDRETURNVAL>
 	friend class CASBaseEventCaller;
 
 private:

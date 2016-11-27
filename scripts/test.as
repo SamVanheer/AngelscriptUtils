@@ -113,6 +113,16 @@ class Baz
 }
 }
 
+class HookEvent
+{
+	HookReturnCode Hook( const string& in szString )
+	{
+		Print( "HookEvent lookup works\n" );
+		
+		return HOOK_CONTINUE;
+	}
+}
+
 int main( const string& in szString, const bool bInEvent )
 {
 	Print( "foo\nbar\n" );
@@ -122,6 +132,8 @@ int main( const string& in szString, const bool bInEvent )
 	{
 		Events::Main.Hook( MainFunc );
 		Events::Main.Hook( @MainHook( Foo().Func ) );
+		
+		g_EventManager.HookEvent( "Main", @MainHook( HookEvent().Hook ) );
 	}
 	
 	CEvent@ pEvent = g_EventManager.FindEventByName( "Main" );

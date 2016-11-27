@@ -66,6 +66,57 @@ CASEvent* CASEventManager::FindEventByName( const std::string& szName )
 	return nullptr;
 }
 
+bool CASEventManager::HookEvent( const std::string& szName, void* pValue, const int iTypeId )
+{
+	auto pEvent = FindEventByName( szName );
+
+	if( !pEvent )
+	{
+		//TODO: refactor this into a helper function - Solokiller
+		const char* pszFile = nullptr;
+		int iLine = 0;
+		int iColumn = 0;
+
+		if( auto pContext = asGetActiveContext() )
+		{
+			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+		}
+
+		if( !pszFile )
+			pszFile = "Unknown";
+
+		as::Critical( "CEventManager::HookEvent: %s(%d, %d): Couldn't find event \"%s\"!\n", pszFile, iLine, iColumn, szName.c_str() );
+		return false;
+	}
+
+	return pEvent->Hook( pValue, iTypeId );
+}
+
+void CASEventManager::UnhookEvent( const std::string& szName, void* pValue, const int iTypeId )
+{
+	auto pEvent = FindEventByName( szName );
+
+	if( !pEvent )
+	{
+		//TODO: refactor this into a helper function - Solokiller
+		const char* pszFile = nullptr;
+		int iLine = 0;
+		int iColumn = 0;
+
+		if( auto pContext = asGetActiveContext() )
+		{
+			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+		}
+
+		if( !pszFile )
+			pszFile = "Unknown";
+
+		as::Critical( "CEventManager::UnhookEvent: %s(%d, %d): Couldn't find event \"%s\"!\n", pszFile, iLine, iColumn, szName.c_str() );
+	}
+
+	pEvent->Unhook( pValue, iTypeId );
+}
+
 bool CASEventManager::AddEvent( CASEvent* pEvent )
 {
 	assert( pEvent );
@@ -182,6 +233,14 @@ static void RegisterScriptCEventManager( asIScriptEngine& engine )
 	engine.RegisterObjectMethod(
 		pszObjectName, "CEvent@ FindEventByName(const " AS_STRING_OBJNAME "& in szName)",
 		asMETHOD( CASEventManager, FindEventByName ), asCALL_THISCALL );
+
+	engine.RegisterObjectMethod(
+		pszObjectName, "bool HookEvent(const " AS_STRING_OBJNAME "& in szName, ?& in pFunction)",
+		asMETHOD( CASEventManager, HookEvent ), asCALL_THISCALL );
+
+	engine.RegisterObjectMethod(
+		pszObjectName, "void UnhookEvent(const " AS_STRING_OBJNAME "& in szName, ?& in pFunction)",
+		asMETHOD( CASEventManager, UnhookEvent ), asCALL_THISCALL );
 }
 
 void RegisterScriptEventAPI( asIScriptEngine& engine )

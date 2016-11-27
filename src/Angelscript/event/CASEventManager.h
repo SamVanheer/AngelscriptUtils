@@ -66,6 +66,27 @@ public:
 	CASEvent* FindEventByName( const std::string& szName );
 
 	/**
+	*	Hooks a named event. The given name must specify its category if it has one.
+	*	Format: \<Category\>::\<Name\>
+	*	May optionally specify Events:: as the start of the category.
+	*	@param szName Name of the event.
+	*	@param pValue Function pointer.
+	*	@param iTypeId Function pointer type id.
+	*	@return true on success, false otherwise.
+	*/
+	bool HookEvent( const std::string& szName, void* pValue, const int iTypeId );
+
+	/**
+	*	Unhooks a named event. The given name must specify its category if it has one.
+	*	Format: \<Category\>::\<Name\>
+	*	May optionally specify Events:: as the start of the category.
+	*	@param szName Name of the event.
+	*	@param pValue Function pointer.
+	*	@param iTypeId Function pointer type id.
+	*/
+	void UnhookEvent( const std::string& szName, void* pValue, const int iTypeId );
+
+	/**
 	*	Adds an event.
 	*	@param pEvent Event to add.
 	*	@return true if the event was added, false otherwise.

@@ -1,14 +1,7 @@
-#include <type_traits>
-
 #include "CASEventCaller.h"
 
 CASEventCaller::ReturnType_t CASEventCaller::CallEvent( EventType_t& event, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 {
-	assert( pContext );
-
-	if( !pContext )
-		return HookCallResult::FAILED;
-
 	CASContext ctx( *pContext );
 
 	bool bSuccess = true;
@@ -17,19 +10,19 @@ CASEventCaller::ReturnType_t CASEventCaller::CallEvent( EventType_t& event, asIS
 
 	asIScriptModule* pLastModule = nullptr;
 
-	IncrementCallCount( event );
-
-	const auto functionCount = event.GetFunctionCount();
-
-	const auto stopMode = event.GetStopMode();
-
 	decltype( event.GetFunctionByIndex( 0 ) ) pFunc;
 
-	for( std::remove_const<decltype( functionCount )>::type index = 0; index < functionCount; ++index )
+	for( decltype( event.GetFunctionCount() ) index = 0; index < event.GetFunctionCount(); ++index )
 	{
 		pFunc = event.GetFunctionByIndex( index );
 
-		if( stopMode == EventStopMode::MODULE_HANDLED && returnCode == HookReturnCode::HANDLED )
+		if( !pFunc )
+		{
+			//Function was removed in a hook call, skip.
+			continue;
+		}
+
+		if( event.GetStopMode() == EventStopMode::MODULE_HANDLED && returnCode == HookReturnCode::HANDLED )
 		{
 			//A hook in the last module handled it, so stop.
 			if( pLastModule && pLastModule != pFunc->GetModule() )
@@ -40,7 +33,12 @@ CASEventCaller::ReturnType_t CASEventCaller::CallEvent( EventType_t& event, asIS
 
 		CASFunction func( *pFunc, ctx );
 
+		//The hook might remove itself from the list, so make sure we still have a strong reference.
+		pFunc->AddRef();
+
 		const auto successCall = func.VCall( flags, list );
+
+		pFunc->Release();
 
 		bSuccess = successCall && bSuccess;
 
@@ -52,14 +50,10 @@ CASEventCaller::ReturnType_t CASEventCaller::CallEvent( EventType_t& event, asIS
 
 		if( returnCode == HookReturnCode::HANDLED )
 		{
-			if( stopMode == EventStopMode::ON_HANDLED )
+			if( event.GetStopMode() == EventStopMode::ON_HANDLED )
 				break;
 		}
 	}
-
-	DecrementCallCount( event );
-
-	assert( GetCallCount( event ) >= 0 );
 
 	if( !bSuccess )
 		return HookCallResult::FAILED;

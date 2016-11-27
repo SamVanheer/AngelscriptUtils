@@ -119,6 +119,8 @@ class HookEvent
 	{
 		Print( "HookEvent lookup works\n" );
 		
+		g_EventManager.UnhookEvent( "Main", @MainHook( HookEvent().Hook ) );
+		
 		return HOOK_CONTINUE;
 	}
 }

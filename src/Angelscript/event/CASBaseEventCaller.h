@@ -1,6 +1,7 @@
 #ifndef ANGELSCRIPT_CASBASEEVENTCALLER_H
 #define ANGELSCRIPT_CASBASEEVENTCALLER_H
 
+#include <cassert>
 #include <cstdarg>
 
 #include <angelscript.h>
@@ -56,7 +57,24 @@ public:
 	*/
 	inline ReturnType_t VCall( EventType_t& event, asIScriptContext* pContext, CallFlags_t flags, va_list list )
 	{
-		return static_cast<SubClass_t*>( this )->CallEvent( event, pContext, flags, list );
+		//Take care of some common bookkeeping here.
+		assert( pContext );
+
+		if( !pContext )
+			return HookCallResult::FAILED;
+
+		IncrementCallCount( event );
+
+		auto result = static_cast<SubClass_t*>( this )->CallEvent( event, pContext, flags, list );
+
+		DecrementCallCount( event );
+
+		assert( GetCallCount( event ) >= 0 );
+
+		//Clear any removed hooks.
+		event.ClearRemovedHooks();
+
+		return result;
 	}
 
 	/**

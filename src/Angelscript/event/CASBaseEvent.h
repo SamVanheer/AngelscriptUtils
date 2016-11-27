@@ -125,6 +125,11 @@ public:
 	*/
 	void DumpHookedFunctions( const char* const pszName ) const;
 
+	/**
+	*	@return Whether this event is currently being triggered.
+	*/
+	bool IsTriggering() const { return m_iInCallCount != 0; }
+
 protected:
 	/**
 	*	@return The call count.
@@ -149,6 +154,12 @@ protected:
 	{
 		--m_iInCallCount;
 	}
+
+	/**
+	*	If a script called Unhook while in this event's hook invocation it'll leave behind a null pointer.
+	*	This cleans up those hooks.
+	*/
+	void ClearRemovedHooks();
 
 private:
 	const asDWORD m_AccessMask;

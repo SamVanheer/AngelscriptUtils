@@ -36,7 +36,7 @@ bool CASBaseEvent::AddFunction( asIScriptFunction* pFunction )
 	assert( pFunction );
 
 	//Don't add functions while this event is being invoked.
-	if( m_iInCallCount != 0 )
+	if( IsTriggering() )
 	{
 		const char* pszFile = nullptr;
 		int iLine = 0;
@@ -96,27 +96,6 @@ bool CASBaseEvent::Hook( void* pValue, const int iTypeId )
 
 void CASBaseEvent::RemoveFunction( asIScriptFunction* pFunction )
 {
-	//Don't remove functions while this event is being invoked.
-	if( m_iInCallCount != 0 )
-	{
-		const char* pszFile = nullptr;
-		int iLine = 0;
-		int iColumn = 0;
-
-		if( auto pContext = asGetActiveContext() )
-		{
-			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
-
-			pContext->SetException( "Cannot remove event hooks during the event's invocation" );
-		}
-
-		if( !pszFile )
-			pszFile = "Unknown";
-
-		as::Critical( "CBaseEvent::RemoveFunction: %s(%d, %d): Cannot remove function while invoking event!\n", pszFile, iLine, iColumn );
-		return;
-	}
-
 	if( !pFunction )
 		return;
 
@@ -127,7 +106,16 @@ void CASBaseEvent::RemoveFunction( asIScriptFunction* pFunction )
 
 	( *it )->Release();
 
-	m_Functions.erase( it );
+	if( IsTriggering() )
+	{
+		//Currently triggering, mark as removed.
+		*it = nullptr;
+	}
+	else
+	{
+		//Remove now.
+		m_Functions.erase( it );
+	}
 }
 
 void CASBaseEvent::Unhook( void* pValue, const int iTypeId )
@@ -152,7 +140,7 @@ void CASBaseEvent::RemoveFunctionsOfModule( CASModule* pModule )
 	assert( pModule );
 
 	//This method should never be called while in an event invocation.
-	if( m_iInCallCount != 0 )
+	if( IsTriggering() )
 	{
 		assert( !"CBaseEvent::RemoveFunctionsOfModule: Module hooks should not be removed while invoking events!" );
 
@@ -177,15 +165,16 @@ void CASBaseEvent::RemoveFunctionsOfModule( CASModule* pModule )
 	if( !pModule )
 		return;
 
+	//These functions might be null in some edge cases due to hooks being removed in event calls.
 	auto it = std::remove_if( m_Functions.begin(), m_Functions.end(), [ = ]( const asIScriptFunction* pFunction )
 	{
-		auto pOther = GetModuleFromScriptFunction( pFunction );
-		return pModule == GetModuleFromScriptFunction( pFunction );
+		return !pFunction || pModule == GetModuleFromScriptFunction( pFunction );
 	} );
 
 	for( auto it2 = it; it2 < m_Functions.end(); ++it2 )
 	{
-		( *it2 )->Release();
+		if( *it2 )
+			( *it2 )->Release();
 	}
 
 	m_Functions.erase( it, m_Functions.end() );
@@ -338,6 +327,25 @@ void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 	}
 
 	std::cout << "End functions" << std::endl;
+}
+
+void CASBaseEvent::ClearRemovedHooks()
+{
+	//Can happen when recursively triggering events.
+	if( IsTriggering() )
+		return;
+
+	for( auto it = m_Functions.begin(); it != m_Functions.end(); )
+	{
+		if( !( *it ) )
+		{
+			it = m_Functions.erase( it );
+		}
+		else
+		{
+			++it;
+		}
+	}
 }
 
 void RegisterScriptCBaseEvent( asIScriptEngine& engine )

@@ -7,6 +7,8 @@
 
 #include <angelscript.h>
 
+#include "Angelscript/util/Platform.h"
+
 #include "Angelscript/util/ContextUtils.h"
 
 #include "CASContext.h"
@@ -48,7 +50,7 @@ namespace as
 *	@return true on success, false otherwise.
 */
 template<typename CALLABLE, typename ARGS>
-bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args )
+bool CallFunction( CALLABLE& callable, CallFlags_t ASUNREFERENCED( flags ), const ARGS& args )
 {
 	auto pContext = callable.GetContext().GetContext();
 
@@ -149,7 +151,7 @@ protected:
 	*	@param iResult Result of the asIScriptContext::Execute call.
 	*	@return true if the call should continue, false otherwise.
 	*/
-	bool PostExecute( const int iResult ) { return true; }
+	bool PostExecute( const int ASUNREFERENCED( iResult ) ) { return true; }
 
 private:
 	asIScriptFunction& m_Function;

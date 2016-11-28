@@ -290,17 +290,17 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 		asDWORD uiObjFlags = pType->GetFlags();
 		ArgType::ArgType argType;
 
-		if( ( bSuccess = ctx::GetArgumentFromVarargs( value, iTypeId, uiFlags, vaList, &uiObjFlags, &argType ) ) )
+		if( ( bSuccess = ctx::GetArgumentFromVarargs( value, iTypeId, uiFlags, vaList, &uiObjFlags, &argType ) ) != false )
 		{
 			//Make copies of the input arguments; they won't exist anymore once this method has finished execution.
 			args[ uiIndex ].Set( *pEngine, iTypeId, argType, value, true );
 		}
 		else
 		{
-			if( auto pType = targetFunc.GetObjectType() )
+			if( auto pFuncType = targetFunc.GetObjectType() )
 			{
 				as::Critical( "CASArguments::SetArguments(va_list): Method '%s::%s::%s': failed to set argument %u, aborting!\n",
-							  pType->GetNamespace(), pType->GetName(), targetFunc.GetName(), uiIndex );
+							  pFuncType->GetNamespace(), pFuncType->GetName(), targetFunc.GetName(), uiIndex );
 			}
 			else
 			{

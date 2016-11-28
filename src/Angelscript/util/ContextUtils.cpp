@@ -105,7 +105,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 
 	ArgumentValue value;
 
-	if( ( bSuccess = GetArgumentFromVarargs( value, iTypeId, uiFlags, list ) ) )
+	if( ( bSuccess = GetArgumentFromVarargs( value, iTypeId, uiFlags, list ) ) != false )
 	{
 		//Remove the handle flag from the typeid.
 		//Input should never be dereferenced

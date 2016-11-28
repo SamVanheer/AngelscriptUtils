@@ -1,6 +1,8 @@
 #ifndef ANGELSCRIPT_IASMODULEBUILDER_H
 #define ANGELSCRIPT_IASMODULEBUILDER_H
 
+#include "util/Platform.h"
+
 class CScriptBuilder;
 class CASModule;
 
@@ -26,7 +28,7 @@ public:
 	*	@param builder Builder to define words for.
 	*	@return true on success, false on failure.
 	*/
-	virtual bool DefineWords( CScriptBuilder& builder ) { return true; }
+	virtual bool DefineWords( CScriptBuilder& ASUNREFERENCED( builder ) ) { return true; }
 
 	/**
 	*	Allows scripts to be added.
@@ -42,14 +44,19 @@ public:
 	*	@param pszFromFileName Name of the file that contains the include statement.
 	*	@return true on success, false on failure.
 	*/
-	virtual bool IncludeScript( CScriptBuilder& builder, const char* const pszIncludeFileName, const char* const pszFromFileName ) { return false; }
+	virtual bool IncludeScript( CScriptBuilder& ASUNREFERENCED( builder ), 
+								const char* const ASUNREFERENCED( pszIncludeFileName ), 
+								const char* const ASUNREFERENCED( pszFromFileName ) )
+	{
+		return false;
+	}
 
 	/**
 	*	Called right before the module is built. Gives the builder a chance to evaluate the module.
 	*	@param builder Builder.
 	*	@return true if the module should be built, false otherwise.
 	*/
-	virtual bool PreBuild( CScriptBuilder& builder ) { return true; }
+	virtual bool PreBuild( CScriptBuilder& ASUNREFERENCED( builder ) ) { return true; }
 
 	/**
 	*	Called after the build has finished.
@@ -58,7 +65,12 @@ public:
 	*	@param pModule If bSuccess is true, the module. Otherwise, null.
 	*	@return true if the module should be kept, false if it should be discarded.
 	*/
-	virtual bool PostBuild( CScriptBuilder& builder, const bool bSuccess, CASModule* pModule ) { return true; }
+	virtual bool PostBuild( CScriptBuilder& ASUNREFERENCED( builder ), 
+							const bool ASUNREFERENCED( bSuccess ), 
+							CASModule* ASUNREFERENCED( pModule ) )
+	{
+		return true;
+	}
 };
 
 inline IASModuleBuilder::~IASModuleBuilder()

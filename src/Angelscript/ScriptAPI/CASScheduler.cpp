@@ -171,7 +171,7 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 
 	CASArguments* pArgs = new CASArguments();
 
-	if( ( bSuccess = pArgs->SetArguments( arguments, uiStartIndex ) ) )
+	if( ( bSuccess = pArgs->SetArguments( arguments, uiStartIndex ) ) != false )
 	{
 		if( pThis && iTypeId & asTYPEID_OBJHANDLE )
 			pThis = *reinterpret_cast<void**>( pThis );

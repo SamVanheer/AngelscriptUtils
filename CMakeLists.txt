@@ -151,6 +151,23 @@ message(STATUS "")
 
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y" )
 
+#Set global compiler settings.
+if( MSVC )
+	#Warning level 4. Wall shows warnings in standard headers so we can't compile if that's enabled.
+	#Treat warnings as errors.
+	#When using the v140_xp toolset or newer, static local variables are initialized using thread safe initialization. This won't work on XP so we have to disable this behavior.
+	#See https://connect.microsoft.com/VisualStudio/Feedback/Details/1941836 for more information.
+	set( GLOBAL_COMPILER_FLAGS "/W4 /WX /Zc:threadSafeInit-" )
+else()
+	#All warnings.
+	#No unknown pragma directives.
+	#No attributes.
+	set( GLOBAL_COMPILER_FLAGS "-Wall -Wno-unknown-pragmas -Wno-attributes" )
+endif()
+
+set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GLOBAL_COMPILER_FLAGS}" )
+set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GLOBAL_COMPILER_FLAGS}" )
+
 if( UNIX )
 	set( LINUX_32BIT_FLAG "-m32" )
 else()

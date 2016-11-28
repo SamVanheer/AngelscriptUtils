@@ -92,7 +92,7 @@ private:
 *	@param ... Arguments to pass.
 */
 #define CALL_EXTEND_FUNC_RET_DIFFFUNC( retType, methodName, baseMethodName, pszParams, ... )						\
-retType result;																										\
+retType result = retType();																							\
 																													\
 if( auto pFunction = GetObject().GetTypeInfo()->GetMethodByDecl( #retType " " #methodName pszParams ) )				\
 {																													\

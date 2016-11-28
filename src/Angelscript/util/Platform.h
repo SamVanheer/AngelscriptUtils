@@ -28,4 +28,9 @@
 #define MakeDirectory( pszDirectory ) mkdir( pszDirectory, 0777 )
 #endif
 
+/**
+*	Used to mark function parameters as unused.
+*/
+#define ASUNREFERENCED( x )
+
 #endif //ANGELSCRIPT_UTIL_PLATFORM_H

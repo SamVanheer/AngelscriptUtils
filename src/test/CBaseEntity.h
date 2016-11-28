@@ -3,6 +3,8 @@
 
 #include <string>
 
+#include "Angelscript/util/Platform.h"
+
 class CBaseEntity
 {
 public:
@@ -11,7 +13,7 @@ public:
 	{
 	}
 
-	virtual int ScheduleOfType( const std::string& szName )
+	virtual int ScheduleOfType( const std::string& ASUNREFERENCED( szName ) )
 	{
 		return 1;
 	}

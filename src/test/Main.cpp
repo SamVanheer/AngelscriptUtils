@@ -84,7 +84,7 @@ const bool USE_EVENT_MANAGER = true;
 *	Stops as soon as it's handled.
 *	Can be hooked by calling Events::Main.Hook( @MainHook( ... ) );
 */
-CASEvent event( "Main", "const " AS_STRING_OBJNAME "& in", "", ModuleAccessMask::ALL, EventStopMode::ON_HANDLED );
+CASEvent testEvent( "Main", "const " AS_STRING_OBJNAME "& in", "", ModuleAccessMask::ALL, EventStopMode::ON_HANDLED );
 
 class CASTestInitializer : public IASInitializer
 {
@@ -107,10 +107,10 @@ public:
 		return true;
 	}
 
-	bool AddEvents( CASManager& manager, CASEventManager& eventManager ) override
+	bool AddEvents( CASManager& ASUNREFERENCED( manager ), CASEventManager& eventManager ) override
 	{
 		//Add an event. Scripts will be able to hook these, when it's invoked by C++ code all hooked functions are called.
-		eventManager.AddEvent( &event );
+		eventManager.AddEvent( &testEvent );
 
 		return true;
 	}
@@ -174,7 +174,7 @@ public:
 		return builder.AddSectionFromFile( "scripts/test.as" ) >= 0;
 	}
 
-	bool PostBuild( CScriptBuilder& builder, const bool bSuccess, CASModule* pModule ) override
+	bool PostBuild( CScriptBuilder& ASUNREFERENCED( builder ), const bool bSuccess, CASModule* pModule ) override
 	{
 		if( !bSuccess )
 			return false;
@@ -252,7 +252,7 @@ public:
 
 CASLogger g_Logger( "logs/L", CASFileLogger::Flag::USE_DATESTAMP | CASFileLogger::Flag::USE_TIMESTAMP | CASFileLogger::Flag::OUTPUT_LOG_LEVEL );
 
-int main( int iArgc, char* pszArgV[] )
+int main( int ASUNREFERENCED( iArgc ), char* ASUNREFERENCED( pszArgV )[] )
 {
 	as::SetLogger( &g_Logger );
 
@@ -297,12 +297,12 @@ int main( int iArgc, char* pszArgV[] )
 				if( USE_EVENT_MANAGER )
 				{
 					//Add main as a hook.
-					event.AddFunction( pFunction );
+					testEvent.AddFunction( pFunction );
 
 					//Trigger the event.
 					CASEventCaller caller;
 
-					caller.Call( event, pEngine, &szString, true );
+					caller.Call( testEvent, pEngine, &szString, true );
 				}
 			}
 
@@ -357,6 +357,8 @@ int main( int iArgc, char* pszArgV[] )
 					func.Set( pFunction );
 
 					auto pPtr = func.Get();
+
+					std::cout << "Smart pointer points to: 0x" << std::hex << reinterpret_cast<intptr_t>( pPtr ) << std::dec << std::endl;
 				}
 
 				//Regular varargs.
@@ -450,8 +452,6 @@ int main( int iArgc, char* pszArgV[] )
 				pBaseEnt->Spawn();
 
 				const int result = pBaseEnt->ScheduleOfType( "foo" );
-
-				int x = 10;
 
 				delete pEntity;
 			}

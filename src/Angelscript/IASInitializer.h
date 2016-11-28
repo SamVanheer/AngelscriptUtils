@@ -3,6 +3,8 @@
 
 #include <angelscript.h>
 
+#include "util/Platform.h"
+
 /**
 *	@addtogroup ASManager
 *
@@ -27,7 +29,7 @@ public:
 	*	@param[ out ] outCallConv Calling convention.
 	*	@return true if a callback was set, false otherwise.
 	*/
-	virtual bool GetMessageCallback( asSFuncPtr& outFuncPtr, void*& pOutObj, asDWORD& outCallConv ) { return false; }
+	virtual bool GetMessageCallback( asSFuncPtr& ASUNREFERENCED( outFuncPtr ), void*& ASUNREFERENCED( pOutObj ), asDWORD& ASUNREFERENCED( outCallConv ) ) { return false; }
 
 	/**
 	*	@return Whether to create an event manager.
@@ -55,7 +57,7 @@ public:
 	*	@param eventManager Event manager.
 	*	@return true on success, false otherwise.
 	*/
-	virtual bool AddEvents( CASManager& manager, CASEventManager& eventManager ) { return true; }
+	virtual bool AddEvents( CASManager& ASUNREFERENCED( manager ), CASEventManager& ASUNREFERENCED( eventManager ) ) { return true; }
 
 	/**
 	*	Should register the remainder of the API.

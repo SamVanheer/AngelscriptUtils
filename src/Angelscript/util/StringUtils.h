@@ -54,7 +54,6 @@ struct EqualTo_C_String final
 		return COMPARE( lhs, rhs ) == 0;
 	}
 };
-}
 
 /*
 *	This code is based on the following Stack Overflow answer: http://stackoverflow.com/a/217605
@@ -84,5 +83,6 @@ inline std::string& Trim( std::string& s )
 /*
 *	End based on code.
 */
+}
 
 #endif //ANGELSCRIPT_UTIL_STRINGUTILS_H

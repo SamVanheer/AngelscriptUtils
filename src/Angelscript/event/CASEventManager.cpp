@@ -20,7 +20,7 @@ CASEventManager::CASEventManager( asIScriptEngine& engine, const char* const psz
 
 	m_szNamespace = pszNamespace;
 
-	Trim( m_szNamespace );
+	as::Trim( m_szNamespace );
 }
 
 CASEventManager::~CASEventManager()

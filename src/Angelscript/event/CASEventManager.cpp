@@ -72,20 +72,11 @@ bool CASEventManager::HookEvent( const std::string& szName, void* pValue, const 
 
 	if( !pEvent )
 	{
-		//TODO: refactor this into a helper function - Solokiller
-		const char* pszFile = nullptr;
-		int iLine = 0;
-		int iColumn = 0;
+		as::CASCallerInfo info;
 
-		if( auto pContext = asGetActiveContext() )
-		{
-			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
-		}
+		as::GetCallerInfo( info );
 
-		if( !pszFile )
-			pszFile = "Unknown";
-
-		as::Critical( "CEventManager::HookEvent: %s(%d, %d): Couldn't find event \"%s\"!\n", pszFile, iLine, iColumn, szName.c_str() );
+		as::Critical( "CEventManager::HookEvent: %s(%d, %d): Couldn't find event \"%s\"!\n", info.pszSection, info.iLine, info.iColumn, szName.c_str() );
 		return false;
 	}
 
@@ -98,20 +89,11 @@ void CASEventManager::UnhookEvent( const std::string& szName, void* pValue, cons
 
 	if( !pEvent )
 	{
-		//TODO: refactor this into a helper function - Solokiller
-		const char* pszFile = nullptr;
-		int iLine = 0;
-		int iColumn = 0;
+		as::CASCallerInfo info;
 
-		if( auto pContext = asGetActiveContext() )
-		{
-			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
-		}
+		as::GetCallerInfo( info );
 
-		if( !pszFile )
-			pszFile = "Unknown";
-
-		as::Critical( "CEventManager::UnhookEvent: %s(%d, %d): Couldn't find event \"%s\"!\n", pszFile, iLine, iColumn, szName.c_str() );
+		as::Critical( "CEventManager::UnhookEvent: %s(%d, %d): Couldn't find event \"%s\"!\n", info.pszSection, info.iLine, info.iColumn, szName.c_str() );
 	}
 
 	pEvent->Unhook( pValue, iTypeId );

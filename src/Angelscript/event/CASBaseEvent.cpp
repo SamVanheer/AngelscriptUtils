@@ -37,21 +37,11 @@ bool CASBaseEvent::AddFunction( asIScriptFunction* pFunction )
 	//Don't add functions while this event is being invoked.
 	if( IsTriggering() )
 	{
-		const char* pszFile = nullptr;
-		int iLine = 0;
-		int iColumn = 0;
+		as::CASCallerInfo info;
 
-		if( auto pContext = asGetActiveContext() )
-		{
-			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+		as::GetCallerInfo( info );
 
-			pContext->SetException( "Cannot add event hooks during the event's invocation" );
-		}
-
-		if( !pszFile )
-			pszFile = "Unknown";
-
-		as::Critical( "CBaseEvent::AddFunction: %s(%d, %d): Cannot add function while invoking event!\n", pszFile, iLine, iColumn );
+		as::Critical( "CBaseEvent::AddFunction: %s(%d, %d): Cannot add function while invoking event!\n", info.pszSection, info.iLine, info.iColumn );
 		return false;
 	}
 
@@ -143,21 +133,11 @@ void CASBaseEvent::RemoveFunctionsOfModule( CASModule* pModule )
 	{
 		assert( !"CBaseEvent::RemoveFunctionsOfModule: Module hooks should not be removed while invoking events!" );
 
-		const char* pszFile = nullptr;
-		int iLine = 0;
-		int iColumn = 0;
+		as::CASCallerInfo info;
 
-		if( auto pContext = asGetActiveContext() )
-		{
-			iLine = pContext->GetLineNumber( 0, &iColumn, &pszFile );
+		as::GetCallerInfo( info );
 
-			pContext->SetException( "Cannot remove event hooks during the event's invocation" );
-		}
-
-		if( !pszFile )
-			pszFile = "Unknown";
-
-		as::Critical( "CBaseEvent::RemoveFunctionsOfModule: %s(%d, %d): Module hooks should not be removed while invoking events!\n", pszFile, iLine, iColumn );
+		as::Critical( "CBaseEvent::RemoveFunctionsOfModule: %s(%d, %d): Module hooks should not be removed while invoking events!\n", info.pszSection, info.iLine, info.iColumn );
 		return;
 	}
 

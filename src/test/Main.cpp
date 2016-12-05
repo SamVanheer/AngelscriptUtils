@@ -43,22 +43,26 @@ enum ModuleAccessMask
 	/**
 	*	No access.
 	*/
-	NONE		= 0,
+	NONE			= 0,
 
 	/**
 	*	Shared API.
 	*/
-	SHARED		= 1 << 0,
+	SHARED			= 1 << 0,
 
 	/**
 	*	Map script specific.
 	*/
-	MAPSCRIPT	= SHARED | 1 << 1,
+	MAPSCRIPT_ONLY	= 1 << 1,
+
+	MAPSCRIPT		= SHARED | MAPSCRIPT_ONLY,
 
 	/**
 	*	Plugin script specific.
 	*/
-	PLUGIN		= SHARED | 1 << 2,
+	PLUGIN_ONLY		= 1 << 2,
+
+	PLUGIN			= SHARED | PLUGIN_ONLY,
 
 	/**
 	*	All scripts.

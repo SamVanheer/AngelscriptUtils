@@ -7,6 +7,9 @@
 #include "Angelscript/util/ASUtil.h"
 #include "Angelscript/util/StringUtils.h"
 
+#include "Angelscript/CASModule.h"
+#include "Angelscript/CASModuleDescriptor.h"
+
 #include "CASEvent.h"
 
 #include "CASEventManager.h"
@@ -32,14 +35,73 @@ CASEventManager::~CASEventManager()
 
 CASEvent* CASEventManager::GetEventByIndex( const uint32_t uiIndex )
 {
+	asDWORD uiAccessMask = 0xFFFFFFFF;
+
+	auto pCtx = asGetActiveContext();
+
+	if( pCtx )
+	{
+		//A script is calling us, get the access mask from the calling module.
+		auto pModule = GetModuleFromScriptContext( pCtx );
+
+		if( !pModule )
+		{
+			as::CASCallerInfo info;
+
+			as::GetCallerInfo( info, pCtx );
+
+			as::Critical( "CEventManager::GetEventByIndex: %s(%d, %d): Couldn't get module for index \"%u\"!\n", info.pszSection, info.iLine, info.iColumn, uiIndex );
+			return nullptr;
+		}
+
+		uiAccessMask = pModule->GetDescriptor().GetAccessMask();
+	}
+
 	if( uiIndex < GetEventCount() )
-		return m_Events[ uiIndex ];
+	{
+		auto pEvent = m_Events[ uiIndex ];
+
+		if( pEvent->GetAccessMask() & uiAccessMask )
+			return pEvent;
+
+		as::CASCallerInfo info;
+
+		as::GetCallerInfo( info, pCtx );
+
+		as::Verbose( "CEventManager::GetEventByIndex: %s( %d, %d ): Access denied for event \"%s::%s\" (index %u)\n", 
+					 info.pszSection, info.iLine, info.iColumn, 
+					 pEvent->GetCategory(), pEvent->GetName(), uiIndex );
+		return nullptr;
+	}
 
 	return nullptr;
 }
 
 CASEvent* CASEventManager::FindEventByName( const std::string& szName )
 {
+	asDWORD uiAccessMask = 0xFFFFFFFF;
+
+	auto pCtx = asGetActiveContext();
+
+	if( pCtx )
+	{
+		//A script is calling us, get the access mask from the calling module.
+		auto pModule = GetModuleFromScriptContext( pCtx );
+
+		if( !pModule )
+		{
+			as::CASCallerInfo info;
+
+			as::GetCallerInfo( info, pCtx );
+
+			as::Critical( "CEventManager::FindEventByName: %s(%d, %d): Couldn't get calling module for event \"%s\"!\n", info.pszSection, info.iLine, info.iColumn, szName.c_str() );
+			return nullptr;
+		}
+
+		uiAccessMask = pModule->GetDescriptor().GetAccessMask();
+	}
+
+
 	auto szNamespace = as::ExtractNamespaceFromName( szName );
 	const auto szEventName = as::ExtractNameFromName( szName );
 
@@ -60,7 +122,18 @@ CASEvent* CASEventManager::FindEventByName( const std::string& szName )
 	{
 		if( szNamespace == pEvent->GetCategory() && 
 			szEventName == pEvent->GetName() )
-			return pEvent;
+		{
+			//Access mask must allow use of this event.
+			if( pEvent->GetAccessMask() & uiAccessMask )
+				return pEvent;
+
+			as::CASCallerInfo info;
+
+			as::GetCallerInfo( info, pCtx );
+
+			as::Verbose( "CEventManager::FindEventByName: %s( %d, %d ): Access denied for event \"%s\"\n", info.pszSection, info.iLine, info.iColumn, szName.c_str() );
+			return nullptr;
+		}
 	}
 
 	return nullptr;

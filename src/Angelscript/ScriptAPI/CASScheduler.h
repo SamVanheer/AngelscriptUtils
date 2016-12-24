@@ -192,8 +192,6 @@ public:
 		~CScheduledFunction();
 
 	private:
-		CScheduledFunction*	m_pNext;
-
 		asIScriptFunction*	m_pFunction;
 		float				m_flNextCallTime;
 		float				m_flRepeatTime;
@@ -203,6 +201,8 @@ public:
 		const int			m_iTypeId;
 
 		CASArguments*		m_pArguments;
+
+		CScheduledFunction*	m_pNext;
 
 		bool				m_bRemoved = false;
 

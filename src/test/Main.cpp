@@ -455,7 +455,10 @@ int main( int ASUNREFERENCED( iArgc ), char* ASUNREFERENCED( pszArgV )[] )
 
 				pBaseEnt->Spawn();
 
-				const int result = pBaseEnt->ScheduleOfType( "foo" );
+				int result = pBaseEnt->ScheduleOfType( "foo" );
+
+				//Silence compiler warnings (unused var).
+				result = result;
 
 				delete pEntity;
 			}

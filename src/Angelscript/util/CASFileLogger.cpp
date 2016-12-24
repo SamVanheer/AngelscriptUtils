@@ -114,7 +114,7 @@ bool CASFileLogger::OpenFile( const char* pszFilename, const bool bUseDatestamp 
 	char szPath[ MAX_PATH ];
 
 	strncpy( szPath, pszFilename, sizeof( szPath ) );
-	szPath[ sizeof( szPath ) - 1 ];
+	szPath[ sizeof( szPath ) - 1 ] = '\0';
 
 	for( auto pszNext = szPath; *pszNext; ++pszNext )
 	{

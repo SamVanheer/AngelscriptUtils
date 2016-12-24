@@ -16,7 +16,7 @@ const char* ToString( const ASLog logLevel )
 
 	//Lower values are more critical, higher values are more diagnostic.
 	if( logLevel < CRITICAL )
-		"UNKNOWN CRITICAL";
+		return "UNKNOWN CRITICAL";
 
 	return "UNKNOWN DIAGNOSTIC";
 }

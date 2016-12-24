@@ -673,7 +673,7 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 
 		auto result = snprintf( szBuffer, sizeof( szBuffer ), "%s@ opImplCast()", pszBaseType );
 
-		if( result >= 0 && result < sizeof( szBuffer ) )
+		if( result >= 0 && static_cast<size_t>( result ) < sizeof( szBuffer ) )
 		{
 			//Allocate a string here because documentation does not allocate anything itself.
 			const auto retCode = engine.RegisterObjectMethod(
@@ -689,7 +689,7 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 
 		result = snprintf( szBuffer, sizeof( szBuffer ), "%s@ opCast()", pszSubType );
 
-		if( result >= 0 && result < sizeof( szBuffer ) )
+		if( result >= 0 && static_cast<size_t>( result ) < sizeof( szBuffer ) )
 		{
 			const auto retCode = engine.RegisterObjectMethod(
 				pszBaseType, szBuffer, asFUNCTION( downcast ), asCALL_CDECL_OBJFIRST );

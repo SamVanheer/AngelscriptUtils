@@ -33,4 +33,9 @@
 */
 #define ASUNREFERENCED( x )
 
+/**
+*	Used to mark function parameters as unused. Used at the start of the function body.
+*/
+#define ASREFERENCED( x ) ( ( x ) = ( x ) )
+
 #endif //ANGELSCRIPT_UTIL_PLATFORM_H

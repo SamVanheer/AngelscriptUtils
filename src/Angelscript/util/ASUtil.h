@@ -18,6 +18,8 @@
 
 #include "Platform.h"
 
+#include "StringUtils.h"
+
 class CScriptAny;
 
 /**
@@ -866,6 +868,50 @@ inline bool GetCallerInfo( const char*& pszSection, int& iLine, int& iColumn, as
 inline bool GetCallerInfo( CASCallerInfo& info, asIScriptContext* pContext = nullptr )
 {
 	return GetCallerInfo( info.pszSection, info.iLine, info.iColumn, pContext );
+}
+
+/**
+*	Formats a function name and stores the result in the given buffer.
+*	The format for global functions is \<namespace>::<\name>.
+*	The format for member functions is \n<namespace>::\<classname>::\<name>.
+*	@param function Function whose name should be formatted.
+*	@param pszDest Destination buffer. Must be non-null.
+*	@param uiSizeInCharacters Size of the destination buffer, in characters.
+*	@return Whether the name fits in the buffer.
+*/
+inline bool FormatFunctionName( const asIScriptFunction& function, char* pszDest, const size_t uiSizeInCharacters )
+{
+	assert( pszDest );
+
+	if( uiSizeInCharacters == 0 )
+		return false;
+
+	const asIScriptFunction* pFunction = &function;
+
+	{
+		//If this is a delegate, get the original function.
+		auto pDelegate = pFunction->GetDelegateFunction();
+
+		if( pDelegate )
+			pFunction = pDelegate;
+	}
+
+	auto pszObjName = pFunction->GetObjectName();
+
+	int result;
+
+	//Object methods need a different format.
+	if( pszObjName )
+		result = snprintf( pszDest, uiSizeInCharacters, "%s::%s::%s", pFunction->GetNamespace(), pszObjName, pFunction->GetName() );
+	else
+		result = snprintf( pszDest, uiSizeInCharacters, "%s::%s", pFunction->GetNamespace(), pFunction->GetName() );
+
+	if( PrintfSuccess( result, uiSizeInCharacters ) )
+		return true;
+
+	pszDest[ uiSizeInCharacters - 1 ] = '\0';
+
+	return false;
 }
 }
 

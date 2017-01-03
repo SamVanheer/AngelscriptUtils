@@ -3,7 +3,7 @@
 
 #include <angelscript.h>
 
-#include "util/Platform.h"
+#include "util/ASPlatform.h"
 
 /**
 *	@addtogroup ASManager

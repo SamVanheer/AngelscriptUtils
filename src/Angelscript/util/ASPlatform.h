@@ -42,14 +42,12 @@
 */
 #define ASREFERENCED( x ) ( ( x ) = ( x ) )
 
-#undef ARRAYSIZE
-
 template<typename T, size_t SIZE>
-inline size_t _ArraySizeof( const T( & )[ SIZE ] )
+inline size_t _ASArraySizeof( const T( & )[ SIZE ] )
 {
 	return SIZE;
 }
 
-#define ARRAYSIZE( p )	_ArraySizeof( p )
+#define ASARRAYSIZE( p )	_ASArraySizeof( p )
 
 #endif //ANGELSCRIPT_UTIL_PLATFORM_H

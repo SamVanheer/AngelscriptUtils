@@ -12,7 +12,7 @@
 #endif
 #endif
 
-#include "Platform.h"
+#include "ASPlatform.h"
 
 #include "CASFileLogger.h"
 

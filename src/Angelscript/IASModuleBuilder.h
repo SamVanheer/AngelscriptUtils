@@ -1,7 +1,7 @@
 #ifndef ANGELSCRIPT_IASMODULEBUILDER_H
 #define ANGELSCRIPT_IASMODULEBUILDER_H
 
-#include "util/Platform.h"
+#include "util/ASPlatform.h"
 
 class CScriptBuilder;
 class CASModule;

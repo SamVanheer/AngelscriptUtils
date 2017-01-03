@@ -3,6 +3,7 @@ add_sources(
 	ASExtendAdapter.cpp
 	ASLogging.h
 	ASLogging.cpp
+	ASPlatform.h
 	ASUtil.h
 	ASUtil.cpp
 	ContextUtils.h
@@ -18,13 +19,13 @@ add_sources(
 	IASExtendAdapter.h
 	IASLogger.h
 	IASLogger.cpp
-	Platform.h
 	StringUtils.h
 )
 
 add_includes(
 	ASExtendAdapter.h
 	ASLogging.h
+	ASPlatform.h
 	ASUtil.h
 	ContextUtils.h
 	CASBaseClass.h
@@ -35,6 +36,5 @@ add_includes(
 	CASObjPtr.h
 	IASExtendAdapter.h
 	IASLogger.h
-	Platform.h
 	StringUtils.h
 )

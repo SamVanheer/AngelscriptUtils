@@ -3,7 +3,7 @@
 
 #include <angelscript.h>
 
-#include "Angelscript/util/Platform.h"
+#include "Angelscript/util/ASPlatform.h"
 
 #ifndef ASUTILS_CTX_RESULTHANDLER_USERDATA
 /**

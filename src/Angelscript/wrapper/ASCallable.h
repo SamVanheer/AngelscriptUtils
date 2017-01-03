@@ -6,7 +6,7 @@
 
 #include <angelscript.h>
 
-#include "Angelscript/util/Platform.h"
+#include "Angelscript/util/ASPlatform.h"
 #include "Angelscript/util/ContextUtils.h"
 
 #include "Angelscript/IASContextResultHandler.h"

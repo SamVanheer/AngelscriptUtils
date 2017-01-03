@@ -16,7 +16,7 @@
 
 #include "ASLogging.h"
 
-#include "Platform.h"
+#include "ASPlatform.h"
 
 #include "StringUtils.h"
 
@@ -910,7 +910,7 @@ inline bool FormatFunctionName( const asIScriptFunction& function, char* pszDest
 	auto pszName = pFunction->GetName();
 
 	const char szNSSep[] = "::";
-	const size_t uiNSSepLength = ARRAYSIZE( szNSSep ) - 1;
+	const size_t uiNSSepLength = ASARRAYSIZE( szNSSep ) - 1;
 
 	size_t uiNSLength = 0;
 

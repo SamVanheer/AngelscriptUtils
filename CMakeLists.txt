@@ -199,8 +199,20 @@ endif()
 
 set_target_properties( Angelscript PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
 
+#Properly named pdb. By default it always uses the base name.
+set_target_properties( Angelscript PROPERTIES COMPILE_PDB_NAME_DEBUG "Angelscriptd" )
+#Match the debug version so its relative position is the same.
+set_target_properties( Angelscript PROPERTIES COMPILE_PDB_NAME_RELWITHDEBINFO "Angelscript" )
+
 install( TARGETS Angelscript DESTINATION lib )
 install( FILES external/Angelscript/include/angelscript.h DESTINATION include )
+
+#Install the pdb files.
+if( WIN32 )
+	install( FILES ${CMAKE_BINARY_DIR}/Debug/Angelscriptd.pdb DESTINATION lib CONFIGURATIONS Debug )
+	install( FILES ${CMAKE_BINARY_DIR}/RelWithDebInfo/Angelscript.pdb DESTINATION lib CONFIGURATIONS RelWithDebInfo )
+endif()
+
 install_includes( "${CMAKE_SOURCE_DIR}/external/Angelscript/src" )
 
 clear_sources()
@@ -226,10 +238,22 @@ target_compile_definitions( AngelscriptUtils PRIVATE
 
 set_target_properties( AngelscriptUtils PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
 
+#Properly named pdb. By default it always uses the base name.
+set_target_properties( AngelscriptUtils PROPERTIES COMPILE_PDB_NAME_DEBUG "AngelscriptUtilsd" )
+#Match the debug version so its relative position is the same.
+set_target_properties( AngelscriptUtils PROPERTIES COMPILE_PDB_NAME_RELWITHDEBINFO "AngelscriptUtils" )
+
 #Create filters
 create_source_groups( "${CMAKE_SOURCE_DIR}/src" )
 
 install( TARGETS AngelscriptUtils DESTINATION lib )
+
+#Install the pdb files.
+if( WIN32 )
+	install( FILES ${CMAKE_BINARY_DIR}/Debug/AngelscriptUtilsd.pdb DESTINATION lib CONFIGURATIONS Debug )
+	install( FILES ${CMAKE_BINARY_DIR}/RelWithDebInfo/AngelscriptUtils.pdb DESTINATION lib CONFIGURATIONS RelWithDebInfo )
+endif()
+
 install_includes( "${CMAKE_SOURCE_DIR}/src" )
 
 clear_sources()

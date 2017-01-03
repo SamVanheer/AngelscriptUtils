@@ -297,6 +297,9 @@ int main( int ASUNREFERENCED( iArgc ), char* ASUNREFERENCED( pszArgV )[] )
 
 	std::cout << "Hello World!" << std::endl;
 
+	//Needed so the test script can load.
+	chdir( ".." );
+
 	CASManager manager;
 
 	CASTestInitializer initializer( manager );

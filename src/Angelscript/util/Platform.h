@@ -7,6 +7,7 @@
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <Windows.h>
+#include <direct.h>
 #endif
 
 #if _MSC_VER < 1900
@@ -14,6 +15,7 @@
 #endif
 
 #define mkdir _mkdir
+#define chdir _chdir
 
 #ifndef ALLOW_VOID_DEF
 #undef VOID
@@ -23,6 +25,7 @@
 
 #else
 #include <linux/limits.h>
+#include <unistd.h>
 
 #define MAX_PATH PATH_MAX
 
@@ -38,5 +41,15 @@
 *	Used to mark function parameters as unused. Used at the start of the function body.
 */
 #define ASREFERENCED( x ) ( ( x ) = ( x ) )
+
+#undef ARRAYSIZE
+
+template<typename T, size_t SIZE>
+inline size_t _ArraySizeof( const T( & )[ SIZE ] )
+{
+	return SIZE;
+}
+
+#define ARRAYSIZE( p )	_ArraySizeof( p )
 
 #endif //ANGELSCRIPT_UTIL_PLATFORM_H

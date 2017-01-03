@@ -1,8 +1,6 @@
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 #include <limits>
-#include <string>
 
 #include "Angelscript/util/ASUtil.h"
 #include "Angelscript/util/StringUtils.h"
@@ -11,6 +9,7 @@
 #include "Angelscript/CASModuleDescriptor.h"
 
 #include "CASEvent.h"
+#include "CASEventCaller.h"
 
 #include "CASEventManager.h"
 

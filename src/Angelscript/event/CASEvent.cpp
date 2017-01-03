@@ -1,10 +1,4 @@
-#include <algorithm>
 #include <cassert>
-#include <iostream>
-
-#include "Angelscript/wrapper/CASContext.h"
-
-#include "Angelscript/CASModule.h"
 
 #include "CASEvent.h"
 
@@ -23,21 +17,6 @@ CASEvent::CASEvent( const char* const pszName, const char* pszArguments, const c
 void CASEvent::DumpHookedFunctions() const
 {
 	CASBaseEvent::DumpHookedFunctions( ( std::string( "Event \"" ) + GetCategory() + "::" + GetName() + '(' + GetArguments() + ")\"" ).c_str() );
-}
-
-void RegisterScriptHookReturnCode( asIScriptEngine& engine )
-{
-	const char* const pszObjectName = "HookReturnCode";
-
-	int result = engine.RegisterEnum( pszObjectName );
-
-	assert( result >= 0 );
-
-	result = engine.RegisterEnumValue( pszObjectName, "HOOK_CONTINUE", static_cast<int>( HookReturnCode::CONTINUE ) );
-	assert( result >= 0 );
-
-	result = engine.RegisterEnumValue( pszObjectName, "HOOK_HANDLED", static_cast<int>( HookReturnCode::HANDLED ) );
-	assert( result >= 0 );
 }
 
 void RegisterScriptCEvent( asIScriptEngine& engine )

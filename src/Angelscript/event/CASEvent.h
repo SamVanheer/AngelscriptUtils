@@ -1,17 +1,9 @@
 #ifndef ANGELSCRIPT_CASEVENT_H
 #define ANGELSCRIPT_CASEVENT_H
 
-#include <cstdarg>
-#include <cstdint>
-#include <vector>
-
 #include <angelscript.h>
 
-#include "Angelscript/wrapper/ASCallable.h"
-
 #include "CASBaseEvent.h"
-
-class CASModule;
 
 /**
 *	@addtogroup ASEvents
@@ -38,43 +30,6 @@ enum class EventStopMode
 	*	Stop as soon as a function has handled it.
 	*/
 	ON_HANDLED
-};
-
-/**
-*	Return codes for functions that hook into an event.
-*/
-enum class HookReturnCode
-{
-	/**
-	*	Continue executing.
-	*/
-	CONTINUE,
-
-	/**
-	*	The function handled the event, stop.
-	*/
-	HANDLED
-};
-
-/**
-*	Result codes for hook invocation.
-*/
-enum class HookCallResult
-{
-	/**
-	*	An error occurred while executing the hook.
-	*/
-	FAILED,
-
-	/**
-	*	No functions handled the hook.
-	*/
-	NONE_HANDLED,
-
-	/**
-	*	One or more functions handled the hook.
-	*/
-	HANDLED
 };
 
 /**
@@ -130,13 +85,6 @@ private:
 	CASEvent( const CASEvent& ) = delete;
 	CASEvent& operator=( const CASEvent& ) = delete;
 };
-
-/**
-*	Registers the HookReturnCode enum.
-*	@param engine Script engine.
-*/
-void RegisterScriptHookReturnCode( asIScriptEngine& engine );
-
 /**
 *	Registers the CASEvent class.
 *	@param engine Script engine.

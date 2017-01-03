@@ -60,3 +60,18 @@ CASEventCaller::ReturnType_t CASEventCaller::CallEvent( EventType_t& event, asIS
 
 	return returnCode == HookReturnCode::HANDLED ? HookCallResult::HANDLED : HookCallResult::NONE_HANDLED;
 }
+
+void RegisterScriptHookReturnCode( asIScriptEngine& engine )
+{
+	const char* const pszObjectName = "HookReturnCode";
+
+	int result = engine.RegisterEnum( pszObjectName );
+
+	assert( result >= 0 );
+
+	result = engine.RegisterEnumValue( pszObjectName, "HOOK_CONTINUE", static_cast<int>( HookReturnCode::CONTINUE ) );
+	assert( result >= 0 );
+
+	result = engine.RegisterEnumValue( pszObjectName, "HOOK_HANDLED", static_cast<int>( HookReturnCode::HANDLED ) );
+	assert( result >= 0 );
+}

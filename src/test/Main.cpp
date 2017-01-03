@@ -6,6 +6,7 @@
 #include "Angelscript/event/CASEvent.h"
 #include "Angelscript/event/CASEventCaller.h"
 #include "Angelscript/CASModule.h"
+#include "Angelscript/CASLoggingContextResultHandler.h"
 #include "Angelscript/IASInitializer.h"
 #include "Angelscript/IASModuleBuilder.h"
 
@@ -18,6 +19,7 @@
 #include "Angelscript/ScriptAPI/CASScheduler.h"
 #include "Angelscript/ScriptAPI/Reflection/ASReflection.h"
 
+#include "Angelscript/util/CASBaseClass.h"
 #include "Angelscript/util/ASExtendAdapter.h"
 #include "Angelscript/util/ASLogging.h"
 #include "Angelscript/util/ASUtil.h"
@@ -81,6 +83,26 @@ int NSTest()
 	return 0;
 }
 
+asIScriptContext* CreateScriptContext( asIScriptEngine* pEngine, void* )
+{
+	auto pContext = pEngine->CreateContext();
+
+	//TODO: add test to see if suspending will log an error.
+	auto pResultHandler = new CASLoggingContextResultHandler( CASLoggingContextResultHandler::Flag::SUSPEND_IS_ERROR );
+
+	as::SetContextResultHandler( *pContext, pResultHandler );
+
+	pResultHandler->Release();
+
+	return pContext;
+}
+
+void DestroyScriptContext( asIScriptEngine* ASUNREFERENCED( pEngine ), asIScriptContext* pContext, void* )
+{
+	if( pContext )
+		pContext->Release();
+}
+
 const bool USE_EVENT_MANAGER = true;
 
 /*
@@ -93,7 +115,17 @@ CASEvent testEvent( "Main", "const " AS_STRING_OBJNAME "& in", "", ModuleAccessM
 class CASTestInitializer : public IASInitializer
 {
 public:
+	CASTestInitializer( CASManager& manager )
+		: m_Manager( manager )
+	{
+	}
+
 	bool UseEventManager() override { return USE_EVENT_MANAGER; }
+
+	void OnInitBegin()
+	{
+		m_Manager.GetEngine()->SetContextCallbacks( &::CreateScriptContext, &::DestroyScriptContext );
+	}
 
 	bool RegisterCoreAPI( CASManager& manager ) override
 	{
@@ -146,6 +178,9 @@ public:
 
 		return true;
 	}
+
+private:
+	CASManager& m_Manager;
 };
 
 /**
@@ -264,7 +299,7 @@ int main( int ASUNREFERENCED( iArgc ), char* ASUNREFERENCED( pszArgV )[] )
 
 	CASManager manager;
 
-	CASTestInitializer initializer;
+	CASTestInitializer initializer( manager );
 
 	if( manager.Initialize( initializer ) )
 	{
@@ -396,6 +431,19 @@ int main( int ASUNREFERENCED( iArgc ), char* ASUNREFERENCED( pszArgV )[] )
 				//va_list version.
 				Helper helper( pFunction );
 				helper.Call( CallFlag::NONE );
+			}
+
+			//Call a function that triggers a null pointer exception.
+			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "DoNullPointerException" ) )
+			{
+				std::cout << "Triggering null pointer exception" << std::endl;
+				as::Call( pFunction );
+			}
+
+			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "DoNullPointerException2" ) )
+			{
+				std::cout << "Triggering null pointer exception in object member function" << std::endl;
+				as::Call( pFunction );
 			}
 
 			//Test the scheduler.

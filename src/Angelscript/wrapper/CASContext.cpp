@@ -1,13 +1,19 @@
 #include <cassert>
 
+#include "Angelscript/IASContextResultHandler.h"
+
 #include "CASContext.h"
 
 void CASOwningContext::Release()
 {
 	if( m_pContext )
 	{
-		//TODO check return value
 		const auto result = m_pContext->Unprepare();
+
+		auto pResultHandler = as::GetContextResultHandler( *m_pContext );
+
+		if( pResultHandler )
+			pResultHandler->ProcessUnprepareResult( *m_pContext, result );
 	}
 
 	if( m_pEngine )

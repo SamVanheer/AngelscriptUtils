@@ -227,6 +227,35 @@ int main( const string& in szString, const bool bInEvent )
 	@pType = Reflect::Engine.FindTypeInfo( "Foo2::Baz", true );
 	
 	Print( "(Engine) Didn't find type info by decl: " + ( ( pType is null ) ? "yes" : "no" ) + "\n" );
-	
+
 	return 1;
+}
+
+//This function deliberately triggers a null pointer exception so the context result handler can log it.
+void DoNullPointerException()
+{
+	dictionary@ pDict = null;
+	
+	Print( "checking null pointer\n" );
+	Print( "Value: " + pDict.getKeys()[ 0 ] + "\n" );
+}
+
+//This function deliberately triggers a null pointer exception so the context result handler can log it. Object member function version to format it differently.
+namespace Naaa
+{
+class NullAccess
+{
+	void TryAccess()
+	{
+		dictionary@ pDict = null;
+	
+		Print( "checking null pointer\n" );
+		Print( "Value: " + pDict.getKeys()[ 0 ] + "\n" );
+	}
+}
+}
+
+void DoNullPointerException2()
+{
+	Naaa::NullAccess().TryAccess();
 }

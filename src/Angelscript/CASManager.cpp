@@ -3,6 +3,10 @@
 
 #include <angelscript.h>
 
+#include "Angelscript/util/ASLogging.h"
+#include "Angelscript/util/ASUtil.h"
+
+#include "IASContextResultHandler.h"
 #include "IASInitializer.h"
 
 #include "CASManager.h"
@@ -57,6 +61,29 @@ bool CASManager::Initialize( IASInitializer& initializer )
 		return false;
 	}
 
+	//Used to caller OnInitEnd autmatically.
+	struct InitEndCaller
+	{
+		IASInitializer& initializer;
+		bool bSuccess = false;
+
+		InitEndCaller( IASInitializer& initializer )
+			: initializer( initializer )
+		{
+		}
+
+		~InitEndCaller()
+		{
+			initializer.OnInitEnd( bSuccess );
+		}
+	}
+	initEndCaller( initializer );
+
+	initializer.OnInitBegin();
+
+	//Set the cleanup callback for the result handler.
+	m_pScriptEngine->SetContextUserDataCleanupCallback( as::FreeContextResultHandler, ASUTILS_CTX_RESULTHANDLER_USERDATA );
+
 	const bool bUseEventManager = initializer.UseEventManager();
 
 	if( bUseEventManager )
@@ -95,6 +122,8 @@ bool CASManager::Initialize( IASInitializer& initializer )
 
 	if( !initializer.RegisterAPI( *this ) )
 		return false;
+
+	initEndCaller.bSuccess = true;
 
 	return true;
 }

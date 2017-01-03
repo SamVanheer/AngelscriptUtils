@@ -1,4 +1,6 @@
 add_sources(
+	CASLoggingContextResultHandler.h
+	CASLoggingContextResultHandler.cpp
 	CASManager.h
 	CASManager.cpp
 	CASModuleDescriptor.h
@@ -7,17 +9,20 @@ add_sources(
 	CASModule.cpp
 	CASModuleManager.h
 	CASModuleManager.cpp
-	IASModuleBuilder.h
+	IASContextResultHandler.h
 	IASInitializer.h
+	IASModuleBuilder.h
 )
 
 add_includes(
+	CASLoggingContextResultHandler.h
 	CASManager.h
 	CASModuleDescriptor.h
 	CASModule.h
 	CASModuleManager.h
-	IASModuleBuilder.h
+	IASContextResultHandler.h
 	IASInitializer.h
+	IASModuleBuilder.h
 )
 
 add_subdirectory( add_on )

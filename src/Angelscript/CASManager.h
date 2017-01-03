@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include "Angelscript/util/Platform.h"
+
 #include "CASModuleManager.h"
 #include "event/CASEventManager.h"
 

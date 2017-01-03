@@ -7,7 +7,7 @@
 
 #include "Angelscript/util/ASUtil.h"
 
-#include "Angelscript/wrapper/ASCallable.h"
+#include "Angelscript/wrapper/ASCallableConst.h"
 
 class CASModule;
 

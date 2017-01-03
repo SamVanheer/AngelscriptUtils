@@ -7,10 +7,9 @@
 
 #include <angelscript.h>
 
-#include "CASEvent.h"
-
 class asIScriptEngine;
 class CASModule;
+class CASEvent;
 
 /**
 *	@addtogroup ASEvents

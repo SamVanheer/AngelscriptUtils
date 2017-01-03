@@ -5,6 +5,7 @@
 //Some projects might manage their Windows dependencies differenly.
 #ifndef ASUTILS_DISABLE_WINDOWS_INCLUDES
 #define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <Windows.h>
 #endif
 

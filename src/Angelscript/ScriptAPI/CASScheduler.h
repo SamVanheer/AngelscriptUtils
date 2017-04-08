@@ -145,7 +145,7 @@ public:
 		*/
 		void Called()
 		{
-			assert( m_iRepeatCount > 0 );
+			assert( m_iRepeatCount > 0 || ( IsInfiniteRepeat() && m_iRepeatCount == REPEAT_INF_TIMES ) );
 
 			if( !IsInfiniteRepeat() )
 				--m_iRepeatCount;

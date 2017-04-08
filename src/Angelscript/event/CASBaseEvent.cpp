@@ -145,18 +145,26 @@ void CASBaseEvent::RemoveFunctionsOfModule( CASModule* pModule )
 		return;
 
 	//These functions might be null in some edge cases due to hooks being removed in event calls.
-	auto it = std::remove_if( m_Functions.begin(), m_Functions.end(), [ = ]( const asIScriptFunction* pFunction )
-	{
-		return !pFunction || pModule == GetModuleFromScriptFunction( pFunction );
-	} );
-
-	for( auto it2 = it; it2 < m_Functions.end(); ++it2 )
-	{
-		if( *it2 )
-			( *it2 )->Release();
-	}
-
-	m_Functions.erase( it, m_Functions.end() );
+	//Fixed version provided by HoraceWeebler - Solokiller
+	m_Functions.erase(
+		std::remove_if(
+			m_Functions.begin(),
+			m_Functions.end(),
+			[ &pModule ]( const asIScriptFunction* pFunction ) -> bool
+			{
+				if( !pFunction )
+					return true;
+				else if( pModule == GetModuleFromScriptFunction( pFunction ) )
+				{
+					pFunction->Release();
+					return true;
+				}
+				else
+					return false;
+			}
+		),
+		m_Functions.end()
+	);
 }
 
 void CASBaseEvent::RemoveAllFunctions()

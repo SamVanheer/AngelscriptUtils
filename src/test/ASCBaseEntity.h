@@ -8,7 +8,7 @@
 /**
 *	Class name for CBaseEntity in scripts.
 */
-#define AS_CBASENTITY_CLASSNAME "CBaseEntity"
+#define AS_CBASEENTITY_CLASSNAME "CBaseEntity"
 
 /**
 *	Registers CBaseEntity for use in scripts.
@@ -16,7 +16,7 @@
 */
 inline void RegisterScriptCBaseEntity( asIScriptEngine& engine )
 {
-	const char* const pszObjectName = AS_CBASENTITY_CLASSNAME;
+	const char* const pszObjectName = AS_CBASEENTITY_CLASSNAME;
 
 	engine.RegisterObjectType( pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT );
 
@@ -62,7 +62,7 @@ void RegisterScriptBaseEntity( asIScriptEngine& engine, const char* const pszObj
 inline void RegisterScriptBaseEntity( asIScriptEngine& engine )
 {
 	//The base name is just the regular name without the 'C'.
-	RegisterScriptBaseEntity<CBaseEntity>( engine, AS_CBASENTITY_CLASSNAME + 1 );
+	RegisterScriptBaseEntity<CBaseEntity>( engine, AS_CBASEENTITY_CLASSNAME + 1 );
 }
 
 #endif //TEST_ASCBASEENTITY_H

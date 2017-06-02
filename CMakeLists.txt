@@ -9,6 +9,9 @@ project( AngelscriptUtils )
 
 check_winxp_support()
 
+set( MSVC_RUNTIME "Dynamic" CACHE STRING "Runtime to use for MSVC" )
+set_property( CACHE MSVC_RUNTIME PROPERTY STRINGS Dynamic Static )
+
 configure_msvc_runtime()
 
 set(variables

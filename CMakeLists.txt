@@ -73,4 +73,4 @@ set( SRC_DIR "${CMAKE_SOURCE_DIR}/src" )
 add_subdirectory( src )
 
 #Default to test project
-set_property( GLOBAL PROPERTY VS_STARTUP_PROJECT AngelscriptUtilsTest )
+set_property( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT AngelscriptUtilsTest )

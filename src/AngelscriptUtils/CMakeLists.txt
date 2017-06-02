@@ -67,10 +67,7 @@ create_source_groups( "${SRC_DIR}" )
 install( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
 #Install the pdb files.
-if( WIN32 )
-	install( FILES ${CMAKE_BINARY_DIR}/Debug/${PROJECT_NAME}${CMAKE_DEBUG_POSTFIX}.pdb DESTINATION lib CONFIGURATIONS Debug )
-	install( FILES ${CMAKE_BINARY_DIR}/RelWithDebInfo/${PROJECT_NAME}.pdb DESTINATION lib CONFIGURATIONS RelWithDebInfo )
-endif()
+install_pdbs( ${PROJECT_NAME} lib )
 
 install_includes( "${SRC_DIR}" )
 

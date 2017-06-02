@@ -31,10 +31,7 @@ install( TARGETS ${PROJECT_NAME} DESTINATION lib )
 install( FILES ${EXTERNAL_DIR}/Angelscript/include/angelscript.h DESTINATION include )
 
 #Install the pdb files.
-if( WIN32 )
-	install( FILES ${CMAKE_BINARY_DIR}/Debug/${PROJECT_NAME}${CMAKE_DEBUG_POSTFIX}.pdb DESTINATION lib CONFIGURATIONS Debug )
-	install( FILES ${CMAKE_BINARY_DIR}/RelWithDebInfo/${PROJECT_NAME}.pdb DESTINATION lib CONFIGURATIONS RelWithDebInfo )
-endif()
+install_pdbs( ${PROJECT_NAME} lib )
 
 #TODO: needed? - Solokiller
 install_includes( "${EXTERNAL_DIR}/Angelscript/src" )

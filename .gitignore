@@ -55,7 +55,6 @@ Temporary Items
 *.cache
 *.db
 *.opendb
-*.cmake
 
 Doxyfile
 

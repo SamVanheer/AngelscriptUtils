@@ -56,10 +56,7 @@ set_target_properties( ${PROJECT_NAME} PROPERTIES
 	LINK_FLAGS "${LINUX_32BIT_FLAG}"
 )
 
-#Properly named pdb. By default it always uses the base name.
-set_target_properties( ${PROJECT_NAME} PROPERTIES COMPILE_PDB_NAME_DEBUG "${PROJECT_NAME}${CMAKE_DEBUG_POSTFIX}" )
-#Match the debug version so its relative position is the same.
-set_target_properties( ${PROJECT_NAME} PROPERTIES COMPILE_PDB_NAME_RELWITHDEBINFO "${PROJECT_NAME}" )
+set_pdb_names( ${PROJECT_NAME} )
 
 #Create filters
 create_source_groups( "${SRC_DIR}" )

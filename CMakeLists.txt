@@ -1,8 +1,8 @@
 cmake_minimum_required( VERSION 3.6 )
 
 include( cmake/InputFilesList.cmake )
-include( cmake/InstallPDB.cmake )
 include( cmake/MSVCRuntime.cmake )
+include( cmake/PDBUtils.cmake )
 include( cmake/WinXPSupport.cmake )
 
 project( AngelscriptUtils )

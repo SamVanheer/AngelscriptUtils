@@ -56,10 +56,18 @@ else()
 	set( LINUX_32BIT_FLAG "" )
 endif()
 
+set( AS_NO_EXCEPTIONS OFF CACHE BOOL "Whether to disable exception handling in the Angelscript library" )
+
 set( SHARED_DEFS
-	AS_NO_EXCEPTIONS
 	_CRT_SECURE_NO_WARNINGS
 )
+
+if( AS_NO_EXCEPTIONS )
+	set( SHARED_DEFS
+		${SHARED_DEFS}
+		AS_NO_EXCEPTIONS
+	)
+endif()
 
 set( AS_STRING_OBJNAME "string" CACHE STRING "The name of the object type used to represent strings" )
 

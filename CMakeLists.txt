@@ -26,7 +26,13 @@ foreach(variable ${variables})
 endforeach()
 message(STATUS "")
 
+#C++14 support
 set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++1y" )
+
+#Debug builds should have a distinct name.
+if( NOT CMAKE_DEBUG_POSTFIX )
+  set( CMAKE_DEBUG_POSTFIX d )
+endif()
 
 #Set global compiler settings.
 if( MSVC )
@@ -49,119 +55,22 @@ else()
 	set( LINUX_32BIT_FLAG "" )
 endif()
 
-#Debug builds should have a distinct name.
-if( NOT CMAKE_DEBUG_POSTFIX )
-  set( CMAKE_DEBUG_POSTFIX d )
-endif()
-
-# Angelscript library
+set( SHARED_DEFS
+	AS_NO_EXCEPTIONS
+	_CRT_SECURE_NO_WARNINGS
+)
 
 set( AS_STRING_OBJNAME "string" CACHE STRING "The name of the object type used to represent strings" )
-
-add_definitions( -DAS_NO_EXCEPTIONS )
-
-add_subdirectory( external/Angelscript )
-
-preprocess_sources()
-
-add_library( Angelscript STATIC ${PREP_SRCS} )
-
-if( NOT WIN32 )
-	target_link_libraries( Angelscript
-		pthread
-	)
-endif()
-
-set_target_properties( Angelscript PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
-
-#Properly named pdb. By default it always uses the base name.
-set_target_properties( Angelscript PROPERTIES COMPILE_PDB_NAME_DEBUG "Angelscriptd" )
-#Match the debug version so its relative position is the same.
-set_target_properties( Angelscript PROPERTIES COMPILE_PDB_NAME_RELWITHDEBINFO "Angelscript" )
-
-install( TARGETS Angelscript DESTINATION lib )
-install( FILES external/Angelscript/include/angelscript.h DESTINATION include )
-
-#Install the pdb files.
-if( WIN32 )
-	install( FILES ${CMAKE_BINARY_DIR}/Debug/Angelscriptd.pdb DESTINATION lib CONFIGURATIONS Debug )
-	install( FILES ${CMAKE_BINARY_DIR}/RelWithDebInfo/Angelscript.pdb DESTINATION lib CONFIGURATIONS RelWithDebInfo )
-endif()
-
-install_includes( "${CMAKE_SOURCE_DIR}/external/Angelscript/src" )
-
-clear_sources()
 
 #version number
 set( AngelscriptUtils_VERSION_MAJOR 1 )
 set( AngelscriptUtils_VERSION_MINOR 0 )
 
-add_definitions( -D_CRT_SECURE_NO_WARNINGS )
+set( EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external" )
+set( SRC_DIR "${CMAKE_SOURCE_DIR}/src" )
 
 #include the subdirectory containing our libs
 add_subdirectory( src )
 
-include_directories( src external/Angelscript/include )
-
-preprocess_sources()
-
-add_library( AngelscriptUtils STATIC ${PREP_SRCS} )
-
-target_compile_definitions( AngelscriptUtils PRIVATE
-	AS_STRING_OBJNAME="${AS_STRING_OBJNAME}"
-)
-
-set_target_properties( AngelscriptUtils PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
-
-#Properly named pdb. By default it always uses the base name.
-set_target_properties( AngelscriptUtils PROPERTIES COMPILE_PDB_NAME_DEBUG "AngelscriptUtilsd" )
-#Match the debug version so its relative position is the same.
-set_target_properties( AngelscriptUtils PROPERTIES COMPILE_PDB_NAME_RELWITHDEBINFO "AngelscriptUtils" )
-
-#Create filters
-create_source_groups( "${CMAKE_SOURCE_DIR}/src" )
-
-install( TARGETS AngelscriptUtils DESTINATION lib )
-
-#Install the pdb files.
-if( WIN32 )
-	install( FILES ${CMAKE_BINARY_DIR}/Debug/AngelscriptUtilsd.pdb DESTINATION lib CONFIGURATIONS Debug )
-	install( FILES ${CMAKE_BINARY_DIR}/RelWithDebInfo/AngelscriptUtils.pdb DESTINATION lib CONFIGURATIONS RelWithDebInfo )
-endif()
-
-install_includes( "${CMAKE_SOURCE_DIR}/src" )
-
-clear_sources()
-
-#This really needs a better approach.
-add_sources( 
-	src/test/CBaseEntity.h
-	src/test/CBaseEntity.cpp
-	src/test/CScriptBaseEntity.h
-	src/test/ASCBaseEntity.h
-	src/test/Main.cpp
-)
-
-preprocess_sources()
-
-#indicate the entry point for the executable
-add_executable( AngelscriptUtilsTest ${PREP_SRCS} )
-
-target_compile_definitions( AngelscriptUtilsTest PRIVATE
-	AS_STRING_OBJNAME="${AS_STRING_OBJNAME}"
-)
-
-set_target_properties( AngelscriptUtilsTest PROPERTIES COMPILE_FLAGS "${LINUX_32BIT_FLAG}" LINK_FLAGS "${LINUX_32BIT_FLAG}" )
-
-#Create filters
-create_source_groups( "${CMAKE_SOURCE_DIR}/src" )
-
+#Default to test project
 set_property( GLOBAL PROPERTY VS_STARTUP_PROJECT AngelscriptUtilsTest )
-
-# Indicate which libraries to include during the link process.
-target_link_libraries( AngelscriptUtilsTest AngelscriptUtils Angelscript )
-
-install( TARGETS AngelscriptUtilsTest DESTINATION bin )
-install_includes( "${CMAKE_SOURCE_DIR}/src" )
-
-clear_sources()

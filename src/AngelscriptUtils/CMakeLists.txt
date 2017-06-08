@@ -42,7 +42,7 @@ preprocess_sources()
 add_library( ${PROJECT_NAME} STATIC ${PREP_SRCS} )
 
 target_include_directories( ${PROJECT_NAME} PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}
+	${SRC_DIR}
 	${EXTERNAL_DIR}/Angelscript/include
 )
 

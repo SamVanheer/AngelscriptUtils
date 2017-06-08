@@ -6,10 +6,10 @@
 
 #include <angelscript.h>
 
-#include "util/ASPlatform.h"
-#include "util/ContextUtils.h"
+#include "AngelscriptUtils/util/ASPlatform.h"
+#include "AngelscriptUtils/util/ContextUtils.h"
 
-#include "IASContextResultHandler.h"
+#include "AngelscriptUtils/IASContextResultHandler.h"
 
 #include "ASCallableConst.h"
 #include "CASContext.h"

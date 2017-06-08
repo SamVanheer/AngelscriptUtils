@@ -6,7 +6,7 @@
 
 #include <angelscript.h>
 
-#include "util/CASBaseClass.h"
+#include "AngelscriptUtils/util/CASBaseClass.h"
 
 class CASModule;
 class CScriptAny;

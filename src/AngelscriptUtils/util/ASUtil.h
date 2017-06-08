@@ -10,9 +10,9 @@
 
 #include <angelscript.h>
 
-#include "wrapper/CASArguments.h"
+#include "AngelscriptUtils/wrapper/CASArguments.h"
 
-#include "util/ContextUtils.h"
+#include "AngelscriptUtils/util/ContextUtils.h"
 
 #include "ASLogging.h"
 

@@ -1,7 +1,7 @@
 #include <cassert>
 #include <sstream>
 
-#include "wrapper/ASCallable.h"
+#include "AngelscriptUtils/wrapper/ASCallable.h"
 
 #include "IASExtendAdapter.h"
 

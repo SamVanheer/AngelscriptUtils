@@ -1,6 +1,6 @@
-#include "CASModule.h"
+#include "AngelscriptUtils/CASModule.h"
 
-#include "util/ASUtil.h"
+#include "AngelscriptUtils/util/ASUtil.h"
 
 #include "CASModuleReflectionGroup.h"
 

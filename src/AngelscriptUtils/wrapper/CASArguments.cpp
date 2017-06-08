@@ -3,10 +3,10 @@
 
 #include <angelscript.h>
 
-#include "CASManager.h"
-#include "util/ASLogging.h"
-#include "util/ASUtil.h"
-#include "util/ContextUtils.h"
+#include "AngelscriptUtils/CASManager.h"
+#include "AngelscriptUtils/util/ASLogging.h"
+#include "AngelscriptUtils/util/ASUtil.h"
+#include "AngelscriptUtils/util/ContextUtils.h"
 
 #include "CASArguments.h"
 

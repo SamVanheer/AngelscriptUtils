@@ -5,7 +5,7 @@
 #include <cstdarg>
 
 #include <angelscript.h>
-#include <wrapper/ASCallable.h>
+#include "AngelscriptUtils/wrapper/ASCallable.h"
 
 /**
 *	Base class for classes that can call events.

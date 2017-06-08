@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "util/ASUtil.h"
+#include "AngelscriptUtils/util/ASUtil.h"
 
 #include "CASEngineReflectionGroup.h"
 

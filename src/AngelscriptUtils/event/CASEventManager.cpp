@@ -2,11 +2,11 @@
 #include <cassert>
 #include <limits>
 
-#include "util/ASUtil.h"
-#include "util/StringUtils.h"
+#include "AngelscriptUtils/util/ASUtil.h"
+#include "AngelscriptUtils/util/StringUtils.h"
 
-#include "CASModule.h"
-#include "CASModuleDescriptor.h"
+#include "AngelscriptUtils/CASModule.h"
+#include "AngelscriptUtils/CASModuleDescriptor.h"
 
 #include "CASEvent.h"
 #include "CASEventCaller.h"

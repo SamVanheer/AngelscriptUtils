@@ -3,7 +3,7 @@
 
 #include <string>
 
-#include "util/ASPlatform.h"
+#include "AngelscriptUtils/util/ASPlatform.h"
 
 class CBaseEntity
 {

@@ -1,5 +1,5 @@
-#include "util/ASUtil.h"
-#include "util/CASBaseClass.h"
+#include "AngelscriptUtils/util/ASUtil.h"
+#include "AngelscriptUtils/util/CASBaseClass.h"
 
 #include "IASReflectionGroup.h"
 #include "CASEngineReflectionGroup.h"

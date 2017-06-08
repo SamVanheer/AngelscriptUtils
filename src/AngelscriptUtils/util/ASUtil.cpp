@@ -1,7 +1,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "add_on/scriptany.h"
+#include "AngelscriptUtils/add_on/scriptany.h"
 
 #include "ASUtil.h"
 

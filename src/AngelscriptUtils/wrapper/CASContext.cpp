@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "IASContextResultHandler.h"
+#include "AngelscriptUtils/IASContextResultHandler.h"
 
 #include "CASContext.h"
 

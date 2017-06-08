@@ -1,17 +1,17 @@
 #include <angelscript.h>
 
-#include "CASManager.h"
-#include "CASModule.h"
+#include "AngelscriptUtils/CASManager.h"
+#include "AngelscriptUtils/CASModule.h"
 
-#include "add_on/scriptany.h"
+#include "AngelscriptUtils/add_on/scriptany.h"
 
-#include "util/ASLogging.h"
-#include "util/ASUtil.h"
-#include "util/ContextUtils.h"
+#include "AngelscriptUtils/util/ASLogging.h"
+#include "AngelscriptUtils/util/ASUtil.h"
+#include "AngelscriptUtils/util/ContextUtils.h"
 
-#include "wrapper/ASCallable.h"
-#include "wrapper/CASArguments.h"
-#include "wrapper/CASContext.h"
+#include "AngelscriptUtils/wrapper/ASCallable.h"
+#include "AngelscriptUtils/wrapper/CASArguments.h"
+#include "AngelscriptUtils/wrapper/CASContext.h"
 
 #include "CASScheduler.h"
 

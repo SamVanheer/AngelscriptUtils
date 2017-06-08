@@ -1,7 +1,7 @@
 #ifndef TEST_CSCRIPTBASEENTITY_H
 #define TEST_CSCRIPTBASEENTITY_H
 
-#include "util/CASExtendAdapter.h"
+#include "AngelscriptUtils/util/CASExtendAdapter.h"
 #include "CBaseEntity.h"
 
 /**

@@ -210,7 +210,7 @@ public:
 			m_szDecl.c_str() ) < 0 )
 			return false;
 
-		return builder.AddSectionFromFile( "scripts/test.as" ) >= 0;
+		return builder.AddSectionFromFile( "../resources/scripts/test.as" ) >= 0;
 	}
 
 	bool PostBuild( CScriptBuilder& ASUNREFERENCED( builder ), const bool bSuccess, CASModule* pModule ) override
@@ -296,9 +296,6 @@ int main( int ASUNREFERENCED( iArgc ), char* ASUNREFERENCED( pszArgV )[] )
 	as::SetLogger( &g_Logger );
 
 	std::cout << "Hello World!" << std::endl;
-
-	//Needed so the test script can load.
-	chdir( ".." );
 
 	CASManager manager;
 

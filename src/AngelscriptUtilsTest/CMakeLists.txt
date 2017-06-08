@@ -44,6 +44,16 @@ target_link_libraries( ${PROJECT_NAME}
 	Angelscript
 )
 
+#CMake places libraries in /Debug or /Release on Windows, so explicitly set the paths for both.
+#On Linux, it uses LIBRARY_OUTPUT_DIRECTORY
+set_target_properties( ${PROJECT_NAME} PROPERTIES
+	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
+	RUNTIME_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
+	RUNTIME_OUTPUT_MINSIZEREL "${OUTPUT_DIR}"
+	RUNTIME_OUTPUT_RELWITHDEBINFO "${OUTPUT_DIR}"
+)
+
 install( TARGETS ${PROJECT_NAME} DESTINATION bin )
 install_includes( "${SRC_DIR}" )
 

@@ -61,3 +61,6 @@ Doxyfile
 bin/*
 bin_*/*
 docs/*
+
+#Ignore test build directory
+test*/*

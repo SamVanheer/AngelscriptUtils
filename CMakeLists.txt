@@ -78,6 +78,8 @@ set( AS_STRING_OBJNAME "string" CACHE STRING "The name of the object type used t
 set( AngelscriptUtils_VERSION_MAJOR 1 )
 set( AngelscriptUtils_VERSION_MINOR 0 )
 
+set( OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries" )
+
 set( EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external" )
 set( SRC_DIR "${CMAKE_SOURCE_DIR}/src" )
 

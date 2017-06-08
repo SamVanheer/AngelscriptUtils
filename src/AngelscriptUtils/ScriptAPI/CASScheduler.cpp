@@ -15,8 +15,6 @@
 
 #include "CASScheduler.h"
 
-#undef GetObject
-
 void CASScheduler::CScheduledFunction::Remove( asIScriptEngine& engine )
 {
 	if( m_bRemoved )

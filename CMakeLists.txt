@@ -83,6 +83,11 @@ set( OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for bina
 set( EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external" )
 set( SRC_DIR "${CMAKE_SOURCE_DIR}/src" )
 
+#Copy all resources to the destination directory
+MESSAGE( STATUS "Copying resources..." )
+file( COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${OUTPUT_DIR} )
+MESSAGE( STATUS "Done" )
+
 #include the subdirectory containing our libs
 add_subdirectory( src )
 

@@ -210,7 +210,7 @@ public:
 			m_szDecl.c_str() ) < 0 )
 			return false;
 
-		return builder.AddSectionFromFile( "../resources/scripts/test.as" ) >= 0;
+		return builder.AddSectionFromFile( "resources/scripts/test.as" ) >= 0;
 	}
 
 	bool PostBuild( CScriptBuilder& ASUNREFERENCED( builder ), const bool bSuccess, CASModule* pModule ) override

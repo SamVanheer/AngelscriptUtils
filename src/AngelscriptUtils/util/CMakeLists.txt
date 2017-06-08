@@ -3,6 +3,7 @@ add_sources(
 	ASExtendAdapter.cpp
 	ASLogging.h
 	ASLogging.cpp
+	ASPlatform.cpp
 	ASPlatform.h
 	ASUtil.h
 	ASUtil.cpp

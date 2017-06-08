@@ -1,36 +1,35 @@
 #ifndef ANGELSCRIPT_UTIL_PLATFORM_H
 #define ANGELSCRIPT_UTIL_PLATFORM_H
 
+#include <cstdio>
+
 #ifdef WIN32
-//Some projects might manage their Windows dependencies differenly.
-#ifndef ASUTILS_DISABLE_WINDOWS_INCLUDES
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <Windows.h>
-#include <direct.h>
+	#if _MSC_VER < 1900
+		#define snprintf _snprintf
+	#endif
 #endif
 
-#if _MSC_VER < 1900
-#define snprintf _snprintf
+#ifndef MAX_PATH
+//Constrain the MAX_PATH value so it can always be used on the stack.
+//FILENAME_MAX is not required to be usable as an array size on some systems, so this imposes a large but still limited maximum size.
+	#define FILENAME_MAX_STACK_SIZE 4096
+
+	#if FILENAME_MAX < FILENAME_MAX_STACK_SIZE
+		#define MAX_PATH FILENAME_MAX
+	#else
+		#define MAX_PATH FILENAME_MAX_STACK_SIZE
+	#endif
 #endif
 
-#define mkdir _mkdir
-#define chdir _chdir
+/**
+*	Creates a directory
+*/
+void MakeDirectory( const char* pszDirectoryName );
 
-#ifndef ALLOW_VOID_DEF
-#undef VOID
-#endif
-
-#define MakeDirectory( pszDirectory ) CreateDirectoryA( pszDirectory, nullptr )
-
-#else
-#include <linux/limits.h>
-#include <unistd.h>
-
-#define MAX_PATH PATH_MAX
-
-#define MakeDirectory( pszDirectory ) mkdir( pszDirectory, 0777 )
-#endif
+/**
+*	Changes the working directory
+*/
+void ChangeDirectory( const char* pszDirectoryName );
 
 /**
 *	Used to mark function parameters as unused.

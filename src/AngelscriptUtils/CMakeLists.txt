@@ -2,7 +2,7 @@
 #   AngelscriptUtils library
 #
 
-set( PROJECT_NAME AngelscriptUtils )
+set( TARGET_NAME AngelscriptUtils )
 
 add_sources(
 	CASLoggingContextResultHandler.cpp
@@ -39,33 +39,34 @@ add_subdirectory( wrapper )
 
 preprocess_sources()
 
-add_library( ${PROJECT_NAME} STATIC ${PREP_SRCS} )
+add_library( ${TARGET_NAME} STATIC ${PREP_SRCS} )
 
-target_include_directories( ${PROJECT_NAME} PRIVATE
+check_winxp_support( ${TARGET_NAME} )
+
+configure_msvc_runtime( ${TARGET_NAME} ${MSVC_RUNTIME_CONFIG} )
+
+target_include_directories( ${TARGET_NAME} PRIVATE
 	${SRC_DIR}
 	${EXTERNAL_DIR}/Angelscript/include
 )
 
-target_compile_definitions( ${PROJECT_NAME} PRIVATE
+target_compile_definitions( ${TARGET_NAME} PRIVATE
 	AS_STRING_OBJNAME="${AS_STRING_OBJNAME}"
 	${SHARED_DEFS}
 )
 
-set_target_properties( ${PROJECT_NAME} PROPERTIES
-	COMPILE_FLAGS "${LINUX_32BIT_FLAG}"
-	LINK_FLAGS "${LINUX_32BIT_FLAG}"
+set_target_properties( ${TARGET_NAME} PROPERTIES
+	COMPILE_FLAGS "${SHARED_COMPILE_FLAGS}"
+	LINK_FLAGS "${SHARED_LINK_FLAGS}"
 )
 
-set_pdb_names( ${PROJECT_NAME} )
+set_pdb_names( ${TARGET_NAME} )
 
 #Create filters
 create_source_groups( "${SRC_DIR}" )
 
-install( TARGETS ${PROJECT_NAME} DESTINATION lib )
-
-#Install the pdb files.
-install_pdbs( ${PROJECT_NAME} lib )
-
+install( TARGETS ${TARGET_NAME} DESTINATION lib )
+install_pdbs( ${TARGET_NAME} lib )
 install_includes( "${SRC_DIR}" )
 
 clear_sources()

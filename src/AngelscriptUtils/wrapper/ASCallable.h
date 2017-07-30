@@ -401,6 +401,8 @@ struct CASMethodFunctor final
 	{
 	}
 
+	CASMethodFunctor( const CASMethodFunctor& other ) = default;
+
 	/**
 	*	Calls an object method using varargs.
 	*	@param function Function to call.
@@ -434,6 +436,9 @@ struct CASMethodFunctor final
 
 		return method.CallArgs( flags, args );
 	}
+
+private:
+	CASMethodFunctor& operator=( const CASMethodFunctor& ) = delete;
 };
 
 /**

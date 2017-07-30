@@ -47,6 +47,27 @@ CASManager::~CASManager()
 	assert( !m_pScriptEngine );
 }
 
+//Used to caller OnInitEnd autmatically.
+struct InitEndCaller
+{
+	IASInitializer& initializer;
+	bool bSuccess = false;
+
+	InitEndCaller( IASInitializer& initializer )
+		: initializer( initializer )
+	{
+	}
+
+	~InitEndCaller()
+	{
+		initializer.OnInitEnd( bSuccess );
+	}
+
+private:
+	InitEndCaller( const InitEndCaller& ) = delete;
+	InitEndCaller& operator=( const InitEndCaller& ) = delete;
+};
+
 bool CASManager::Initialize( IASInitializer& initializer )
 {
 	if( m_pScriptEngine )
@@ -61,23 +82,7 @@ bool CASManager::Initialize( IASInitializer& initializer )
 		return false;
 	}
 
-	//Used to caller OnInitEnd autmatically.
-	struct InitEndCaller
-	{
-		IASInitializer& initializer;
-		bool bSuccess = false;
-
-		InitEndCaller( IASInitializer& initializer )
-			: initializer( initializer )
-		{
-		}
-
-		~InitEndCaller()
-		{
-			initializer.OnInitEnd( bSuccess );
-		}
-	}
-	initEndCaller( initializer );
+	InitEndCaller initEndCaller( initializer );
 
 	initializer.OnInitBegin();
 

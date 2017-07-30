@@ -18,8 +18,8 @@ public:
 	CASBaseLogger( const CASBaseLogger& other ) = default;
 	CASBaseLogger& operator=( const CASBaseLogger& other ) = default;
 
-	CASBaseLogger( CASBaseLogger&& other ) = default;
-	CASBaseLogger& operator=( CASBaseLogger&& other ) = default;
+	CASBaseLogger( CASBaseLogger&& other ) {}
+	CASBaseLogger& operator=( CASBaseLogger&& other ) {}
 
 	//Overridden so the correct implementation is called.
 	void AddRef() const override

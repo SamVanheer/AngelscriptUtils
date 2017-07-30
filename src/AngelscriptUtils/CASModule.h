@@ -174,10 +174,15 @@ struct ModuleEqualByName final
 	{
 	}
 
+	ModuleEqualByName( const ModuleEqualByName& other ) = default;
+
 	bool operator()( const CASModule* pModule ) const
 	{
 		return strcmp( pModule->GetModuleName(), pszModuleName ) == 0;
 	}
+
+private:
+	ModuleEqualByName& operator=( const ModuleEqualByName& ) = delete;
 };
 
 /** @} */

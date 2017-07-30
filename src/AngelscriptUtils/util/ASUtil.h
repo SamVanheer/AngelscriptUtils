@@ -366,11 +366,16 @@ struct CASRegisterMethod final
 	{
 	}
 
+	CASRegisterMethod( const CASRegisterMethod& other ) = default;
+
 	int operator()( asIScriptEngine& engine, const char* const pszDeclaration,
 					const asSFuncPtr& funcPtr, asDWORD callConv, void* pAuxiliary = nullptr )
 	{
 		return engine.RegisterObjectMethod( pszObjectName, pszDeclaration, funcPtr, callConv, pAuxiliary );
 	}
+
+private:
+	CASRegisterMethod& operator=( const CASRegisterMethod& ) = delete;
 };
 
 /**
@@ -413,6 +418,8 @@ struct CASFunctionIterator final
 	{
 	}
 
+	CASFunctionIterator( const CASFunctionIterator& other ) = default;
+
 	/**
 	*	@return Number of functions.
 	*/
@@ -427,6 +434,9 @@ struct CASFunctionIterator final
 	{
 		return module.GetFunctionByIndex( uiIndex );
 	}
+
+private:
+	CASFunctionIterator& operator=( const CASFunctionIterator& ) = delete;
 };
 
 /**
@@ -444,8 +454,11 @@ struct CASMethodIterator final
 		: objectType( objectType )
 	{
 		//Must be an object.
+		//TODO: asOBJ_VALUE should also count - Solokiller
 		assert( objectType.GetFlags() & ( asOBJ_REF ) );
 	}
+
+	CASMethodIterator( const CASMethodIterator& other ) = default;
 
 	/**
 	*	@return Number of methods.
@@ -461,6 +474,9 @@ struct CASMethodIterator final
 	{
 		return objectType.GetMethodByIndex( uiIndex );
 	}
+
+private:
+	CASMethodIterator& operator=( const CASMethodIterator& ) = delete;
 };
 
 /**

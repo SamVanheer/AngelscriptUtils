@@ -181,6 +181,10 @@ public:
 
 private:
 	CASManager& m_Manager;
+
+private:
+	CASTestInitializer( const CASTestInitializer& ) = delete;
+	CASTestInitializer& operator=( const CASTestInitializer& ) = delete;
 };
 
 /**

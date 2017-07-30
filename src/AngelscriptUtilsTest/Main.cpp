@@ -105,6 +105,12 @@ void DestroyScriptContext( asIScriptEngine* ASUNREFERENCED( pEngine ), asIScript
 
 const bool USE_EVENT_MANAGER = true;
 
+//This gets around conditional expression is constant warnings
+bool UseEventManager()
+{
+	return USE_EVENT_MANAGER;
+}
+
 /*
 *	An event to test out the event system.
 *	Stops as soon as it's handled.
@@ -337,7 +343,7 @@ int main( int ASUNREFERENCED( iArgc ), char* ASUNREFERENCED( pszArgV )[] )
 				//Note: main takes a const string& in, so pass the address here. References are handled as pointers.
 				as::Call( pFunction, &szString, false );
 
-				if( USE_EVENT_MANAGER )
+				if( UseEventManager() )
 				{
 					//Add main as a hook.
 					testEvent.AddFunction( pFunction );

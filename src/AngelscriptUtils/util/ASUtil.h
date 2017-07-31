@@ -312,7 +312,10 @@ void RegisterVarArgs( asIScriptEngine& engine, REGFUNCTOR regFunctor,
 
 		std::string str = stream.str();
 
-		const auto result = regFunctor( engine, str.c_str(), funcPtr, asCALL_GENERIC, pAuxiliary );
+#ifndef NDEBUG
+		const auto result =
+#endif
+			regFunctor( engine, str.c_str(), funcPtr, asCALL_GENERIC, pAuxiliary );
 
 		assert( result >= 0 );
 
@@ -693,9 +696,11 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 
 		if( result >= 0 && static_cast<size_t>( result ) < sizeof( szBuffer ) )
 		{
-			//Allocate a string here because documentation does not allocate anything itself.
-			const auto retCode = engine.RegisterObjectMethod(
-				pszSubType, szBuffer, asFUNCTION( upcast ), asCALL_CDECL_OBJFIRST );
+#ifndef NDEBUG
+			const auto retCode =
+#endif
+				engine.RegisterObjectMethod(
+					pszSubType, szBuffer, asFUNCTION( upcast ), asCALL_CDECL_OBJFIRST );
 
 			assert( retCode >= 0 );
 		}
@@ -709,8 +714,11 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 
 		if( result >= 0 && static_cast<size_t>( result ) < sizeof( szBuffer ) )
 		{
-			const auto retCode = engine.RegisterObjectMethod(
-				pszBaseType, szBuffer, asFUNCTION( downcast ), asCALL_CDECL_OBJFIRST );
+#ifndef NDEBUG
+			const auto retCode =
+#endif
+				engine.RegisterObjectMethod(
+					pszBaseType, szBuffer, asFUNCTION( downcast ), asCALL_CDECL_OBJFIRST );
 
 			assert( retCode >= 0 );
 		}

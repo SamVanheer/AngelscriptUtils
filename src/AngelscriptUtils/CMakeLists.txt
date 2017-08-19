@@ -29,6 +29,7 @@ add_includes(
 	IASContextResultHandler.h
 	IASInitializer.h
 	IASModuleBuilder.h
+	std_make_unique.h
 )
 
 add_subdirectory( add_on )

@@ -11,6 +11,8 @@
 
 #include "CASManager.h"
 
+#include "std_make_unique.h"
+
 CASManager* CASManager::m_pActiveManager = nullptr;
 
 CASManager* CASManager::GetActiveManager()

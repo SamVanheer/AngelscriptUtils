@@ -11,6 +11,8 @@
 
 #include "CASModuleManager.h"
 
+#include "std_make_unique.h"
+
 CASModuleManager::CASModuleManager( asIScriptEngine& engine, const std::shared_ptr<CASEventManager>& eventManager )
 	: m_Engine( engine )
 	, m_EventManager( eventManager )

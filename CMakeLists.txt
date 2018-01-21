@@ -23,8 +23,6 @@ set_property( CACHE MSVC_RUNTIME PROPERTY STRINGS dynamic static )
 
 string( TOUPPER ${MSVC_RUNTIME} MSVC_RUNTIME_CONFIG )
 
-set( AS_NO_EXCEPTIONS OFF CACHE BOOL "Whether to disable exception handling in the Angelscript library" )
-
 #C++11 support
 #Targets that use VS2013 are also supported, so C++14 cannot be used
 set( CMAKE_CXX_STANDARD 11 )

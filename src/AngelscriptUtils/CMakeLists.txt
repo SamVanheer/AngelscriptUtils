@@ -21,7 +21,6 @@ add_sources(
 	IASContextResultHandler.h
 	IASInitializer.h
 	IASModuleBuilder.h
-	add_on/scriptany/scriptany.cpp
 	add_on/scriptbuilder/scriptbuilder.cpp
 )
 
@@ -35,7 +34,6 @@ add_includes(
 	IASInitializer.h
 	IASModuleBuilder.h
 	std_make_unique.h
-	add_on/scriptany/scriptany.h
 	add_on/scriptbuilder/scriptbuilder.h
 )
 

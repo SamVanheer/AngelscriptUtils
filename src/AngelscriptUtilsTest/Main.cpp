@@ -11,7 +11,6 @@
 #include "AngelscriptUtils/IASModuleBuilder.h"
 
 #include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
-#include "AngelscriptUtils/add_on/scriptany/scriptany.h"
 
 #include "AngelscriptUtils/ScriptAPI/CASScheduler.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
@@ -28,6 +27,7 @@
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 #include "AngelscriptUtils/wrapper/CASContext.h"
 
+#include "add_on/scriptany/scriptany.h"
 #include "add_on/scriptarray/scriptarray.h"
 #include "add_on/scriptdictionary/scriptdictionary.h"
 #include "add_on/scriptstdstring/scriptstdstring.h"

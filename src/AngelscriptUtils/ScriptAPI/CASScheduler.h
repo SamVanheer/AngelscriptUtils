@@ -9,7 +9,6 @@
 #include "AngelscriptUtils/util/CASBaseClass.h"
 
 class CASModule;
-class CScriptAny;
 class CASArguments;
 
 /**

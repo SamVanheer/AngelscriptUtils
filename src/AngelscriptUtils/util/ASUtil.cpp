@@ -1,8 +1,6 @@
 #include <cstdint>
 #include <memory>
 
-#include "AngelscriptUtils/add_on/scriptany/scriptany.h"
-
 #include "ASUtil.h"
 
 namespace as
@@ -67,51 +65,6 @@ void* CreateObjectInstance( asIScriptEngine& engine, const asITypeInfo& type )
 		return nullptr;
 
 	return engine.CreateScriptObject( &type );
-}
-
-CScriptAny* CreateScriptAny( asIScriptEngine& engine, void* pObject, int iTypeId )
-{
-	//Have to convert primitive types of the form signed int and float smaller than their largest so that any.retrieve works correctly.
-	asINT64 iDest = 0;
-	double flDest = 0.0;
-
-	//TODO: do unsigned types work properly with any?
-
-	switch( iTypeId )
-	{
-	case asTYPEID_INT8:
-	case asTYPEID_UINT8:	iDest = *static_cast<int8_t*>( pObject ); break;
-	case asTYPEID_INT16:
-	case asTYPEID_UINT16:	iDest = *static_cast<int16_t*>( pObject ); break;
-	case asTYPEID_INT32:
-	case asTYPEID_UINT32:	iDest = *static_cast<int32_t*>( pObject ); break;
-
-	case asTYPEID_FLOAT:	flDest = *static_cast<float*>( pObject ); break;
-
-	default: break;
-	}
-
-	switch( iTypeId )
-	{
-	case asTYPEID_INT8:
-	case asTYPEID_UINT8:
-	case asTYPEID_INT16:
-	case asTYPEID_UINT16:
-	case asTYPEID_INT32:
-	case asTYPEID_UINT32:
-		pObject = &iDest;
-		iTypeId = asTYPEID_INT64;
-		break;
-
-	case asTYPEID_FLOAT:
-		pObject = &flDest;
-		iTypeId = asTYPEID_DOUBLE;
-		break;
-
-	default: break;
-	}
-
-	return new CScriptAny( pObject, iTypeId, &engine );
 }
 
 bool PODToString( char* pszBuffer, const size_t uiBufferSize, const void* pObject, const int iTypeId )

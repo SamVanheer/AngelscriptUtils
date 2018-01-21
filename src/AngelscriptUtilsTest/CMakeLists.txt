@@ -10,6 +10,8 @@ add_sources(
 	CBaseEntity.h
 	CScriptBaseEntity.h
 	Main.cpp
+	add_on/scriptany/scriptany.cpp
+	add_on/scriptany/scriptany.h
 	add_on/scriptarray/scriptarray.cpp
 	add_on/scriptarray/scriptarray.h
 	add_on/scriptdictionary/scriptdictionary.cpp

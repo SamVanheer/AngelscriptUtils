@@ -20,8 +20,6 @@
 
 #include "StringUtils.h"
 
-class CScriptAny;
-
 /**
 *	@defgroup ASUtil Angelscript Utility Code
 *
@@ -121,14 +119,57 @@ bool HasDefaultConstructor( const asITypeInfo& type );
 void* CreateObjectInstance( asIScriptEngine& engine, const asITypeInfo& type );
 
 /**
-*	Creates an any object that converts integer and float types smaller than 64 bit to their 64 bit type so any::retrieve works correctly.
+*	Sets a value on an any object, which is an instance of a class that has the interface defined by CScriptAny
 *	Angelscript will select the int64 or double overload when any integer or float type is passed, so this is necessary.
-*	@param engine Script engine.
-*	@param pObject Object to set in the any.
-*	@param iTypeId Type Id.
-*	@return Any instance.
+*	@param any Script engine.
+*	@param pObject Object to set in the any
+*	@param iTypeId Type Id
 */
-CScriptAny* CreateScriptAny( asIScriptEngine& engine, void* pObject, int iTypeId );
+template<typename ANY>
+void SetAny( ANY& any, void* pObject, int iTypeId )
+{
+	//Have to convert primitive types of the form signed int and float smaller than their largest so that any.retrieve works correctly.
+	asINT64 iDest = 0;
+	double flDest = 0.0;
+
+	//TODO: do unsigned types work properly with any?
+
+	switch( iTypeId )
+	{
+	case asTYPEID_INT8:
+	case asTYPEID_UINT8:	iDest = *static_cast<int8_t*>( pObject ); break;
+	case asTYPEID_INT16:
+	case asTYPEID_UINT16:	iDest = *static_cast<int16_t*>( pObject ); break;
+	case asTYPEID_INT32:
+	case asTYPEID_UINT32:	iDest = *static_cast<int32_t*>( pObject ); break;
+
+	case asTYPEID_FLOAT:	flDest = *static_cast<float*>( pObject ); break;
+
+	default: break;
+	}
+
+	switch( iTypeId )
+	{
+	case asTYPEID_INT8:
+	case asTYPEID_UINT8:
+	case asTYPEID_INT16:
+	case asTYPEID_UINT16:
+	case asTYPEID_INT32:
+	case asTYPEID_UINT32:
+		pObject = &iDest;
+		iTypeId = asTYPEID_INT64;
+		break;
+
+	case asTYPEID_FLOAT:
+		pObject = &flDest;
+		iTypeId = asTYPEID_DOUBLE;
+		break;
+
+	default: break;
+	}
+
+	any.Store( pObject, iTypeId );
+}
 
 /**
 *	Converts a primitive type to its string representation.

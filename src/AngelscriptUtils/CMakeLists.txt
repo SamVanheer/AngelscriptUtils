@@ -54,7 +54,6 @@ target_include_directories( ${TARGET_NAME} PRIVATE
 )
 
 target_compile_definitions( ${TARGET_NAME} PRIVATE
-	AS_STRING_OBJNAME="${AS_STRING_OBJNAME}"
 	${SHARED_DEFS}
 )
 

@@ -496,13 +496,13 @@ void RegisterScriptScheduler( asIScriptEngine* pEngine )
 
 	as::RegisterVarArgsMethod(
 		*pEngine, pszObjectName, 
-		"CScheduledFunction@", "SetTimeout", "const " AS_STRING_OBJNAME "& in szFunction, float flDelay",
+		"CScheduledFunction@", "SetTimeout", "const string& in szFunction, float flDelay",
 		0, 8, 
 		asFUNCTION( CASScheduler::SetTimeoutHandler ) );
 
 	as::RegisterVarArgsMethod(
 		*pEngine, pszObjectName, 
-		"CScheduledFunction@",  "SetTimeout", "?& in thisObject, const " AS_STRING_OBJNAME "& in szFunction, float flDelay",
+		"CScheduledFunction@",  "SetTimeout", "?& in thisObject, const string& in szFunction, float flDelay",
 		0, 8,
 		asFUNCTION( CASScheduler::SetTimeoutObj ) );
 
@@ -512,21 +512,21 @@ void RegisterScriptScheduler( asIScriptEngine* pEngine )
 
 	as::RegisterVarArgsMethod(
 		*pEngine, pszObjectName,
-		"CScheduledFunction@", "SetInterval", "const " AS_STRING_OBJNAME "& in szFunction, float flRepeatTime, int iRepeatCount",
+		"CScheduledFunction@", "SetInterval", "const string& in szFunction, float flRepeatTime, int iRepeatCount",
 		0, 8, asFUNCTION( CASScheduler::SetIntervalHandler ) );
 
 	pEngine->RegisterObjectMethod(
-		pszObjectName, "CScheduledFunction@ SetInterval(const " AS_STRING_OBJNAME "& in szFunction, float flRepeatTime)",
+		pszObjectName, "CScheduledFunction@ SetInterval(const string& in szFunction, float flRepeatTime)",
 		asFUNCTION( CASScheduler::SetInterval_NoArgs ), asCALL_GENERIC );
 
 	as::RegisterVarArgsMethod(
 		*pEngine, pszObjectName,
-		"CScheduledFunction@", "SetInterval", "?& in thisObject, const " AS_STRING_OBJNAME "& in szFunction, float flRepeatTime, int iRepeatCount",
+		"CScheduledFunction@", "SetInterval", "?& in thisObject, const string& in szFunction, float flRepeatTime, int iRepeatCount",
 		0, 8,
 		asFUNCTION( CASScheduler::SetIntervalObj ) );
 
 	pEngine->RegisterObjectMethod(
-		pszObjectName, "CScheduledFunction@ SetInterval(?& in thisObject, const " AS_STRING_OBJNAME "& in szFunction, float flRepeatTime)",
+		pszObjectName, "CScheduledFunction@ SetInterval(?& in thisObject, const string& in szFunction, float flRepeatTime)",
 		asFUNCTION( CASScheduler::SetIntervalObj_NoArgs ), asCALL_GENERIC );
 
 	pEngine->RegisterObjectMethod(

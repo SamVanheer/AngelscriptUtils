@@ -285,15 +285,15 @@ static void RegisterScriptCEventManager( asIScriptEngine& engine )
 		asMETHOD( CASEventManager, GetEventByIndex ), asCALL_THISCALL );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "CEvent@ FindEventByName(const " AS_STRING_OBJNAME "& in szName)",
+		pszObjectName, "CEvent@ FindEventByName(const string& in szName)",
 		asMETHOD( CASEventManager, FindEventByName ), asCALL_THISCALL );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "bool HookEvent(const " AS_STRING_OBJNAME "& in szName, ?& in pFunction)",
+		pszObjectName, "bool HookEvent(const string& in szName, ?& in pFunction)",
 		asMETHOD( CASEventManager, HookEvent ), asCALL_THISCALL );
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "void UnhookEvent(const " AS_STRING_OBJNAME "& in szName, ?& in pFunction)",
+		pszObjectName, "void UnhookEvent(const string& in szName, ?& in pFunction)",
 		asMETHOD( CASEventManager, UnhookEvent ), asCALL_THISCALL );
 }
 

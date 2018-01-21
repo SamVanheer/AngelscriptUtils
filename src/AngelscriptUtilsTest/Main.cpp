@@ -116,7 +116,7 @@ bool UseEventManager()
 *	Stops as soon as it's handled.
 *	Can be hooked by calling Events::Main.Hook( @MainHook( ... ) );
 */
-CASEvent testEvent( "Main", "const " AS_STRING_OBJNAME "& in", "", ModuleAccessMask::ALL, EventStopMode::ON_HANDLED );
+CASEvent testEvent( "Main", "const string& in", "", ModuleAccessMask::ALL, EventStopMode::ON_HANDLED );
 
 class CASTestInitializer : public IASInitializer
 {
@@ -162,7 +162,7 @@ public:
 		auto pEngine = manager.GetEngine();
 
 		//Printing function.
-		pEngine->RegisterGlobalFunction( "void Print(const " AS_STRING_OBJNAME "& in szString)", asFUNCTION( Print ), asCALL_CDECL );
+		pEngine->RegisterGlobalFunction( "void Print(const string& in szString)", asFUNCTION( Print ), asCALL_CDECL );
 
 		pEngine->SetDefaultNamespace( "NS" );
 

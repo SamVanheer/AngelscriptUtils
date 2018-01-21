@@ -3,15 +3,9 @@
 
 #include <angelscript.h>
 
-#include "util/ASPlatform.h"
+#include "ASUtilsConfig.h"
 
-#ifndef ASUTILS_CTX_RESULTHANDLER_USERDATA
-/**
-*	The user data key for the context result handler user data entry.
-*	Overridable by the user by defining it.
-*/
-#define ASUTILS_CTX_RESULTHANDLER_USERDATA 20001
-#endif
+#include "util/ASPlatform.h"
 
 /**
 *	Provides result handling functions for context operations.
@@ -75,7 +69,7 @@ namespace as
 */
 inline IASContextResultHandler* GetContextResultHandler( const asIScriptContext& context )
 {
-	return reinterpret_cast<IASContextResultHandler*>( context.GetUserData( ASUTILS_CTX_RESULTHANDLER_USERDATA ) );
+	return reinterpret_cast<IASContextResultHandler*>( context.GetUserData( ASUTILS_CTX_RESULTHANDLER_USERDATA_ID ) );
 }
 
 /**
@@ -90,7 +84,7 @@ inline void SetContextResultHandler( asIScriptContext& context, IASContextResult
 	if( pHandler )
 		pHandler->AddRef();
 
-	auto pOldHandler = reinterpret_cast<IASContextResultHandler*>( context.SetUserData( pHandler, ASUTILS_CTX_RESULTHANDLER_USERDATA ) );
+	auto pOldHandler = reinterpret_cast<IASContextResultHandler*>( context.SetUserData( pHandler, ASUTILS_CTX_RESULTHANDLER_USERDATA_ID ) );
 
 	if( pOldHandler )
 		pOldHandler->Release();

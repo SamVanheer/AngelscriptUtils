@@ -3,6 +3,8 @@
 
 #include <angelscript.h>
 
+#include "ASUtilsConfig.h"
+
 #include "util/ASLogging.h"
 #include "util/ASUtil.h"
 
@@ -89,7 +91,7 @@ bool CASManager::Initialize( IASInitializer& initializer )
 	initializer.OnInitBegin();
 
 	//Set the cleanup callback for the result handler.
-	m_pScriptEngine->SetContextUserDataCleanupCallback( as::FreeContextResultHandler, ASUTILS_CTX_RESULTHANDLER_USERDATA );
+	m_pScriptEngine->SetContextUserDataCleanupCallback( as::FreeContextResultHandler, ASUTILS_CTX_RESULTHANDLER_USERDATA_ID );
 
 	const bool bUseEventManager = initializer.UseEventManager();
 

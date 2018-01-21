@@ -23,7 +23,6 @@ configure_msvc_runtime( ${TARGET_NAME} ${MSVC_RUNTIME_CONFIG} )
 target_include_directories( ${TARGET_NAME} PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${SRC_DIR}
-	${EXTERNAL_DIR}/Angelscript/include
 )
 
 target_compile_definitions( ${TARGET_NAME} PRIVATE
@@ -42,7 +41,6 @@ create_source_groups( "${SRC_DIR}" )
 # Indicate which libraries to include during the link process.
 target_link_libraries( ${TARGET_NAME}
 	AngelscriptUtils
-	Angelscript
 )
 
 #CMake places libraries in /Debug or /Release on Windows, so explicitly set the paths for both.

@@ -4,6 +4,9 @@
 
 set( TARGET_NAME AngelscriptUtils )
 
+find_package( Threads REQUIRED )
+find_package( Angelscript CONFIG 2.32.0 REQUIRED )
+
 add_sources(
 	CASLoggingContextResultHandler.cpp
 	CASLoggingContextResultHandler.h
@@ -48,12 +51,15 @@ configure_msvc_runtime( ${TARGET_NAME} ${MSVC_RUNTIME_CONFIG} )
 
 target_include_directories( ${TARGET_NAME} PRIVATE
 	${SRC_DIR}
-	${EXTERNAL_DIR}/Angelscript/include
 )
 
 target_compile_definitions( ${TARGET_NAME} PRIVATE
 	AS_STRING_OBJNAME="${AS_STRING_OBJNAME}"
 	${SHARED_DEFS}
+)
+
+target_link_libraries( ${TARGET_NAME}
+	Angelscript::angelscript
 )
 
 set_target_properties( ${TARGET_NAME} PROPERTIES

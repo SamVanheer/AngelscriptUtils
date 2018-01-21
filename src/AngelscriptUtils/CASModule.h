@@ -3,6 +3,8 @@
 
 #include <cstring>
 
+#include "ASUtilsConfig.h"
+
 #include "util/CASBaseClass.h"
 
 #include "CASModuleDescriptor.h"
@@ -33,11 +35,6 @@ public:
 inline IASModuleUserData::~IASModuleUserData()
 {
 }
-
-/**
-*	The user data ID for the CASModule instance in asIScriptModule.
-*/
-#define CASMODULE_USER_DATA_ID 10001
 
 /**
 *	Angelscript module. Wraps asIScriptModule and provides the descriptor.

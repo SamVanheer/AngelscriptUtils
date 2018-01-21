@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <cassert>
 
-#include "add_on/scriptbuilder.h"
+#include "add_on/scriptbuilder/scriptbuilder.h"
 
 #include "event/CASEventManager.h"
 

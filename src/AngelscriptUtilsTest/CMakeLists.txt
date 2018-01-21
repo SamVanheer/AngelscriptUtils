@@ -10,6 +10,13 @@ add_sources(
 	CBaseEntity.h
 	CScriptBaseEntity.h
 	Main.cpp
+	add_on/scriptarray/scriptarray.cpp
+	add_on/scriptarray/scriptarray.h
+	add_on/scriptdictionary/scriptdictionary.cpp
+	add_on/scriptdictionary/scriptdictionary.h
+	add_on/scriptstdstring/scriptstdstring.cpp
+	add_on/scriptstdstring/scriptstdstring_utils.cpp
+	add_on/scriptstdstring/scriptstdstring.h
 )
 
 preprocess_sources()

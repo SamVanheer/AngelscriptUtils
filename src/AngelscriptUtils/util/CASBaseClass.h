@@ -70,6 +70,16 @@ protected:
 	mutable int m_iRefCount;
 };
 
+inline void CASRefCountedBaseClass::AddRef() const
+{
+	++m_iRefCount;
+}
+
+inline bool CASRefCountedBaseClass::InternalRelease() const
+{
+	return !--m_iRefCount;
+}
+
 /**
 *	Base class for all Angelscript classes that are reference counted and are used acrosss threads
 */
@@ -94,6 +104,16 @@ protected:
 	*/
 	bool InternalRelease() const;
 };
+
+inline void CASAtomicRefCountedBaseClass::AddRef() const
+{
+	asAtomicInc( m_iRefCount );
+}
+
+inline bool CASAtomicRefCountedBaseClass::InternalRelease() const
+{
+	return !asAtomicDec( m_iRefCount );
+}
 
 /**
 *	Garbage collected base class

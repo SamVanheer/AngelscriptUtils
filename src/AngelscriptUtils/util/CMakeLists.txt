@@ -10,7 +10,6 @@ add_sources(
 	ContextUtils.h
 	ContextUtils.cpp
 	CASBaseClass.h
-	CASBaseClass.cpp
 	CASBaseLogger.h
 	CASExtendAdapter.h
 	CASFileLogger.h

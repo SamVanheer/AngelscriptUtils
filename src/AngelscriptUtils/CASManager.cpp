@@ -91,7 +91,7 @@ bool CASManager::Initialize( IASInitializer& initializer )
 	initializer.OnInitBegin();
 
 	//Set the cleanup callback for the result handler.
-	m_pScriptEngine->SetContextUserDataCleanupCallback( as::FreeContextResultHandler, ASUTILS_CTX_RESULTHANDLER_USERDATA_ID );
+	m_pScriptEngine->SetContextUserDataCleanupCallback( as::FreeContextResultHandler, ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID );
 
 	const bool bUseEventManager = initializer.UseEventManager();
 

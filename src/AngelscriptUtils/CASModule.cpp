@@ -14,7 +14,7 @@ CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descr
 {
 	assert( pModule );
 
-	pModule->SetUserData( this, CASMODULE_USER_DATA_ID );
+	pModule->SetUserData( this, ASUTILS_CASMODULE_USER_DATA_ID );
 }
 
 CASModule::~CASModule()
@@ -59,7 +59,7 @@ CASModule* GetModuleFromScriptModule( const asIScriptModule* pModule )
 {
 	assert( pModule );
 
-	return reinterpret_cast<CASModule*>( pModule->GetUserData( CASMODULE_USER_DATA_ID ) );
+	return reinterpret_cast<CASModule*>( pModule->GetUserData( ASUTILS_CASMODULE_USER_DATA_ID ) );
 }
 
 CASModule* GetModuleFromScriptFunction( const asIScriptFunction* pFunction )

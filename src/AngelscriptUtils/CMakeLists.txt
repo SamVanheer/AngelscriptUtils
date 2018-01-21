@@ -42,8 +42,8 @@ add_subdirectory( ScriptAPI )
 add_subdirectory( util )
 add_subdirectory( wrapper )
 
-set( CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID" )
-set( ASUTILS_CTX_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID" )
+set( ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID" )
+set( ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID" )
 
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/ASUtilsConfig.h.in

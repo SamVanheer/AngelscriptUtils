@@ -69,7 +69,7 @@ namespace as
 */
 inline IASContextResultHandler* GetContextResultHandler( const asIScriptContext& context )
 {
-	return reinterpret_cast<IASContextResultHandler*>( context.GetUserData( ASUTILS_CTX_RESULTHANDLER_USERDATA_ID ) );
+	return reinterpret_cast<IASContextResultHandler*>( context.GetUserData( ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID ) );
 }
 
 /**
@@ -84,7 +84,7 @@ inline void SetContextResultHandler( asIScriptContext& context, IASContextResult
 	if( pHandler )
 		pHandler->AddRef();
 
-	auto pOldHandler = reinterpret_cast<IASContextResultHandler*>( context.SetUserData( pHandler, ASUTILS_CTX_RESULTHANDLER_USERDATA_ID ) );
+	auto pOldHandler = reinterpret_cast<IASContextResultHandler*>( context.SetUserData( pHandler, ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID ) );
 
 	if( pOldHandler )
 		pOldHandler->Release();

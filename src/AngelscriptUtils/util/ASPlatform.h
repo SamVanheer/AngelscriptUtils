@@ -9,18 +9,6 @@
 	#endif
 #endif
 
-#ifndef MAX_PATH
-//Constrain the MAX_PATH value so it can always be used on the stack.
-//FILENAME_MAX is not required to be usable as an array size on some systems, so this imposes a large but still limited maximum size.
-	#define FILENAME_MAX_STACK_SIZE 4096
-
-	#if FILENAME_MAX < FILENAME_MAX_STACK_SIZE
-		#define MAX_PATH FILENAME_MAX
-	#else
-		#define MAX_PATH FILENAME_MAX_STACK_SIZE
-	#endif
-#endif
-
 /**
 *	Creates a directory
 */

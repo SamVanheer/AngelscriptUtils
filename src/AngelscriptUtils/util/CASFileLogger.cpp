@@ -1,15 +1,14 @@
 #include <cassert>
+#include <cstdio>
 #include <cstring>
 #include <ctime>
+#include <string>
+#include <sstream>
 
-#if _MSC_VER >= 1900
-#include <experimental/filesystem>
-#else
 #ifdef WIN32
 #include <direct.h>
 #else
 #include <sys/stat.h>
-#endif
 #endif
 
 #include "ASPlatform.h"
@@ -99,60 +98,41 @@ bool CASFileLogger::OpenFile( const char* pszFilename, const bool bUseDatestamp 
 		return false;
 
 	//Create the directory hierarchy.
-#if _MSC_VER >= 1900
-	std::experimental::filesystem::path path( pszFilename );
+	std::string szPath( pszFilename );
 
-	path.remove_filename();
-
-	std::error_code error;
-
-	std::experimental::filesystem::create_directories( path, error );
-
-	if( error )
-		return false;
-#else
-	char szPath[ MAX_PATH ];
-
-	strncpy( szPath, pszFilename, sizeof( szPath ) );
-	szPath[ sizeof( szPath ) - 1 ] = '\0';
-
-	for( auto pszNext = szPath; *pszNext; ++pszNext )
+	for( auto& c : szPath )
 	{
-		if( *pszNext == '\\' )
-			*pszNext = '/';
+		if( c == '\\' )
+			c = '/';
 	}
 
-	auto pszDelim = strrchr( szPath, '/' );
+	auto uiDelim = szPath.rfind( '/' );
 
-	if( pszDelim )
+	if( uiDelim != std::string::npos )
 	{
-		*pszDelim = '\0';
+		szPath.resize( uiDelim );
 
 		//Make each directory.
-		for( auto pszNext = szPath; *pszNext; ++pszNext )
+		std::string::size_type uiIndex = 0;
+		for( auto c : szPath )
 		{
-			if( *pszNext == '/' )
+			if( c == '/' )
 			{
-				*pszNext = '\0';
-				MakeDirectory( szPath );
-				*pszNext = '/';
+				MakeDirectory( szPath.substr( 0, uiIndex ).c_str() );
 			}
+
+			++uiIndex;
 		}
 
 		//Make last directory.
-		MakeDirectory( szPath );
+		MakeDirectory( szPath.c_str() );
 	}
-#endif
 
-	char szBaseFilename[ MAX_PATH ];
+	std::ostringstream stream;
 
-	const char* pszFile;
+	stream << pszFilename;
 
-	if( !bUseDatestamp )
-	{
-		pszFile = pszFilename;
-	}
-	else
+	if( bUseDatestamp )
 	{
 		time_t currentTime;
 
@@ -160,22 +140,31 @@ bool CASFileLogger::OpenFile( const char* pszFilename, const bool bUseDatestamp 
 
 		const tm localTime = *localtime( &currentTime );
 
-		const int iResult = snprintf( szBaseFilename, sizeof( szBaseFilename ), "%s-%04d-%02d-%02d", pszFilename, localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday );
+		stream << '-';
 
-		if( iResult < 0 || static_cast<size_t>( iResult ) >= sizeof( szBaseFilename ) )
-			return false;
+		stream.fill( '0' );
 
-		pszFile = szBaseFilename;
+		stream.width( 4 );
+		stream << ( localTime.tm_year + 1900 );
+
+		stream.width( 0 );
+		stream << '-';
+
+		stream.width( 2 );
+		stream << ( localTime.tm_mon + 1 );
+
+		stream.width( 0 );
+		stream << '-';
+
+		stream.width( 2 );
+		stream << localTime.tm_mday;
+
+		stream.width( 0 );
 	}
 
-	char szFullFilename[ MAX_PATH ];
+	stream << m_szExtension;
 
-	const int iResult = snprintf( szFullFilename, sizeof( szFullFilename ), "%s%s", pszFile, m_szExtension.c_str() );
-
-	if( iResult < 0 || static_cast<size_t>( iResult ) >= sizeof( szFullFilename ) )
-		return false;
-
-	m_File.reset( fopen( szFullFilename, "a" ) );
+	m_File.reset( fopen( stream.str().c_str(), "a" ) );
 
 	return IsOpen();
 }

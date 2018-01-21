@@ -13,7 +13,7 @@ public:
 	{
 	}
 
-	virtual int ScheduleOfType( const std::string& ASUNREFERENCED( szName ) )
+	virtual int ScheduleOfType( const std::string& /*szName*/ )
 	{
 		return 1;
 	}

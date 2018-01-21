@@ -35,10 +35,8 @@ namespace as
 *	@return true on success, false otherwise.
 */
 template<typename CALLABLE, typename ARGS>
-bool CallFunction( CALLABLE& callable, CallFlags_t flags, const ARGS& args )
+bool CallFunction( CALLABLE& callable, CallFlags_t, const ARGS& args )
 {
-	ASREFERENCED( flags );
-
 	auto pContext = callable.GetContext().GetContext();
 
 	assert( pContext );
@@ -144,7 +142,7 @@ protected:
 	*	@param iResult Result of the asIScriptContext::Execute call.
 	*	@return true if the call should continue, false otherwise.
 	*/
-	bool PostExecute( const int ASUNREFERENCED( iResult ) ) { return true; }
+	bool PostExecute( const int iResult );
 
 private:
 	asIScriptFunction& m_Function;
@@ -174,6 +172,11 @@ inline bool CASCallable::GetReturnValue( void* pReturnValue )
 	const int iTypeId = m_Function.GetReturnTypeId( &uiFlags );
 
 	return ctx::GetReturnValue( *m_Context.GetContext(), iTypeId, uiFlags, pReturnValue );
+}
+
+inline bool CASCallable::PostExecute( const int )
+{
+	return true;
 }
 
 /**

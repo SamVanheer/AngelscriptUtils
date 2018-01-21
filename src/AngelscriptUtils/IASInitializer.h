@@ -82,16 +82,16 @@ inline IASInitializer::~IASInitializer()
 {
 }
 
-inline void IASInitializer::OnInitEnd( const bool ASUNREFERENCED( bSuccess ) )
+inline void IASInitializer::OnInitEnd( const bool )
 {
 }
 
-inline bool IASInitializer::GetMessageCallback( asSFuncPtr& ASUNREFERENCED( outFuncPtr ), void*& ASUNREFERENCED( pOutObj ), asDWORD& ASUNREFERENCED( outCallConv ) )
+inline bool IASInitializer::GetMessageCallback( asSFuncPtr&, void*&, asDWORD& )
 {
 	return false;
 }
 
-inline bool IASInitializer::AddEvents( CASManager& ASUNREFERENCED( manager ), CASEventManager& ASUNREFERENCED( eventManager ) )
+inline bool IASInitializer::AddEvents( CASManager&, CASEventManager& )
 {
 	return true;
 }

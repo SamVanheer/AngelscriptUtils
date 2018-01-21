@@ -98,7 +98,7 @@ asIScriptContext* CreateScriptContext( asIScriptEngine* pEngine, void* )
 	return pContext;
 }
 
-void DestroyScriptContext( asIScriptEngine* ASUNREFERENCED( pEngine ), asIScriptContext* pContext, void* )
+void DestroyScriptContext( asIScriptEngine*, asIScriptContext* pContext, void* )
 {
 	if( pContext )
 		pContext->Release();
@@ -150,7 +150,7 @@ public:
 		return true;
 	}
 
-	bool AddEvents( CASManager& ASUNREFERENCED( manager ), CASEventManager& eventManager ) override
+	bool AddEvents( CASManager&, CASEventManager& eventManager ) override
 	{
 		//Add an event. Scripts will be able to hook these, when it's invoked by C++ code all hooked functions are called.
 		eventManager.AddEvent( &testEvent );
@@ -224,7 +224,7 @@ public:
 		return builder.AddSectionFromFile( "resources/scripts/test.as" ) >= 0;
 	}
 
-	bool PostBuild( CScriptBuilder& ASUNREFERENCED( builder ), const bool bSuccess, CASModule* pModule ) override
+	bool PostBuild( CScriptBuilder&, const bool bSuccess, CASModule* pModule ) override
 	{
 		if( !bSuccess )
 			return false;
@@ -302,7 +302,7 @@ public:
 
 CASLogger g_Logger( "logs/L", CASFileLogger::Flag::USE_DATESTAMP | CASFileLogger::Flag::USE_TIMESTAMP | CASFileLogger::Flag::OUTPUT_LOG_LEVEL );
 
-int main( int ASUNREFERENCED( iArgc ), char* ASUNREFERENCED( pszArgV )[] )
+int main( int, char*[] )
 {
 	as::SetLogger( &g_Logger );
 

@@ -31,16 +31,6 @@ void MakeDirectory( const char* pszDirectoryName );
 */
 void ChangeDirectory( const char* pszDirectoryName );
 
-/**
-*	Used to mark function parameters as unused.
-*/
-#define ASUNREFERENCED( x )
-
-/**
-*	Used to mark function parameters as unused. Used at the start of the function body.
-*/
-#define ASREFERENCED( x ) ( ( x ) = ( x ) )
-
 template<typename T, size_t SIZE>
 inline size_t _ASArraySizeof( const T( & )[ SIZE ] )
 {

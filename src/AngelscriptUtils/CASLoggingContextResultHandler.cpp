@@ -11,7 +11,7 @@ CASLoggingContextResultHandler::CASLoggingContextResultHandler( const Flags_t fl
 	SetFlags( flags );
 }
 
-void CASLoggingContextResultHandler::ProcessPrepareResult( asIScriptFunction& ASUNREFERENCED( function ), asIScriptContext& ASUNREFERENCED( context ), int iResult )
+void CASLoggingContextResultHandler::ProcessPrepareResult( asIScriptFunction&, asIScriptContext&, int iResult )
 {
 	if( iResult < 0 )
 	{
@@ -139,7 +139,7 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 	}
 }
 
-void CASLoggingContextResultHandler::ProcessUnprepareResult( asIScriptContext& ASUNREFERENCED( context ), int iResult )
+void CASLoggingContextResultHandler::ProcessUnprepareResult( asIScriptContext&, int iResult )
 {
 	if( iResult < 0 )
 	{

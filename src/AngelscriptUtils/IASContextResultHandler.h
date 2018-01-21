@@ -48,15 +48,15 @@ inline IASContextResultHandler::~IASContextResultHandler()
 {
 }
 
-inline void IASContextResultHandler::ProcessPrepareResult( asIScriptFunction& ASUNREFERENCED( function ), asIScriptContext& ASUNREFERENCED( context ), int ASUNREFERENCED( iResult ) )
+inline void IASContextResultHandler::ProcessPrepareResult( asIScriptFunction&, asIScriptContext&, int )
 {
 }
 
-inline void IASContextResultHandler::ProcessExecuteResult( asIScriptFunction& ASUNREFERENCED( function ), asIScriptContext& ASUNREFERENCED( context ), int ASUNREFERENCED( iResult ) )
+inline void IASContextResultHandler::ProcessExecuteResult( asIScriptFunction&, asIScriptContext&, int )
 {
 }
 
-inline void IASContextResultHandler::ProcessUnprepareResult( asIScriptContext& ASUNREFERENCED( context ), int ASUNREFERENCED( iResult ) )
+inline void IASContextResultHandler::ProcessUnprepareResult( asIScriptContext&, int )
 {
 }
 

@@ -3,9 +3,15 @@ if( WINXPSUPPORT_INCLUDED )
 endif()
 set( WINXPSUPPORT_INCLUDED true )
 
+if( MSVC )
+	set( WINXP_NOTIFY_THREADSAFE OFF CACHE BOOL "Enable to notify when targets have thread-safe initialization disabled" )
+endif()
+
 #!	Checks if thread-safe initialization needs to be disabled for the given target.
 #	If targeting Windows XP (v*_xp toolset) and using an MSVC version of Visual Studio 2015 or newer, it is disabled.
 #	\arg:target_name The name of the target to check
+#
+#	If WINXP_NOTIFY_THREADSAFE is enabled, affected targets will be printed out
 macro( check_winxp_support target_name )
 	#Visual Studio only.
 	if( MSVC )
@@ -23,7 +29,11 @@ macro( check_winxp_support target_name )
 				message( WARNING "Couldn't get compile flags from target ${target_name}" )
 			else()
 				if( NOT FLAGS MATCHES "/Zc:threadSafeInit-" )
-					message( STATUS "${target_name}: Disabling Thread-safe initialization for Windows XP support" )
+				
+					#Alert users if requested
+					if( WINXP_NOTIFY_THREADSAFE )
+						message( STATUS "${target_name}: Disabling Thread-safe initialization for Windows XP support" )
+					endif()
 					#Disable thread-safe init so Windows XP users don't get crashes.
 
 					target_compile_options( ${target_name} PRIVATE

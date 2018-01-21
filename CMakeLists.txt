@@ -5,11 +5,16 @@
 #############################################################
 cmake_minimum_required( VERSION 3.6 )
 
-include( cmake/InputFilesList.cmake )
-include( cmake/MSVCRuntime.cmake )
-include( cmake/PDBUtils.cmake )
-include( cmake/WinXPSupport.cmake )
-include( cmake/Ternary.cmake )
+# Source additional modules from the "cmake" directory
+list( APPEND CMAKE_MODULE_PATH
+	"${CMAKE_CURRENT_LIST_DIR}/cmake"
+)
+
+include( InputFilesList )
+include( MSVCRuntime )
+include( PDBUtils )
+include( WinXPSupport )
+include( Ternary )
 
 project( AngelscriptUtils LANGUAGES CXX )
 

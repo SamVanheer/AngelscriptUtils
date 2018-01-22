@@ -68,13 +68,6 @@ if( MSVC )
 	)
 endif()
 
-if( AS_NO_EXCEPTIONS )
-	set( SHARED_DEFS
-		${SHARED_DEFS}
-		AS_NO_EXCEPTIONS
-	)
-endif()
-
 set( OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries" )
 
 set( EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external" )

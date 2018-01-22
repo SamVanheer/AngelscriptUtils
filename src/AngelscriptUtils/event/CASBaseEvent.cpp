@@ -2,6 +2,7 @@
 #include <cassert>
 
 #include "AngelscriptUtils/util/ASLogging.h"
+#include "AngelscriptUtils/util/ASUtil.h"
 
 #include "AngelscriptUtils/CASModule.h"
 
@@ -253,19 +254,10 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 	//Verify the function format
 	if( !pFuncDef->IsCompatibleWithTypeId( pFunction->GetTypeId() ) )
 	{
-		//TODO: use FormatFunctionName - Solokiller
-		if( asIScriptFunction* pDelegate = pFunction->GetDelegateFunction() )
-		{
-			asITypeInfo* pDelegateTypeInfo = pFunction->GetDelegateObjectType();
+		const auto szFunctionName = as::FormatFunctionName( *pFunction );
 
-			as::log->critical( "CBaseEvent::{}: Method '{}::{}::{}' is incompatible with event '{}'!",
-				pszScope, pDelegateTypeInfo->GetNamespace(), pDelegateTypeInfo->GetName(), pDelegate->GetName(), pFuncDef->GetName() );
-		}
-		else
-		{
-			as::log->critical( "CBaseEvent::{}: Function '{}::{}' is incompatible with event '{}'!",
-				pszScope, pFunction->GetNamespace(), pFunction->GetName(), pFuncDef->GetName() );
-		}
+		as::log->critical( "CBaseEvent::{}: Function '{}' is incompatible with event '{}'!",
+						   pszScope, szFunctionName, pFuncDef->GetName() );
 
 		return false;
 	}
@@ -286,23 +278,14 @@ void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 
 		auto pModule = pFunc->GetModule();
 
-		auto pActualFunc = pFunc;
-
 		if( !pModule )
 		{
 			auto pDelegate = pFunc->GetDelegateFunction();
 
 			if( pDelegate )
 			{
-				pActualFunc = pDelegate;
 				pModule = pDelegate->GetModule();
 			}
-		}
-
-		if( !pActualFunc )
-		{
-			as::log->info( "Null function!" );
-			continue;
 		}
 
 		if( !pModule )
@@ -311,8 +294,8 @@ void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 			continue;
 		}
 
-		//TODO: need to use as::FormatFunctionName - Solokiller
-		as::log->info( "Module \"{}\", \"{}::{}\"", pModule->GetName(), pActualFunc->GetNamespace(), pActualFunc->GetName() );
+		const auto szFunctionName = as::FormatFunctionName( *pFunc );
+		as::log->info( "Module \"{}\", \"{}\"", pModule->GetName(), szFunctionName );
 	}
 
 	as::log->info( "End functions" );

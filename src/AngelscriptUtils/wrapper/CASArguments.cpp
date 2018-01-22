@@ -297,17 +297,10 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 		}
 		else
 		{
-			//TODO: use FormatFunctionName - Solokiller
-			if( auto pFuncType = targetFunc.GetObjectType() )
-			{
-				as::log->critical( "CASArguments::SetArguments(va_list): Method '{}::{}::{}': failed to set argument {}, aborting!",
-							  pFuncType->GetNamespace(), pFuncType->GetName(), targetFunc.GetName(), uiIndex );
-			}
-			else
-			{
-				as::log->critical( "CASArguments::SetArguments(va_list): Function '{}::{}': failed to set argument {}, aborting!",
-					targetFunc.GetNamespace(), targetFunc.GetName(), uiIndex );
-			}
+			const auto szFunctionName = as::FormatFunctionName( targetFunc );
+
+			as::log->critical( "CASArguments::SetArguments(va_list): Function '{}': failed to set argument {}, aborting!",
+							   szFunctionName, uiIndex );
 		}
 	}
 

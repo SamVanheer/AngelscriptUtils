@@ -186,14 +186,12 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 				}
 				else
 				{
-					//TODO: use FormatFunctionName - Solokiller
 					as::log->critical( "Error: CScheduler::SetInterval: could not add '{}::{}::{}', object type must be a reference!", 
-						pType->GetNamespace(), pType->GetName(), szFunctionName.c_str() );
+						pType->GetNamespace(), pType->GetName(), szFunctionName );
 				}
 			}
 			else
 			{
-				//TODO: use FormatFunctionName - Solokiller
 				as::log->critical( "Error: CScheduler::SetInterval: could not add function '{}', object type for this pointer not found!", szFunctionName );
 			}
 		}
@@ -347,16 +345,9 @@ void CASScheduler::Think( const float flCurrentTime )
 
 					if( !bSuccess )
 					{
-						if( auto pType = pFunction->GetObjectType() )
-						{
-							as::log->critical( "Error: CScheduler::Think: execution of method %s::%s::%s failed!\n",
-										  pType->GetNamespace(), pType->GetName(), pFunction->GetName() );
-						}
-						else
-						{
-							as::log->critical( "Error: CScheduler::Think: execution of function %s::%s failed!\n", 
-								pFunction->GetNamespace(), pFunction->GetName() );
-						}
+						const auto szFunctionName = as::FormatFunctionName( *pFunction );
+						as::log->critical( "Error: CScheduler::Think: execution of function {} failed!\n", 
+										   szFunctionName );
 					}
 
 					//Could've been flagged for removal during the call.

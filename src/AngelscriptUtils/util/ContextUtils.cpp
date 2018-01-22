@@ -17,17 +17,11 @@ bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& contex
 
 	if( uiArgCount != arguments.GetArgumentCount() )
 	{
-		//TODO: use FormatFunctionName - Solokiller
-		if( auto pType = targetFunc.GetObjectType() )
-		{
-			as::log->critical( "ctx::SetArguments: argument count for method '{}::{}::{}' is incorrect: expected {}, got {}!",
-						  pType->GetNamespace(), pType->GetName(), targetFunc.GetName(), uiArgCount, arguments.GetArgumentCount() );
-		}
-		else
-		{
-			as::log->critical( "ctx::SetArguments: argument count for function '{}::{}' is incorrect: expected {}, got {}!",
-							 targetFunc.GetNamespace(), targetFunc.GetName(), uiArgCount, arguments.GetArgumentCount() );
-		}
+		const auto szFunctionName = as::FormatFunctionName( targetFunc );
+
+		as::log->critical( "ctx::SetArguments: argument count for function '{}' is incorrect: expected {}, got {}!",
+						   szFunctionName, uiArgCount, arguments.GetArgumentCount() );
+
 		return false;
 	}
 

@@ -97,6 +97,51 @@ inline bool IsObject( const int iTypeId )
 }
 
 /**
+*	Formats a function name and returns it.
+*	The format for global functions is \<namespace>::\<name>.
+*	The format for member functions is \<namespace>::\<classname>::\<name>.
+*	@param function Function whose name should be formatted
+*	@return Formatted function name
+*/
+inline std::string FormatFunctionName( const asIScriptFunction& function )
+{
+	const asIScriptFunction* pFunction = &function;
+
+	{
+		//If this is a delegate, get the original function.
+		auto pDelegate = pFunction->GetDelegateFunction();
+
+		if( pDelegate )
+			pFunction = pDelegate;
+	}
+
+	auto pszNamespace = pFunction->GetNamespace();
+	auto pszObjName = pFunction->GetObjectName();
+	auto pszName = pFunction->GetName();
+
+	const char szNSSep[] = "::";
+
+	std::string szName;
+
+	//Can copy up to a certain amount of the namespace name.
+	if( pszNamespace && *pszNamespace )
+	{
+		szName += pszNamespace;
+		szName += szNSSep;
+	}
+
+	if( pszObjName )
+	{
+		szName += pszObjName;
+		szName += szNSSep;
+	}
+
+	szName += pszName;
+
+	return szName;
+}
+
+/**
 *	Releases a vararg argument.
 *	@param engine Script engine.
 *	@param pObject Object pointer.
@@ -574,8 +619,8 @@ inline asIScriptFunction* FindFunction(
 
 			if( pFunction->GetParam( uiParamIndex, &iTypeId, &uiFlags ) < 0 )
 			{
-				//TODO: use FormatFunctionName - Solokiller
-				as::log->critical( "as::FindFunction: Failed to retrieve parameter {} for function {}!", uiParamIndex, pFunction->GetName() );
+				const auto szCandidateFuncName = as::FormatFunctionName( *pFunction );
+				as::log->critical( "as::FindFunction: Failed to retrieve parameter {} for function {}!", uiParamIndex, szCandidateFuncName );
 				break;
 			}
 
@@ -935,51 +980,6 @@ inline bool GetCallerInfo( const char*& pszSection, int& iLine, int& iColumn, as
 inline bool GetCallerInfo( CASCallerInfo& info, asIScriptContext* pContext = nullptr )
 {
 	return GetCallerInfo( info.pszSection, info.iLine, info.iColumn, pContext );
-}
-
-/**
-*	Formats a function name and returns it.
-*	The format for global functions is \<namespace>::\<name>.
-*	The format for member functions is \<namespace>::\<classname>::\<name>.
-*	@param function Function whose name should be formatted
-*	@return Formatted function name
-*/
-inline std::string FormatFunctionName( const asIScriptFunction& function )
-{
-	const asIScriptFunction* pFunction = &function;
-
-	{
-		//If this is a delegate, get the original function.
-		auto pDelegate = pFunction->GetDelegateFunction();
-
-		if( pDelegate )
-			pFunction = pDelegate;
-	}
-
-	auto pszNamespace = pFunction->GetNamespace();
-	auto pszObjName = pFunction->GetObjectName();
-	auto pszName = pFunction->GetName();
-
-	const char szNSSep[] = "::";
-
-	std::string szName;
-
-	//Can copy up to a certain amount of the namespace name.
-	if( pszNamespace && *pszNamespace )
-	{
-		szName += pszNamespace;
-		szName += szNSSep;
-	}
-
-	if( pszObjName )
-	{
-		szName += pszObjName;
-		szName += szNSSep;
-	}
-
-	szName += pszName;
-
-	return szName;
 }
 }
 

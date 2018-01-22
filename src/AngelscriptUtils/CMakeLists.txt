@@ -87,7 +87,6 @@ set_pdb_names( ${TARGET_NAME} )
 #Create filters
 create_source_groups( "${SRC_DIR}" )
 
-install( TARGETS ${TARGET_NAME} DESTINATION lib )
 install_pdbs( ${TARGET_NAME} lib )
 install_includes( "${SRC_DIR}" COMPONENT Devel )
 

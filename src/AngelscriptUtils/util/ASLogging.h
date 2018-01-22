@@ -1,74 +1,29 @@
 #ifndef ANGELSCRIPT_UTIL_ASLOGGING_H
 #define ANGELSCRIPT_UTIL_ASLOGGING_H
 
-#include "IASLogger.h"
+#include <memory>
+
+#include <spdlog/logger.h>
+
+#ifdef WIN32
+#undef VOID
+#undef GetObject
+#endif
 
 /**
 *	@file
-*	Defines logging functions.
+*	Provides the log global
 */
 
 namespace as
 {
 /**
-*	Gets the current logger, if any. Does not increment the reference count.
+*	@brief The logger used by AngelscriptUtils. Expected to never be null
+*	
+*	@details The user is responsible for setting this and freeing it on program shutdown
+*	If not provided, CASManager will create a default logger that outputs to stdout
 */
-IASLogger* GetLogger();
-
-/**
-*	Sets the current logger. Can be null. Adds a reference to the logger.
-*/
-void SetLogger( IASLogger* pLogger );
-
-/**
-*	@copydoc IASLogger::Log
-*/
-void Log( LogLevel_t logLevel, const char* pszFormat, ... );
-
-/**
-*	@copydoc IASLogger::VLog
-*/
-void VLog( LogLevel_t logLevel, const char* pszFormat, va_list list );
-
-/**
-*	@copydoc IASLogger::Critical
-*/
-void Critical( const char* pszFormat, ... );
-
-/**
-*	@copydoc IASLogger::VCritical
-*/
-void VCritical( const char* pszFormat, va_list list );
-
-/**
-*	@copydoc IASLogger::Msg
-*/
-void Msg( const char* pszFormat, ... );
-
-/**
-*	@copydoc IASLogger::VMsg
-*/
-void VMsg( const char* pszFormat, va_list list );
-
-/**
-*	@copydoc IASLogger::Verbose
-*/
-void Verbose( const char* pszFormat, ... );
-
-/**
-*	@copydoc IASLogger::VVerbose
-*/
-void VVerbose( const char* pszFormat, va_list list );
-
-/**
-*	@copydoc IASLogger::Diagnostic
-*/
-void Diagnostic( const char* pszFormat, ... );
-
-/**
-*	@copydoc IASLogger::VDiagnostic
-*/
-void VDiagnostic( const char* pszFormat, va_list list );
+extern std::shared_ptr<spdlog::logger> log;
 }
 
 #endif //ANGELSCRIPT_UTIL_ASLOGGING_H

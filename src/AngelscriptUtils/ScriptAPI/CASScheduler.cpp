@@ -75,9 +75,9 @@ void CASScheduler::SetIntervalHandler( asIScriptGeneric* pArguments )
 
 	if( !iRepeatCount || iRepeatCount < CASScheduler::REPEAT_INF_TIMES )
 	{
-		as::Critical(
-			"Error: CScheduler::SetInterval: can only add function '%s' if repeat count is positive and non-zero, or REPEAT_INFINITE_TIMES!\n",
-			szFunctionName.c_str() );
+		as::log->critical(
+			"Error: CScheduler::SetInterval: can only add function '{}' if repeat count is positive and non-zero, or REPEAT_INFINITE_TIMES!",
+			szFunctionName );
 		pArguments->SetReturnAddress( nullptr );
 		return;
 	}
@@ -122,9 +122,9 @@ void CASScheduler::SetIntervalObj( asIScriptGeneric* pArguments )
 
 	if( !iRepeatCount || iRepeatCount < CASScheduler::REPEAT_INF_TIMES )
 	{
-		as::Critical(
-			"Error: CScheduler::SetInterval: can only add function '%s' if repeat count is positive and non-zero, or REPEAT_INFINITE_TIMES!\n",
-			szFunctionName.c_str() );
+		as::log->critical(
+			"Error: CScheduler::SetInterval: can only add function '{}' if repeat count is positive and non-zero, or REPEAT_INFINITE_TIMES!",
+			szFunctionName );
 		pArguments->SetReturnAddress( nullptr );
 		return;
 	}
@@ -154,7 +154,7 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 {
 	if( flRepeatTime < 0.0f )
 	{
-		as::Critical( "Error: CScheduler::SetInterval: negative repeat time or delay is not allowed!\n" );
+		as::log->critical( "Error: CScheduler::SetInterval: negative repeat time or delay is not allowed!" );
 		arguments.SetReturnAddress( nullptr );
 		return;
 	}
@@ -186,13 +186,15 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 				}
 				else
 				{
-					as::Critical( "Error: CScheduler::SetInterval: could not add '%s::%s::%s', object type must be a reference!\n", 
+					//TODO: use FormatFunctionName - Solokiller
+					as::log->critical( "Error: CScheduler::SetInterval: could not add '{}::{}::{}', object type must be a reference!", 
 						pType->GetNamespace(), pType->GetName(), szFunctionName.c_str() );
 				}
 			}
 			else
 			{
-				as::Critical( "Error: CScheduler::SetInterval: could not add function '%s', object type for this pointer not found!\n", szFunctionName.c_str() );
+				//TODO: use FormatFunctionName - Solokiller
+				as::log->critical( "Error: CScheduler::SetInterval: could not add function '{}', object type for this pointer not found!", szFunctionName );
 			}
 		}
 		else
@@ -230,13 +232,13 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 		else
 		{
 			delete pArgs;
-			as::Critical( "Error: CScheduler::SetInterval: could not add function '%s', function not found\n", szFunctionName.c_str() );
+			as::log->critical( "Error: CScheduler::SetInterval: could not add function '{}', function not found", szFunctionName );
 			bSuccess = false;
 		}
 	}
 	else
 	{
-		as::Critical( "Error: CScheduler::SetInterval: could not add function '%s', failed to parse arguments\n", szFunctionName.c_str() );
+		as::log->critical( "Error: CScheduler::SetInterval: could not add function '{}', failed to parse arguments", szFunctionName );
 		bSuccess = false;
 	}
 
@@ -347,12 +349,12 @@ void CASScheduler::Think( const float flCurrentTime )
 					{
 						if( auto pType = pFunction->GetObjectType() )
 						{
-							as::Critical( "Error: CScheduler::Think: execution of method %s::%s::%s failed!\n",
+							as::log->critical( "Error: CScheduler::Think: execution of method %s::%s::%s failed!\n",
 										  pType->GetNamespace(), pType->GetName(), pFunction->GetName() );
 						}
 						else
 						{
-							as::Critical( "Error: CScheduler::Think: execution of function %s::%s failed!\n", 
+							as::log->critical( "Error: CScheduler::Think: execution of function %s::%s failed!\n", 
 								pFunction->GetNamespace(), pFunction->GetName() );
 						}
 					}

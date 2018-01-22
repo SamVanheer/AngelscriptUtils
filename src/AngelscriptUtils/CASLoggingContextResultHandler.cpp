@@ -15,32 +15,32 @@ void CASLoggingContextResultHandler::ProcessPrepareResult( asIScriptFunction&, a
 		{
 		case asCONTEXT_ACTIVE:
 			{
-				as::Critical( "Tried to prepare context that is currently executing or suspended\n" );
+				as::log->error( "Tried to prepare context that is currently executing or suspended" );
 				break;
 			}
 
 			//This can't happen without throwing an exception when passing the function into as::Call since it dereferences the pointer.
 		case asNO_FUNCTION:
 			{
-				as::Critical( "Tried to prepare null function\n" );
+				as::log->error( "Tried to prepare null function" );
 				break;
 			}
 
 		case asINVALID_ARG:
 			{
-				as::Critical( "Tried to prepare context with function from different engine\n" );
+				as::log->error( "Tried to prepare context with function from different engine" );
 				break;
 			}
 
 		case asOUT_OF_MEMORY:
 			{
-				as::Critical( "Ran out of memory while preparing context for execution\n" );
+				as::log->error( "Ran out of memory while preparing context for execution" );
 				break;
 			}
 
 		default:
 			{
-				as::Critical( "Unknown error \"%d\" occurred while preparing context for execution\n", iResult );
+				as::log->error( "Unknown error \"{}\" occurred while preparing context for execution", iResult );
 				break;
 			}
 		}
@@ -60,7 +60,7 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 				//Suspended execution is an error if the user wants it to be.
 				if( m_Flags & Flag::SUSPEND_IS_ERROR )
 				{
-					as::Critical( "Script execution unexpectedly suspended while executing function \"%s\"\n", szFunctionName.c_str() );
+					as::log->error( "Script execution unexpectedly suspended while executing function \"{}\"", szFunctionName );
 
 					LogCurrentFunction( context, "Suspended" );
 				}
@@ -70,13 +70,13 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 
 		case asCONTEXT_NOT_PREPARED:
 			{
-				as::Critical( "Context not prepared to execute function \"%s\"\n", szFunctionName.c_str() );
+				as::log->error( "Context not prepared to execute function \"{}\"", szFunctionName );
 				break;
 			}
 
 		case asEXECUTION_ABORTED:
 			{
-				as::Critical( "Script execution aborted while executing function \"%s\"\n", szFunctionName.c_str() );
+				as::log->error( "Script execution aborted while executing function \"{}\"", szFunctionName );
 
 				LogCurrentFunction( context, "Aborted" );
 
@@ -85,8 +85,6 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 
 		case asEXECUTION_EXCEPTION:
 			{
-				as::Critical( "Exception occurred while executing function \"%s\"\n", szFunctionName.c_str() );
-
 				const auto szExceptionFunction = as::FormatFunctionName( *context.GetExceptionFunction() );
 
 				int iColumn = 0;
@@ -94,7 +92,10 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 
 				const int iLineNumber = context.GetExceptionLineNumber( &iColumn, &pszSection );
 
-				as::Critical( "Function \"%s\" at line %d, column %d in section \"%s\":\n%s\n", szExceptionFunction.c_str(), iLineNumber, iColumn, pszSection, context.GetExceptionString() );
+				as::log->warn(
+					"Exception occurred while executing function \"{}\"\nFunction \"{}\" at line {}, column {} in section \"{}\":\n{}",
+					szFunctionName, szExceptionFunction, iLineNumber, iColumn, pszSection, context.GetExceptionString()
+				);
 
 				break;
 			}
@@ -106,7 +107,7 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 		case asEXECUTION_ACTIVE:
 		case asEXECUTION_ERROR:
 			{
-				as::Critical( "Unexpected context state \"%d\" encountered while executing function \"%s\"\n", iResult, szFunctionName.c_str() );
+				as::log->error( "Unexpected context state \"{}\" encountered while executing function \"{}\"", iResult, szFunctionName );
 				break;
 			}
 
@@ -114,7 +115,7 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 		default:
 		case asERROR:
 			{
-				as::Critical( "Unknown error \"%d\" occurred while executing function \"%s\"\n", iResult, szFunctionName.c_str() );
+				as::log->error( "Unknown error \"{}\" occurred while executing function \"{}\"\n", iResult, szFunctionName );
 				break;
 			}
 		}
@@ -130,13 +131,13 @@ void CASLoggingContextResultHandler::ProcessUnprepareResult( asIScriptContext&, 
 			//This can happen if a longjmp occurs while executing a script. The context state is corrupted after such a call.
 		case asCONTEXT_ACTIVE:
 			{
-				as::Critical( "Tried to unprepare context that is still active\n" );
+				as::log->error( "Tried to unprepare context that is still active" );
 				break;
 			}
 
 		default:
 			{
-				as::Critical( "Unknown error \"%d\" occurred while unpreparing\n", iResult );
+				as::log->error( "Unknown error \"{}\" occurred while unpreparing", iResult );
 				break;
 			}
 		}
@@ -158,10 +159,10 @@ void CASLoggingContextResultHandler::LogCurrentFunction( asIScriptContext& conte
 	{
 		const auto szFunctionName = as::FormatFunctionName( *pCurrentFunc );
 
-		as::Critical( "%s while in function \"%s\" at line %d, column %d in section \"%s\"\n", pszAction, szFunctionName.c_str(), info.iLine, info.iColumn, info.pszSection );
+		as::log->error( "{} while in function \"{}\" at line {}, column {} in section \"{}\"", pszAction, szFunctionName, info.iLine, info.iColumn, info.pszSection );
 	}
 	else
 	{
-		as::Critical( "%s in unknown function\n", pszAction );
+		as::log->error( "{} in unknown function", pszAction );
 	}
 }

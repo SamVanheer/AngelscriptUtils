@@ -574,7 +574,8 @@ inline asIScriptFunction* FindFunction(
 
 			if( pFunction->GetParam( uiParamIndex, &iTypeId, &uiFlags ) < 0 )
 			{
-				as::Critical( "as::FindFunction: Failed to retrieve parameter %u for function %s!\n", uiParamIndex, pFunction->GetName() );
+				//TODO: use FormatFunctionName - Solokiller
+				as::log->critical( "as::FindFunction: Failed to retrieve parameter {} for function {}!", uiParamIndex, pFunction->GetName() );
 				break;
 			}
 
@@ -605,7 +606,7 @@ inline asIScriptFunction* FindFunction(
 					//Change the type to match
 					if( !arg.Set( iTypeId, arg.GetArgumentType(), value, false ) )
 					{
-						as::Critical( "as::FindFunction: Failed to convert enum value!\n" );
+						as::log->critical( "as::FindFunction: Failed to convert enum value!" );
 						break;
 					}
 					*/
@@ -731,6 +732,7 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 	//Only register casts if the type being registered is not this type.
 	if( strcmp( pszSubType, pszBaseType ) != 0 )
 	{
+		//TODO: use std::string - Solokiller
 		char szBuffer[ 1024 ];
 
 		auto result = snprintf( szBuffer, sizeof( szBuffer ), "%s@ opImplCast()", pszBaseType );
@@ -747,7 +749,7 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 		}
 		else
 		{
-			as::Critical( "as::RegisterCasts: Failed to format string for implicit cast for class '%s'!\n", pszSubType );
+			as::log->critical( "as::RegisterCasts: Failed to format string for implicit cast for class '{}'!", pszSubType );
 			return false;
 		}
 
@@ -765,7 +767,7 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 		}
 		else
 		{
-			as::Critical( "as::RegisterCasts: Failed to format string for explicit cast for class '%s'!\n", pszSubType );
+			as::log->critical( "as::RegisterCasts: Failed to format string for explicit cast for class '{}'!", pszSubType );
 			return false;
 		}
 	}

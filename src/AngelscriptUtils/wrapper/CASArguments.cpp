@@ -76,7 +76,7 @@ bool CASArgument::Set( asIScriptEngine& engine, const int iTypeId, const ArgType
 			}
 			else
 			{
-				as::Critical( "CASArgument::Set: Failed to get object type!\n" );
+				as::log->critical( "CASArgument::Set: Failed to get object type!" );
 				bSuccess = false;
 			}
 		}
@@ -126,7 +126,7 @@ void CASArgument::Reset()
 				pEngine->ReleaseScriptObject( m_Value.pValue, pType );
 			else
 			{
-				as::Critical( "CASArgument::Reset: Failed to get object type!\n" );
+				as::log->critical( "CASArgument::Reset: Failed to get object type!" );
 			}
 		}
 
@@ -222,7 +222,7 @@ bool CASArguments::SetArguments( asIScriptGeneric& arguments, size_t uiStartInde
 	//If true, an internal error occured
 	if( uiStartIndex > uiArgCount )
 	{
-		as::Critical( "CASArguments::SetArguments: Start index is greater than argument count!\n" );
+		as::log->critical( "CASArguments::SetArguments: Start index is greater than argument count!" );
 		return false;
 	}
 
@@ -280,7 +280,7 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 	{
 		if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
 		{
-			as::Critical( "CASArguments::SetArguments(va_list): An error occurred while getting function parameter information, aborting!\n" );
+			as::log->critical( "CASArguments::SetArguments(va_list): An error occurred while getting function parameter information, aborting!" );
 			bSuccess = false;
 			break;
 		}
@@ -297,14 +297,15 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 		}
 		else
 		{
+			//TODO: use FormatFunctionName - Solokiller
 			if( auto pFuncType = targetFunc.GetObjectType() )
 			{
-				as::Critical( "CASArguments::SetArguments(va_list): Method '%s::%s::%s': failed to set argument %u, aborting!\n",
+				as::log->critical( "CASArguments::SetArguments(va_list): Method '{}::{}::{}': failed to set argument {}, aborting!",
 							  pFuncType->GetNamespace(), pFuncType->GetName(), targetFunc.GetName(), uiIndex );
 			}
 			else
 			{
-				as::Critical( "CASArguments::SetArguments(va_list): Function '%s::%s': failed to set argument %u, aborting!\n",
+				as::log->critical( "CASArguments::SetArguments(va_list): Function '{}::{}': failed to set argument {}, aborting!",
 					targetFunc.GetNamespace(), targetFunc.GetName(), uiIndex );
 			}
 		}

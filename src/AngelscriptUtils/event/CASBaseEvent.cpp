@@ -41,7 +41,7 @@ bool CASBaseEvent::AddFunction( asIScriptFunction* pFunction )
 
 		as::GetCallerInfo( info );
 
-		as::Critical( "CBaseEvent::AddFunction: %s(%d, %d): Cannot add function while invoking event!\n", info.pszSection, info.iLine, info.iColumn );
+		as::log->critical( "CBaseEvent::AddFunction: {}({}, {}): Cannot add function while invoking event!", info.pszSection, info.iLine, info.iColumn );
 		return false;
 	}
 
@@ -137,7 +137,7 @@ void CASBaseEvent::RemoveFunctionsOfModule( CASModule* pModule )
 
 		as::GetCallerInfo( info );
 
-		as::Critical( "CBaseEvent::RemoveFunctionsOfModule: %s(%d, %d): Module hooks should not be removed while invoking events!\n", info.pszSection, info.iLine, info.iColumn );
+		as::log->critical( "CBaseEvent::RemoveFunctionsOfModule: {}({}, {}): Module hooks should not be removed while invoking events!", info.pszSection, info.iLine, info.iColumn );
 		return;
 	}
 
@@ -173,7 +173,7 @@ void CASBaseEvent::RemoveAllFunctions()
 	if( m_iInCallCount != 0 )
 	{
 		assert( !"CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!" );
-		as::Critical( "CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!\n" );
+		as::log->critical( "CASEvent::RemoveAllFunctions: Hooks should not be removed while invoking events!" );
 
 		if( auto pContext = asGetActiveContext() )
 		{
@@ -204,19 +204,19 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 
 	if( !pObjectType )
 	{
-		as::Critical( "CBaseEvent::%s: unknown type!\n", pszScope );
+		as::log->critical( "CBaseEvent::{}: unknown type!", pszScope );
 		return false;
 	}
 
 	if( !( pObjectType->GetFlags() & asOBJ_FUNCDEF ) )
 	{
-		as::Critical( "CBaseEvent::%s: Object is not a function or delegate!\n", pszScope );
+		as::log->critical( "CBaseEvent::{}: Object is not a function or delegate!", pszScope );
 		return false;
 	}
 
 	if( !pObject )
 	{
-		as::Critical( "CBaseEvent::%s: Object is null!\n", pszScope );
+		as::log->critical( "CBaseEvent::{}: Object is null!", pszScope );
 		return false;
 	}
 
@@ -228,7 +228,7 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 
 	if( !pObject )
 	{
-		as::Critical( "CBaseEvent::%s: Object is null!\n", pszScope );
+		as::log->critical( "CBaseEvent::{}: Object is null!", pszScope );
 		return false;
 	}
 
@@ -236,7 +236,7 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 
 	if( !pFunction )
 	{
-		as::Critical( "CBaseEvent::%s: Null function passed!\n", pszScope );
+		as::log->critical( "CBaseEvent::{}: Null function passed!", pszScope );
 		return false;
 	}
 
@@ -246,23 +246,24 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 
 	if( !pFuncDef )
 	{
-		as::Critical( "CBaseEvent::%s: No funcdef for event!\n", pszScope );
+		as::log->critical( "CBaseEvent::{}: No funcdef for event!", pszScope );
 		return false;
 	}
 
 	//Verify the function format
 	if( !pFuncDef->IsCompatibleWithTypeId( pFunction->GetTypeId() ) )
 	{
+		//TODO: use FormatFunctionName - Solokiller
 		if( asIScriptFunction* pDelegate = pFunction->GetDelegateFunction() )
 		{
 			asITypeInfo* pDelegateTypeInfo = pFunction->GetDelegateObjectType();
 
-			as::Critical( "CBaseEvent::%s: Method '%s::%s::%s' is incompatible with event '%s'!\n",
+			as::log->critical( "CBaseEvent::{}: Method '{}::{}::{}' is incompatible with event '{}'!",
 				pszScope, pDelegateTypeInfo->GetNamespace(), pDelegateTypeInfo->GetName(), pDelegate->GetName(), pFuncDef->GetName() );
 		}
 		else
 		{
-			as::Critical( "CBaseEvent::%s: Function '%s::%s' is incompatible with event '%s'!\n",
+			as::log->critical( "CBaseEvent::{}: Function '{}::{}' is incompatible with event '{}'!",
 				pszScope, pFunction->GetNamespace(), pFunction->GetName(), pFuncDef->GetName() );
 		}
 
@@ -277,7 +278,7 @@ bool CASBaseEvent::ValidateHookFunction( const int iTypeId, void* pObject, const
 void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 {
 	if( pszName )
-		as::Msg( "%s\n", pszName );
+		as::log->info( "{}", pszName );
 
 	for( size_t uiIndex = 0; uiIndex < GetFunctionCount(); ++uiIndex )
 	{
@@ -300,20 +301,21 @@ void CASBaseEvent::DumpHookedFunctions( const char* const pszName ) const
 
 		if( !pActualFunc )
 		{
-			as::Msg( "Null function!\n" );
+			as::log->info( "Null function!" );
 			continue;
 		}
 
 		if( !pModule )
 		{
-			as::Msg( "Null module!\n" );
+			as::log->info( "Null module!" );
 			continue;
 		}
 
-		as::Msg( "Module \"%s\", \"%s::%s\"\n", pModule->GetName(), pActualFunc->GetNamespace(), pActualFunc->GetName() );
+		//TODO: need to use as::FormatFunctionName - Solokiller
+		as::log->info( "Module \"{}\", \"{}::{}\"", pModule->GetName(), pActualFunc->GetNamespace(), pActualFunc->GetName() );
 	}
 
-	as::Msg( "End functions\n" );
+	as::log->info( "End functions" );
 }
 
 void CASBaseEvent::ClearRemovedHooks()

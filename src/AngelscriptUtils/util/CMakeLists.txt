@@ -10,15 +10,10 @@ add_sources(
 	ContextUtils.h
 	ContextUtils.cpp
 	CASBaseClass.h
-	CASBaseLogger.h
 	CASExtendAdapter.h
-	CASFileLogger.h
-	CASFileLogger.cpp
 	CASRefPtr.h
 	CASObjPtr.h
 	IASExtendAdapter.h
-	IASLogger.h
-	IASLogger.cpp
 	StringUtils.h
 )
 
@@ -29,12 +24,9 @@ add_includes(
 	ASUtil.h
 	ContextUtils.h
 	CASBaseClass.h
-	CASBaseLogger.h
 	CASExtendAdapter.h
-	CASFileLogger.h
 	CASRefPtr.h
 	CASObjPtr.h
 	IASExtendAdapter.h
-	IASLogger.h
 	StringUtils.h
 )

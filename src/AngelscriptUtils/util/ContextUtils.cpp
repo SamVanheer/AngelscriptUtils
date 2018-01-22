@@ -17,14 +17,15 @@ bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& contex
 
 	if( uiArgCount != arguments.GetArgumentCount() )
 	{
+		//TODO: use FormatFunctionName - Solokiller
 		if( auto pType = targetFunc.GetObjectType() )
 		{
-			as::Critical( "ctx::SetArguments: argument count for method '%s::%s::%s' is incorrect: expected %u, got %u!\n",
+			as::log->critical( "ctx::SetArguments: argument count for method '{}::{}::{}' is incorrect: expected {}, got {}!",
 						  pType->GetNamespace(), pType->GetName(), targetFunc.GetName(), uiArgCount, arguments.GetArgumentCount() );
 		}
 		else
 		{
-			as::Critical( "ctx::SetArguments: argument count for function '%s::%s' is incorrect: expected %u, got %u!\n",
+			as::log->critical( "ctx::SetArguments: argument count for function '{}::{}' is incorrect: expected {}, got {}!",
 							 targetFunc.GetNamespace(), targetFunc.GetName(), uiArgCount, arguments.GetArgumentCount() );
 		}
 		return false;
@@ -97,7 +98,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 
 	if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
 	{
-		as::Critical( "ctx::SetContextArgument: An error occurred while getting function parameter information, aborting!\n" );
+		as::log->critical( "ctx::SetContextArgument: An error occurred while getting function parameter information, aborting!" );
 		return false;
 	}
 
@@ -123,7 +124,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 
 	if( targetFunc.GetParam( uiIndex, &iTypeId, &uiFlags ) < 0 )
 	{
-		as::Critical( "ctx::SetContextArgument: An error occurred while getting function parameter information, aborting!\n" );
+		as::log->critical( "ctx::SetContextArgument: An error occurred while getting function parameter information, aborting!" );
 		return false;
 	}
 
@@ -150,7 +151,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 					//Functions are incompatible, can't set
 					if( !pSourceFunc->IsCompatibleWithTypeId( iTypeId ) )
 					{
-						as::Critical( "ctx::SetContextArgument: Could not set argument %u, argument function signatures are different, aborting!\n", uiIndex );
+						as::log->critical( "ctx::SetContextArgument: Could not set argument {}, argument function signatures are different, aborting!", uiIndex );
 						bCanSet = false;
 					}
 				}
@@ -162,7 +163,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 						engine.ReleaseScriptObject( pObject, pType );
 					else
 					{
-						as::Critical( "ctx::SetContextArgument: Source argument is incompatible with target, aborting!\n" );
+						as::log->critical( "ctx::SetContextArgument: Source argument is incompatible with target, aborting!" );
 						bCanSet = false;
 					}
 				}
@@ -174,13 +175,13 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 			}
 			else
 			{
-				as::Critical( "ctx::SetContextArgument: Could not get object type for argument %u, aborting!\n", uiIndex );
+				as::log->critical( "ctx::SetContextArgument: Could not get object type for argument {}, aborting!", uiIndex );
 				bSuccess = false;
 			}
 		}
 		else
 		{
-			as::Critical( "ctx::SetContextArgument: Source argument is incompatible with target, aborting!\n" );
+			as::log->critical( "ctx::SetContextArgument: Source argument is incompatible with target, aborting!\n" );
 			bSuccess = false;
 		}
 	}
@@ -220,7 +221,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 				case asTYPEID_VOID:
 					{
 						//Impossible
-						as::Critical( "ctx::SetContextArgument: the impossible happened: a void argument, aborting!\n" );
+						as::log->critical( "ctx::SetContextArgument: the impossible happened: a void argument, aborting!" );
 						bSuccess = false;
 						break;
 					}
@@ -255,7 +256,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 					}
 					else
 					{
-						as::Critical( "ctx::SetContextArgument: Attempted to set parameter of unknown type, aborting!\n" );
+						as::log->critical( "ctx::SetContextArgument: Attempted to set parameter of unknown type, aborting!" );
 						bSuccess = false;
 					}
 					break;
@@ -265,7 +266,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 				{
 					if( iTypeId != iSourceTypeId )
 					{
-						as::Critical( "ctx::SetContextArgument: Attempted to set primitive value of type '%s' to value of type '%s', aborting!\n",
+						as::log->critical( "ctx::SetContextArgument: Attempted to set primitive value of type '{}' to value of type '{}', aborting!",
 										 as::PrimitiveTypeIdToString( iTypeId ), as::PrimitiveTypeIdToString( iSourceTypeId ) );
 						bSuccess = false;
 					}
@@ -302,7 +303,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 				*pOutArgType = ArgType::VALUE;
 			else
 			{
-				as::Critical( "ctx::GetArgumentFromVarargs: Unknown object type, cannot convert!\n" );
+				as::log->critical( "ctx::GetArgumentFromVarargs: Unknown object type, cannot convert!" );
 				bSuccess = false;
 			}
 		}
@@ -323,7 +324,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 			case asTYPEID_VOID:
 				{
 					//Impossible
-					as::Critical( "ctx::SetContextArgument: The impossible happened: a void argument\n" );
+					as::log->critical( "ctx::SetContextArgument: The impossible happened: a void argument" );
 					bSuccess = false;
 					break;
 				}
@@ -355,7 +356,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 				}
 				else
 				{
-					as::Critical( "ctx::SetContextArgument: Attempted to set parameter of unknown type, aborting!\n" );
+					as::log->critical( "ctx::SetContextArgument: Attempted to set parameter of unknown type, aborting!" );
 					bSuccess = false;
 				}
 				break;
@@ -385,7 +386,7 @@ bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue& value, asINT64&
 	case asTYPEID_VOID:
 		{
 			//Impossible
-			as::Critical( "ctx::ConvertInputArgToLargest: The impossible happened: a void argument, aborting!\n" );
+			as::log->critical( "ctx::ConvertInputArgToLargest: The impossible happened: a void argument, aborting!" );
 			bSuccess = false;
 			break;
 		}
@@ -474,7 +475,7 @@ bool ConvertEnumToPrimitive( const CASArgument& arg, const int iTypeId, Argument
 			{
 				if( arg.GetArgumentValue().dword > UINT8_MAX )
 				{
-					as::Critical( "Truncating enum value to 1 byte!\n" );
+					as::log->critical( "Truncating enum value to 1 byte!" );
 				}
 
 				outValue.byte = static_cast<asBYTE>( arg.GetArgumentValue().dword );
@@ -486,7 +487,7 @@ bool ConvertEnumToPrimitive( const CASArgument& arg, const int iTypeId, Argument
 			{
 				if( arg.GetArgumentValue().dword > UINT16_MAX )
 				{
-					as::Critical( "Truncating enum value to 2 bytes!\n" );
+					as::log->critical( "Truncating enum value to 2 bytes!" );
 				}
 
 				outValue.word = static_cast<asWORD>( arg.GetArgumentValue().dword );
@@ -532,7 +533,7 @@ bool ConvertPrimitiveToEnum( const CASArgument& arg, ArgumentValue& outValue )
 		{
 			if( arg.GetArgumentValue().qword > UINT32_MAX )
 			{
-				as::Critical( "Truncating 8 byte value to 4 bytes!\n" );
+				as::log->critical( "Truncating 8 byte value to 4 bytes!" );
 			}
 
 			outValue.dword = static_cast<asDWORD>( arg.GetArgumentValue().qword );
@@ -546,7 +547,7 @@ bool ConvertPrimitiveToEnum( const CASArgument& arg, ArgumentValue& outValue )
 			//TODO: is this correct?
 			if( arg.GetArgumentValue().dValue > UINT32_MAX )
 			{
-				as::Critical( "Truncating 8 byte value to 4 bytes!\n" );
+				as::log->critical( "Truncating 8 byte value to 4 bytes!" );
 			}
 
 			outValue.dword = static_cast<asDWORD>( arg.GetArgumentValue().dValue );
@@ -682,7 +683,7 @@ bool SetObjectArgument( asIScriptEngine& engine, void* pObject, int iTypeId, CAS
 		{
 			//I don't know what this is.
 			bSuccess = false;
-			as::Critical( "ctx::SetObjectArgument: unknown type '%s', aborting!\n", pType->GetName() );
+			as::log->critical( "ctx::SetObjectArgument: unknown type '{}', aborting!", pType->GetName() );
 		}
 	}
 	else
@@ -696,7 +697,7 @@ bool SetObjectArgument( asIScriptEngine& engine, void* pObject, int iTypeId, CAS
 		else //I don't know what this is.
 		{
 			bSuccess = false;
-			as::Critical( "ctx::SetObjectArgument: unknown type '%s'(%d), aborting!\n", engine.GetTypeDeclaration( iTypeId, true ), iTypeId );
+			as::log->critical( "ctx::SetObjectArgument: unknown type '{}'({}), aborting!", engine.GetTypeDeclaration( iTypeId, true ), iTypeId );
 		}
 	}
 
@@ -755,13 +756,13 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 			}
 			else
 			{
-				as::Critical( "ctx::GetReturnValue: unknown object type, cannot convert!\n" );
+				as::log->critical( "ctx::GetReturnValue: unknown object type, cannot convert!" );
 				bSuccess = false;
 			}
 		}
 		else
 		{
-			as::Critical( "ctx::GetReturnValue: failed to get object type!\n" );
+			as::log->critical( "ctx::GetReturnValue: failed to get object type!" );
 			bSuccess = false;
 		}
 	}
@@ -778,7 +779,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 		{
 			if( !SetPrimitiveArgument( context.GetReturnAddress(), iTypeId, value, bWasPrimitive ) )
 			{
-				as::Critical( "ctx::GetReturnValue: Something went wrong while trying to convert the return value to a usable type!\n" );
+				as::log->critical( "ctx::GetReturnValue: Something went wrong while trying to convert the return value to a usable type!" );
 				bSuccess = false;
 			}
 		}
@@ -823,7 +824,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 				}
 				else
 				{
-					as::Critical( "ctx::GetReturnValue: Unknown primitive return type, cannot convert!\n" );
+					as::log->critical( "ctx::GetReturnValue: Unknown primitive return type, cannot convert!" );
 					bSuccess = false;
 				}
 			}
@@ -900,19 +901,19 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, vo
 			if( uiIndex == uiCount )
 			{
 				bSuccess = false;
-				as::Critical( "ctx::GetReturnValue: No assignment operator found for type '%s::%s', cannot convert!\n",
+				as::log->critical( "ctx::GetReturnValue: No assignment operator found for type '{}::{}', cannot convert!",
 								 pType->GetNamespace(), pType->GetName() );
 			}
 		}
 		else
 		{
-			as::Critical( "ctx::GetReturnValue: Failed to get object type!\n" );
+			as::log->critical( "ctx::GetReturnValue: Failed to get object type!" );
 			bSuccess = false;
 		}
 	}
 	else if( iTypeId == asTYPEID_VOID )
 	{
-		as::Critical( "ctx::GetReturnValue: Type is null!\n" );
+		as::log->critical( "ctx::GetReturnValue: Type is null!" );
 	}
 	else //Primitive type (including enum)
 	{
@@ -961,7 +962,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, vo
 				}
 				else
 				{
-					as::Critical( "ctx::GetReturnValue: Unknown primitive return type, cannot convert!\n" );
+					as::log->critical( "ctx::GetReturnValue: Unknown primitive return type, cannot convert!" );
 					bSuccess = false;
 				}
 			}

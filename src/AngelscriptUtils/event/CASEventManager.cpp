@@ -49,7 +49,7 @@ CASEvent* CASEventManager::GetEventByIndex( const uint32_t uiIndex )
 
 			as::GetCallerInfo( info, pCtx );
 
-			as::Critical( "CEventManager::GetEventByIndex: %s(%d, %d): Couldn't get module for index \"%u\"!\n", info.pszSection, info.iLine, info.iColumn, uiIndex );
+			as::log->critical( "CEventManager::GetEventByIndex: {}({}, {}): Couldn't get module for index \"{}\"!", info.pszSection, info.iLine, info.iColumn, uiIndex );
 			return nullptr;
 		}
 
@@ -67,7 +67,7 @@ CASEvent* CASEventManager::GetEventByIndex( const uint32_t uiIndex )
 
 		as::GetCallerInfo( info, pCtx );
 
-		as::Verbose( "CEventManager::GetEventByIndex: %s( %d, %d ): Access denied for event \"%s::%s\" (index %u)\n", 
+		as::log->debug( "CEventManager::GetEventByIndex: {}({}, {}): Access denied for event \"{}::{}\" (index {})", 
 					 info.pszSection, info.iLine, info.iColumn, 
 					 pEvent->GetCategory(), pEvent->GetName(), uiIndex );
 		return nullptr;
@@ -93,7 +93,7 @@ CASEvent* CASEventManager::FindEventByName( const std::string& szName )
 
 			as::GetCallerInfo( info, pCtx );
 
-			as::Critical( "CEventManager::FindEventByName: %s(%d, %d): Couldn't get calling module for event \"%s\"!\n", info.pszSection, info.iLine, info.iColumn, szName.c_str() );
+			as::log->critical( "CEventManager::FindEventByName: {}({}, {}): Couldn't get calling module for event \"{}\"!", info.pszSection, info.iLine, info.iColumn, szName );
 			return nullptr;
 		}
 
@@ -130,7 +130,7 @@ CASEvent* CASEventManager::FindEventByName( const std::string& szName )
 
 			as::GetCallerInfo( info, pCtx );
 
-			as::Verbose( "CEventManager::FindEventByName: %s( %d, %d ): Access denied for event \"%s\"\n", info.pszSection, info.iLine, info.iColumn, szName.c_str() );
+			as::log->debug( "CEventManager::FindEventByName: {}({}, {}): Access denied for event \"{}\"", info.pszSection, info.iLine, info.iColumn, szName );
 			return nullptr;
 		}
 	}
@@ -148,7 +148,7 @@ bool CASEventManager::HookEvent( const std::string& szName, void* pValue, const 
 
 		as::GetCallerInfo( info );
 
-		as::Critical( "CEventManager::HookEvent: %s(%d, %d): Couldn't find event \"%s\"!\n", info.pszSection, info.iLine, info.iColumn, szName.c_str() );
+		as::log->critical( "CEventManager::HookEvent: {}({}, {}): Couldn't find event \"{}\"!", info.pszSection, info.iLine, info.iColumn, szName );
 		return false;
 	}
 
@@ -165,7 +165,7 @@ void CASEventManager::UnhookEvent( const std::string& szName, void* pValue, cons
 
 		as::GetCallerInfo( info );
 
-		as::Critical( "CEventManager::UnhookEvent: %s(%d, %d): Couldn't find event \"%s\"!\n", info.pszSection, info.iLine, info.iColumn, szName.c_str() );
+		as::log->critical( "CEventManager::UnhookEvent: {}({}, {}): Couldn't find event \"{}\"!", info.pszSection, info.iLine, info.iColumn, szName );
 	}
 
 	pEvent->Unhook( pValue, iTypeId );

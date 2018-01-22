@@ -162,6 +162,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 	if( !pszBuffer || !uiBufferSize || !pszFormat || uiFirstParamIndex > static_cast<size_t>( arguments.GetArgCount() ) )
 		return false;
 
+	//TODO: use std::string - Solokiller
 	//Set to empty result
 	memset( pszBuffer, 0, uiBufferSize );
 
@@ -207,7 +208,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 				//If the index is invalid, stop.
 				if( uiIndex == 0 || uiIndex > uiArgCount )
 				{
-					as::Critical( "as::SPrintf: format parameter index is out of range!\n" );
+					as::log->critical( "as::SPrintf: format parameter index is out of range!" );
 					bSuccess = false;
 					break;
 				}
@@ -241,7 +242,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 								//Check to make sure it can fit, stop otherwise.
 								if( uiValueLength >= static_cast<size_t>( pszBufferEnd - pszBufferDest ) )
 								{
-									as::Critical( "as::SPrintf: could not fit data in buffer\n" );
+									as::log->critical( "as::SPrintf: could not fit data in buffer" );
 									bSuccess = false;
 									break;
 								}
@@ -273,7 +274,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 					//Check to make sure it can fit, stop otherwise.
 					if( uiValueLength >= static_cast<size_t>( pszBufferEnd - pszBufferDest ) )
 					{
-						as::Critical( "as::SPrintf: could not fit data in buffer\n" );
+						as::log->critical( "as::SPrintf: could not fit data in buffer" );
 						bSuccess = false;
 						break;
 					}
@@ -294,7 +295,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 
 			if( pszBufferDest == pszBufferEnd )
 			{
-				as::Critical( "as::SPrintf: could not fit data in buffer\n" );
+				as::log->critical( "as::SPrintf: could not fit data in buffer" );
 				bSuccess = false;
 				break;
 			}
@@ -365,7 +366,7 @@ bool CreateFunctionSignature(
 		case ArgType::VOID:
 			{
 				//This should never occur, unless the argument parser fails without returning false
-				as::Critical( "as::CreateFunctionSignature: invalid input argument!\n" );
+				as::log->critical( "as::CreateFunctionSignature: invalid input argument!" );
 				bSuccess = false;
 				break;
 			}

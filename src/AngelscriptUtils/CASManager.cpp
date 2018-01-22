@@ -1,6 +1,8 @@
 #include <cassert>
 #include <iostream>
 
+#include <spdlog/spdlog.h>
+
 #include <angelscript.h>
 
 #include "ASUtilsConfig.h"
@@ -74,6 +76,11 @@ private:
 
 bool CASManager::Initialize( IASInitializer& initializer )
 {
+	if( !as::log )
+	{
+		as::log = spdlog::create<spdlog::sinks::stdout_sink_mt>( "ASUtils" );
+	}
+
 	if( m_pScriptEngine )
 	{
 		return true;

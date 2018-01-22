@@ -1,6 +1,11 @@
 #include <iostream>
+#include <vector>
+
+#include <spdlog/spdlog.h>
 
 #include <angelscript.h>
+
+#undef VOID
 
 #include "AngelscriptUtils/CASManager.h"
 #include "AngelscriptUtils/event/CASEvent.h"
@@ -20,7 +25,6 @@
 #include "AngelscriptUtils/util/ASLogging.h"
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/CASExtendAdapter.h"
-#include "AngelscriptUtils/util/CASFileLogger.h"
 #include "AngelscriptUtils/util/CASRefPtr.h"
 #include "AngelscriptUtils/util/CASObjPtr.h"
 
@@ -261,50 +265,18 @@ public:
 	}
 };
 
-/**
-*	Logger that logs to a file and the console.
-*/
-class CASLogger : public CASBaseLogger<IASLogger>
-{
-public:
-	CASLogger( const char* pszFilename, const CASFileLogger::Flags_t flags = CASFileLogger::Flag::NONE )
-		: m_FileLogger( pszFilename, flags )
-	{
-	}
-
-	void AddRef() const override
-	{
-		//Do nothing
-	}
-
-	void Release() const override
-	{
-		//Do nothing
-	}
-
-	void VLog( LogLevel_t logLevel, const char* pszFormat, va_list list ) override
-	{
-		m_FileLogger.VLog( logLevel, pszFormat, list );
-
-		char szBuffer[ 4096 ];
-
-		const int iResult = vsnprintf( szBuffer, sizeof( szBuffer ), pszFormat, list );
-
-		if( iResult < 0 || static_cast<size_t>( iResult ) >= sizeof( szBuffer ) )
-			return;
-
-		std::cout << szBuffer;
-	}
-
-	//No need to call Release on this because it'll destruct in this class's destructor.
-	CASFileLogger m_FileLogger;
-};
-
-CASLogger g_Logger( "logs/L", CASFileLogger::Flag::USE_DATESTAMP | CASFileLogger::Flag::USE_TIMESTAMP | CASFileLogger::Flag::OUTPUT_LOG_LEVEL );
-
 int main( int, char*[] )
 {
-	as::SetLogger( &g_Logger );
+	{
+		auto console = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+		auto file = std::make_shared<spdlog::sinks::daily_file_sink_mt>( "logs/L", 0, 0 );
+
+		std::vector<spdlog::sink_ptr> sinks{ console, file };
+
+		auto logger = spdlog::create( "ASUtils", sinks.begin(), sinks.end() );
+
+		as::log = logger;
+	}
 
 	std::cout << "Hello World!" << std::endl;
 
@@ -533,6 +505,10 @@ int main( int, char*[] )
 
 	//Shut down the Angelscript engine, frees all resources.
 	manager.Shutdown();
+
+	spdlog::drop( as::log->name() );
+
+	as::log.reset();
 
 	//Wait for input.
 	getchar();

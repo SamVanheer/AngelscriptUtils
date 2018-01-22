@@ -936,30 +936,14 @@ inline bool GetCallerInfo( CASCallerInfo& info, asIScriptContext* pContext = nul
 }
 
 /**
-*	Formats a function name and stores the result in the given buffer.
-*	The format for global functions is \<namespace>::<\name>.
-*	The format for member functions is \n<namespace>::\<classname>::\<name>.
-*	@param function Function whose name should be formatted.
-*	@param pszDest Destination buffer. Must be non-null.
-*	@param uiSizeInCharacters Size of the destination buffer, in characters.
-*	@param bAllowTruncation Whether to truncate the name to "\<name\>..." if the length exceeds the buffer size. If false, the buffer is set to an empty string and false is returned.
-*	@return Whether the name fits in the buffer.
+*	Formats a function name and returns it.
+*	The format for global functions is \<namespace>::\<name>.
+*	The format for member functions is \<namespace>::\<classname>::\<name>.
+*	@param function Function whose name should be formatted
+*	@return Formatted function name
 */
-inline bool FormatFunctionName( const asIScriptFunction& function, char* pszDest, const size_t uiSizeInCharacters, const bool bAllowTruncation = true )
+inline std::string FormatFunctionName( const asIScriptFunction& function )
 {
-	assert( pszDest );
-
-	if( uiSizeInCharacters == 0 )
-		return false;
-
-	*pszDest = '\0';
-
-	//Can never format a function with only room for a null terminator.
-	if( uiSizeInCharacters <= 1 )
-	{
-		return false;
-	}
-
 	const asIScriptFunction* pFunction = &function;
 
 	{
@@ -975,92 +959,25 @@ inline bool FormatFunctionName( const asIScriptFunction& function, char* pszDest
 	auto pszName = pFunction->GetName();
 
 	const char szNSSep[] = "::";
-	const size_t uiNSSepLength = ASARRAYSIZE( szNSSep ) - 1;
 
-	size_t uiNSLength = 0;
-
-	if( pszNamespace && *pszNamespace )
-		uiNSLength += strlen( pszNamespace ) + uiNSSepLength;
-
-	if( pszObjName )
-		uiNSLength += strlen( pszObjName ) + uiNSSepLength;
-
-	const size_t uiNameLength = strlen( pszName );
-
-	//Determine if the entire name would fit.
-	if( ( uiNSLength + uiNameLength ) >= uiSizeInCharacters )
-	{
-		if( !bAllowTruncation )
-		{
-			return false;
-		}
-	}
-
-	size_t uiCurrentLength = 0;
+	std::string szName;
 
 	//Can copy up to a certain amount of the namespace name.
 	if( pszNamespace && *pszNamespace )
 	{
-		strncat( pszDest, pszNamespace, uiSizeInCharacters - 1 );
-		uiCurrentLength = strlen( pszDest );
-		strncat( pszDest, szNSSep, uiSizeInCharacters - uiCurrentLength - 1 );
-		uiCurrentLength = strlen( pszDest );
+		szName += pszNamespace;
+		szName += szNSSep;
 	}
 
 	if( pszObjName )
 	{
-		strncat( pszDest, pszObjName, uiSizeInCharacters - 1 );
-		uiCurrentLength = strlen( pszDest );
-		strncat( pszDest, szNSSep, uiSizeInCharacters - uiCurrentLength - 1 );
-		uiCurrentLength = strlen( pszDest );
+		szName += pszObjName;
+		szName += szNSSep;
 	}
 
-	const size_t MAX_DOTS = 3U;
+	szName += pszName;
 
-	//The total name would exceed the buffer size, so adjust it.
-	if( uiCurrentLength > 0 && ( ( uiCurrentLength + uiNameLength ) >= uiSizeInCharacters ) )
-	{
-		//If the name itself is too long we can't fit the namespace at all, the dots start at the beginning.
-		const size_t uiDotEnd = uiNameLength >= uiSizeInCharacters ?
-									std::min( uiSizeInCharacters - 1, MAX_DOTS ) : 
-									std::max( uiSizeInCharacters - uiNameLength - 1, MAX_DOTS );
-
-		//This could be a very smaller buffer, but we should try regardless.
-		const size_t uiNumDots = std::min( MAX_DOTS, uiDotEnd );
-
-		for( size_t uiDot = uiDotEnd - uiNumDots; uiDot < uiDotEnd; ++uiDot )
-		{
-			pszDest[ uiDot ] = '.';
-		}
-
-		pszDest[ uiDotEnd ] = '\0';
-
-		uiCurrentLength = strlen( pszDest );
-	}
-
-	strncat( pszDest, pszName, uiSizeInCharacters - uiCurrentLength - 1 );
-
-	uiCurrentLength = strlen( pszDest );
-
-	//The name itself is longer than the entire string, so we have to end with dots.
-	if( uiNameLength >= uiCurrentLength )
-	{
-		//We couldn't fit it at all.
-		if( uiSizeInCharacters <= MAX_DOTS )
-		{
-			*pszDest = '\0';
-			return false;
-		}
-
-		for( size_t uiDot = uiSizeInCharacters - MAX_DOTS - 1; uiDot < uiSizeInCharacters; ++uiDot )
-		{
-			pszDest[ uiDot ] = '.';
-		}
-
-		pszDest[ uiSizeInCharacters - 1 ] = '\0';
-	}
-
-	return true;
+	return szName;
 }
 }
 

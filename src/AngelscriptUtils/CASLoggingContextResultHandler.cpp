@@ -2,10 +2,6 @@
 
 #include "CASLoggingContextResultHandler.h"
 
-#define MAX_FUNCTION_NAME 1024
-
-#define FUNCTION_TOO_LONG_NAME "Function name too long"
-
 CASLoggingContextResultHandler::CASLoggingContextResultHandler( const Flags_t flags )
 {
 	SetFlags( flags );
@@ -55,14 +51,7 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 {
 	if( iResult != asEXECUTION_FINISHED )
 	{
-		char szFunctionName[ MAX_FUNCTION_NAME ];
-
-		if( !as::FormatFunctionName( function, szFunctionName, sizeof( szFunctionName ), true ) )
-		{
-			assert( sizeof( szFunctionName ) >= strlen( FUNCTION_TOO_LONG_NAME ) );
-
-			strcpy( szFunctionName, FUNCTION_TOO_LONG_NAME );
-		}
+		const auto szFunctionName = as::FormatFunctionName( function );
 
 		switch( iResult )
 		{
@@ -71,7 +60,7 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 				//Suspended execution is an error if the user wants it to be.
 				if( m_Flags & Flag::SUSPEND_IS_ERROR )
 				{
-					as::Critical( "Script execution unexpectedly suspended while executing function \"%s\"\n", szFunctionName );
+					as::Critical( "Script execution unexpectedly suspended while executing function \"%s\"\n", szFunctionName.c_str() );
 
 					LogCurrentFunction( context, "Suspended" );
 				}
@@ -81,13 +70,13 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 
 		case asCONTEXT_NOT_PREPARED:
 			{
-				as::Critical( "Context not prepared to execute function \"%s\"\n", szFunctionName );
+				as::Critical( "Context not prepared to execute function \"%s\"\n", szFunctionName.c_str() );
 				break;
 			}
 
 		case asEXECUTION_ABORTED:
 			{
-				as::Critical( "Script execution aborted while executing function \"%s\"\n", szFunctionName );
+				as::Critical( "Script execution aborted while executing function \"%s\"\n", szFunctionName.c_str() );
 
 				LogCurrentFunction( context, "Aborted" );
 
@@ -96,23 +85,16 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 
 		case asEXECUTION_EXCEPTION:
 			{
-				as::Critical( "Exception occurred while executing function \"%s\"\n", szFunctionName );
+				as::Critical( "Exception occurred while executing function \"%s\"\n", szFunctionName.c_str() );
 
-				char szExceptionFunction[ MAX_FUNCTION_NAME ];
-
-				if( !as::FormatFunctionName( *context.GetExceptionFunction(), szExceptionFunction, sizeof( szExceptionFunction ), true ) )
-				{
-					assert( sizeof( szExceptionFunction ) >= strlen( FUNCTION_TOO_LONG_NAME ) );
-
-					strcpy( szExceptionFunction, FUNCTION_TOO_LONG_NAME );
-				}
+				const auto szExceptionFunction = as::FormatFunctionName( *context.GetExceptionFunction() );
 
 				int iColumn = 0;
 				const char* pszSection = nullptr;
 
 				const int iLineNumber = context.GetExceptionLineNumber( &iColumn, &pszSection );
 
-				as::Critical( "Function \"%s\" at line %d, column %d in section \"%s\":\n%s\n", szExceptionFunction, iLineNumber, iColumn, pszSection, context.GetExceptionString() );
+				as::Critical( "Function \"%s\" at line %d, column %d in section \"%s\":\n%s\n", szExceptionFunction.c_str(), iLineNumber, iColumn, pszSection, context.GetExceptionString() );
 
 				break;
 			}
@@ -124,7 +106,7 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 		case asEXECUTION_ACTIVE:
 		case asEXECUTION_ERROR:
 			{
-				as::Critical( "Unexpected context state \"%d\" encountered while executing function \"%s\"\n", iResult, szFunctionName );
+				as::Critical( "Unexpected context state \"%d\" encountered while executing function \"%s\"\n", iResult, szFunctionName.c_str() );
 				break;
 			}
 
@@ -132,7 +114,7 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 		default:
 		case asERROR:
 			{
-				as::Critical( "Unknown error \"%d\" occurred while executing function \"%s\"\n", iResult, szFunctionName );
+				as::Critical( "Unknown error \"%d\" occurred while executing function \"%s\"\n", iResult, szFunctionName.c_str() );
 				break;
 			}
 		}
@@ -170,20 +152,13 @@ void CASLoggingContextResultHandler::LogCurrentFunction( asIScriptContext& conte
 
 	as::GetCallerInfo( info, &context );
 
-	char szFunction[ MAX_FUNCTION_NAME ];
-
 	auto pCurrentFunc = context.GetFunction( context.GetCallstackSize() - 1 );
 
 	if( pCurrentFunc )
 	{
-		if( !as::FormatFunctionName( *pCurrentFunc, szFunction, sizeof( szFunction ), true ) )
-		{
-			assert( sizeof( szFunction ) >= strlen( FUNCTION_TOO_LONG_NAME ) );
+		const auto szFunctionName = as::FormatFunctionName( *pCurrentFunc );
 
-			strcpy( szFunction, FUNCTION_TOO_LONG_NAME );
-		}
-
-		as::Critical( "%s while in function \"%s\" at line %d, column %d in section \"%s\"\n", pszAction, szFunction, info.iLine, info.iColumn, info.pszSection );
+		as::Critical( "%s while in function \"%s\" at line %d, column %d in section \"%s\"\n", pszAction, szFunctionName.c_str(), info.iLine, info.iColumn, info.pszSection );
 	}
 	else
 	{

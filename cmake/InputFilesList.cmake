@@ -119,14 +119,21 @@ endfunction( add_includes )
 
 #!	Function to install includes
 #	\arg:_include_root_path Root directory for the list of include files
+#	\param:COMPONENT Which component to install includes to
 function( install_includes _include_root_path )
+	cmake_parse_arguments( INSTALL_INCLUDES  "" "COMPONENT" "" ${ARGN} )
+	
+	if( INSTALL_INCLUDES_COMPONENT )
+		set( INSTALL_COMPONENT COMPONENT ${INSTALL_INCLUDES_COMPONENT} )
+	endif()
+
 	get_property( INCLUDES GLOBAL PROPERTY INCLUDES_LIST )
 	
 	foreach( _include IN ITEMS ${INCLUDES} )
 		get_filename_component( _include_path "${_include}" PATH )
 		file( RELATIVE_PATH _include_path_rel "${_include_root_path}" "${_include_path}" )
 		string( REPLACE "/" "\\" _group_path "${_include_path_rel}" )
-		install( FILES "${_include}" DESTINATION "include/${_group_path}" )
+		install( FILES "${_include}" DESTINATION "include/${_group_path}" ${INSTALL_COMPONENT} )
 	endforeach()
 	
 	set_property( GLOBAL PROPERTY INCLUDES_LIST "" )

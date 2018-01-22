@@ -22,6 +22,7 @@ configure_file(
 )
 
 add_sources(
+	ASUtilsConfig.h
 	CASLoggingContextResultHandler.cpp
 	CASLoggingContextResultHandler.h
 	CASManager.cpp
@@ -36,6 +37,7 @@ add_sources(
 	IASInitializer.h
 	IASModuleBuilder.h
 	add_on/scriptbuilder/scriptbuilder.cpp
+	add_on/scriptbuilder/scriptbuilder.h
 )
 
 add_includes(

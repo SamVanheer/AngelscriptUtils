@@ -217,34 +217,20 @@ void SetAny( ANY& any, void* pObject, int iTypeId )
 }
 
 /**
-*	Converts a primitive type to its string representation.
-*	@param pszBuffer Output buffer.
-*	@param uiBufferSize Buffer size, in characters.
-*	@param pObject pointer to primitive value.
-*	@param iTypeId Type Id.
-*	@return true on success, false otherwise;
+*	Converts a primitive type to its string representation
+*	@param pObject pointer to primitive value
+*	@param iTypeId Type Id
 */
-bool PODToString( char* pszBuffer, const size_t uiBufferSize, const void* pObject, const int iTypeId );
+std::string PODToString( const void* pObject, const int iTypeId );
 
 /**
-*	Printf function used by script functions.
-*	@param pszBuffer Output buffer.
-*	@param uiBufferSize Buffer size, in characters.
-*	@param pszFormat Format string.
-*	@param uiFirstParamIndex Index of the first parameter to use.
-*	@param arguments Generic arguments instance.
+*	Printf function used by script functions
+*	@param pszFormat Format string
+*	@param uiFirstParamIndex Index of the first parameter to use
+*	@param arguments Generic arguments instance
+*	@return Formatted string
 */
-bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat, size_t uiFirstParamIndex, asIScriptGeneric& arguments );
-
-/**
-*	Overload that determines buffer size automatically.
-*	@see SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat, size_t uiFirstParamIndex, asIScriptGeneric& arguments )
-*/
-template<size_t BUFFER_SIZE>
-bool SPrintf( char( &szBuffer )[ BUFFER_SIZE ], const char* pszFormat, size_t uiFirstParamIndex, asIScriptGeneric& arguments )
-{
-	return SPrintf( szBuffer, BUFFER_SIZE, pszFormat, uiFirstParamIndex, arguments );
-}
+std::string SPrintf( const char* pszFormat, size_t uiFirstParamIndex, asIScriptGeneric& arguments );
 
 /**
 *	Used to handle the AddRef and Release behaviors on an Angelscript object when using template functions.

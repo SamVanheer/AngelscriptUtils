@@ -1,5 +1,6 @@
 #include <cstdint>
 #include <memory>
+#include <sstream>
 
 #include "ASUtil.h"
 
@@ -67,119 +68,93 @@ void* CreateObjectInstance( asIScriptEngine& engine, const asITypeInfo& type )
 	return engine.CreateScriptObject( &type );
 }
 
-bool PODToString( char* pszBuffer, const size_t uiBufferSize, const void* pObject, const int iTypeId )
+std::string PODToString( const void* pObject, const int iTypeId )
 {
-	assert( pszBuffer );
-	assert( uiBufferSize > 0 );
 	assert( pObject );
-
-	int iResult;
 
 	switch( iTypeId )
 	{
 	case asTYPEID_VOID:
 		{
 			//Treat as null handle
-			iResult = snprintf( pszBuffer, uiBufferSize, "%p", nullptr );
-			break;
+			std::ostringstream stream;
+			stream << "0x" << std::hex << static_cast<uintptr_t>( 0 );
+			return stream.str();
 		}
 
 	case asTYPEID_BOOL:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, *reinterpret_cast<const bool*>( pObject ) != 0 ? "true" : "false" );
-			break;
+			return *reinterpret_cast<const bool*>( pObject ) != 0 ? "true" : "false";
 		}
 
 	case asTYPEID_INT8:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%d", *reinterpret_cast<const char*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const char*>( pObject ) );
 		}
 
 	case asTYPEID_INT16:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%d", *reinterpret_cast<const short*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const short*>( pObject ) );
 		}
 
 	case asTYPEID_INT32:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%ld", *reinterpret_cast<const long*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const long*>( pObject ) );
 		}
 
 	case asTYPEID_INT64:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%lld", *reinterpret_cast<const long long*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const long long*>( pObject ) );
 		}
 
 	case asTYPEID_UINT8:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%u", *reinterpret_cast<const unsigned char*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const unsigned char*>( pObject ) );
 		}
 
 	case asTYPEID_UINT16:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%u", *reinterpret_cast<const unsigned short*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const unsigned short*>( pObject ) );
 		}
 
 	case asTYPEID_UINT32:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%lu", *reinterpret_cast<const unsigned long*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const unsigned long*>( pObject ) );
 		}
 
 	case asTYPEID_UINT64:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%llu", *reinterpret_cast<const unsigned long long*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const unsigned long long*>( pObject ) );
 		}
 
 	case asTYPEID_FLOAT:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%f", *reinterpret_cast<const float*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const float*>( pObject ) );
 		}
 
 	case asTYPEID_DOUBLE:
 		{
-			iResult = snprintf( pszBuffer, uiBufferSize, "%f", *reinterpret_cast<const double*>( pObject ) );
-			break;
+			return std::to_string( *reinterpret_cast<const double*>( pObject ) );
 		}
 
 	default:
-		return false;
+		{
+			assert( false );
+			return {};
+		}
 	}
-
-	return iResult >= 0 && static_cast<size_t>( iResult ) < uiBufferSize;
 }
 
-bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat, size_t uiFirstParamIndex, asIScriptGeneric& arguments )
+std::string SPrintf( const char* pszFormat, size_t uiFirstParamIndex, asIScriptGeneric& arguments )
 {
-	if( !pszBuffer || !uiBufferSize || !pszFormat || uiFirstParamIndex > static_cast<size_t>( arguments.GetArgCount() ) )
-		return false;
-
-	//TODO: use std::string - Solokiller
-	//Set to empty result
-	memset( pszBuffer, 0, uiBufferSize );
-
-	//Nothing to print
-	if( !( *pszFormat ) )
-		return true;
-
-	char* pszBufferDest = pszBuffer;
-
-	const char* const pszBufferEnd = pszBuffer + uiBufferSize;
+	//TODO: use fmtlib syntax & backend - Solokiller
+	if( !pszFormat || uiFirstParamIndex > static_cast<size_t>( arguments.GetArgCount() ) )
+		return {};
 
 	//Total number of arguments - offset
 	const size_t uiArgCount = static_cast<size_t>( arguments.GetArgCount() ) - uiFirstParamIndex;
 
-	char szValueBuffer[ 1024 ];
-
-	bool bSuccess = true;
+	std::ostringstream stream;
 
 	auto pEngine = arguments.GetEngine();
 
@@ -194,8 +169,7 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 			if( *pszFormat == '%' )
 			{
 				//Just insert a %
-				*pszBufferDest = '%';
-				++pszBufferDest;
+				stream << '%';
 			}
 			else
 			{
@@ -209,8 +183,8 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 				if( uiIndex == 0 || uiIndex > uiArgCount )
 				{
 					as::log->critical( "as::SPrintf: format parameter index is out of range!" );
-					bSuccess = false;
-					break;
+					
+					return {};
 				}
 				else
 				{
@@ -218,13 +192,11 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 					const asUINT uiArgIndex = ( uiIndex - 1 ) + uiFirstParamIndex;
 					const int iTypeId = arguments.GetArgTypeId( uiArgIndex );
 
-					szValueBuffer[ 0 ] = '\0';
-
 					void* pValue = arguments.GetArgAddress( uiArgIndex );
 
 					if( as::IsPrimitive( iTypeId ) )
 					{
-						bSuccess = PODToString( szValueBuffer, sizeof( szValueBuffer ), pValue, iTypeId );
+						stream << PODToString( pValue, iTypeId );
 					}
 					else
 					{
@@ -237,51 +209,22 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 							{
 								const auto& szString = *reinterpret_cast<const std::string*>( pValue );
 
-								const size_t uiValueLength = szString.length();
-
-								//Check to make sure it can fit, stop otherwise.
-								if( uiValueLength >= static_cast<size_t>( pszBufferEnd - pszBufferDest ) )
-								{
-									as::log->critical( "as::SPrintf: could not fit data in buffer" );
-									bSuccess = false;
-									break;
-								}
-
-								strncat( pszBufferDest, szString.c_str(), ( pszBufferEnd - pszBufferDest ) - 1 );
-
-								pszBufferDest += uiValueLength;
+								stream << szString;
 							}
 							else
 							{
 								//Pointer types
-								snprintf( szValueBuffer, sizeof( szValueBuffer ), "%p", pValue );
+								stream << "0x" << std::hex << reinterpret_cast<uintptr_t>( pValue ) << std::dec;
 							}
 						}
 						else
 						{
 							if( pValue ) //Treat as dword
-								snprintf( szValueBuffer, sizeof( szValueBuffer ), "%ld", *reinterpret_cast<long*>( pValue ) );
+								stream << *reinterpret_cast<long*>( pValue );
 							else //Treat as pointer
-								snprintf( szValueBuffer, sizeof( szValueBuffer ), "%p", pValue );
+								stream << "0x" << std::hex << reinterpret_cast<uintptr_t>( pValue ) << std::dec;
 						}
 					}
-
-					if( !bSuccess )
-						break;
-
-					const size_t uiValueLength = strlen( szValueBuffer );
-
-					//Check to make sure it can fit, stop otherwise.
-					if( uiValueLength >= static_cast<size_t>( pszBufferEnd - pszBufferDest ) )
-					{
-						as::log->critical( "as::SPrintf: could not fit data in buffer" );
-						bSuccess = false;
-						break;
-					}
-
-					strncat( pszBufferDest, szValueBuffer, ( pszBufferEnd - pszBufferDest ) - 1 );
-
-					pszBufferDest += uiValueLength;
 
 					pszFormat += uiIndexLength - 1; //Account for the ++ below
 				}
@@ -289,28 +232,13 @@ bool SPrintf( char* pszBuffer, const size_t uiBufferSize, const char* pszFormat,
 		}
 		else
 		{
-			*pszBufferDest = *pszFormat;
-
-			++pszBufferDest;
-
-			if( pszBufferDest == pszBufferEnd )
-			{
-				as::log->critical( "as::SPrintf: could not fit data in buffer" );
-				bSuccess = false;
-				break;
-			}
+			stream << *pszFormat;
 		}
 
 		++pszFormat;
 	}
 
-	if( pszBufferDest == pszBufferEnd )
-		return false;
-
-	if( bSuccess )
-		*pszBufferDest = '\0';
-
-	return bSuccess;
+	return stream.str();
 }
 
 bool CreateFunctionSignature(

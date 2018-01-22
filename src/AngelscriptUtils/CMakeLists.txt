@@ -4,6 +4,11 @@
 
 set( TARGET_NAME AngelscriptUtils )
 
+set( ANGELSCRIPTUTILS_VERSION_MAJOR 0 )
+set( ANGELSCRIPTUTILS_VERSION_MINOR 1 )
+set( ANGELSCRIPTUTILS_VERSION_PATCH 0 )
+set( PROJECT_VERSION ${ANGELSCRIPTUTILS_VERSION_MAJOR}.${ANGELSCRIPTUTILS_VERSION_MINOR}.${ANGELSCRIPTUTILS_VERSION_PATCH} )
+
 find_package( Threads REQUIRED )
 find_package( Angelscript CONFIG 2.32.0 REQUIRED )
 
@@ -84,6 +89,44 @@ create_source_groups( "${SRC_DIR}" )
 
 install( TARGETS ${TARGET_NAME} DESTINATION lib )
 install_pdbs( ${TARGET_NAME} lib )
-install_includes( "${SRC_DIR}" )
+install_includes( "${SRC_DIR}" COMPONENT Devel )
+
+#See https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-packages for a detailed explanation about this part
+install( TARGETS ${TARGET_NAME} EXPORT AngelscriptUtilsTargets
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
+	INCLUDES DESTINATION include
+)
+
+include( CMakePackageConfigHelpers )
+write_basic_package_version_file(
+	"${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsConfigVersion.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion
+)
+
+export( EXPORT AngelscriptUtilsTargets
+	FILE "${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsTargets.cmake"
+	NAMESPACE AngelscriptUtils::
+)
+configure_file( cmake/AngelscriptUtilsConfig.cmake
+	"${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsConfig.cmake"
+	COPYONLY
+)
+
+set( ConfigPackageLocation lib/cmake/AngelscriptUtils)
+install( EXPORT AngelscriptUtilsTargets
+	FILE AngelscriptUtilsTargets.cmake
+	NAMESPACE AngelscriptUtils::
+	DESTINATION ${ConfigPackageLocation}
+)
+install(
+	FILES
+		cmake/AngelscriptUtilsConfig.cmake
+		"${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsConfigVersion.cmake"
+	DESTINATION ${ConfigPackageLocation}
+	COMPONENT Devel
+)
 
 clear_sources()

@@ -75,10 +75,6 @@ if( AS_NO_EXCEPTIONS )
 	)
 endif()
 
-#version number
-set( AngelscriptUtils_VERSION_MAJOR 1 )
-set( AngelscriptUtils_VERSION_MINOR 0 )
-
 set( OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries" )
 
 set( EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external" )

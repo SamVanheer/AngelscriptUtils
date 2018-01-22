@@ -763,44 +763,25 @@ bool RegisterCasts( asIScriptEngine& engine, const char* const pszBaseType, cons
 	//Only register casts if the type being registered is not this type.
 	if( strcmp( pszSubType, pszBaseType ) != 0 )
 	{
-		//TODO: use std::string - Solokiller
-		char szBuffer[ 1024 ];
+		std::string szName = std::string( pszBaseType ) + "@ opImplCast()";
 
-		auto result = snprintf( szBuffer, sizeof( szBuffer ), "%s@ opImplCast()", pszBaseType );
-
-		if( result >= 0 && static_cast<size_t>( result ) < sizeof( szBuffer ) )
-		{
 #ifndef NDEBUG
-			const auto retCode =
+		auto retCode =
 #endif
-				engine.RegisterObjectMethod(
-					pszSubType, szBuffer, asFUNCTION( upcast ), asCALL_CDECL_OBJFIRST );
+			engine.RegisterObjectMethod(
+				pszSubType, szName.c_str(), asFUNCTION( upcast ), asCALL_CDECL_OBJFIRST );
 
-			assert( retCode >= 0 );
-		}
-		else
-		{
-			as::log->critical( "as::RegisterCasts: Failed to format string for implicit cast for class '{}'!", pszSubType );
-			return false;
-		}
+		assert( retCode >= 0 );
 
-		result = snprintf( szBuffer, sizeof( szBuffer ), "%s@ opCast()", pszSubType );
+		szName = std::string( pszSubType ) + "@ opCast()";
 
-		if( result >= 0 && static_cast<size_t>( result ) < sizeof( szBuffer ) )
-		{
 #ifndef NDEBUG
-			const auto retCode =
+		retCode =
 #endif
-				engine.RegisterObjectMethod(
-					pszBaseType, szBuffer, asFUNCTION( downcast ), asCALL_CDECL_OBJFIRST );
+			engine.RegisterObjectMethod(
+				pszBaseType, szName.c_str(), asFUNCTION( downcast ), asCALL_CDECL_OBJFIRST );
 
-			assert( retCode >= 0 );
-		}
-		else
-		{
-			as::log->critical( "as::RegisterCasts: Failed to format string for explicit cast for class '{}'!", pszSubType );
-			return false;
-		}
+		assert( retCode >= 0 );
 	}
 
 	return true;

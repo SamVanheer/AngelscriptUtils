@@ -1,6 +1,6 @@
 This repository contains Angelscript utilities
 
-Uses Angelscript 2.31.1
+Uses Angelscript 2.32.0
 
 Build status
 

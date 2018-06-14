@@ -26,6 +26,7 @@ string( TOUPPER ${MSVC_RUNTIME} MSVC_RUNTIME_CONFIG )
 #C++11 support
 #Targets that use VS2013 are also supported, so C++14 cannot be used
 set( CMAKE_CXX_STANDARD 11 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
 
 #Debug builds should have a distinct name.
 if( NOT CMAKE_DEBUG_POSTFIX )
@@ -59,14 +60,8 @@ set( SHARED_LINK_FLAGS
 )
 
 set( SHARED_DEFS
+	$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
 )
-
-if( MSVC )
-	set( SHARED_DEFS
-		${SHARED_DEFS}
-		_CRT_SECURE_NO_WARNINGS
-	)
-endif()
 
 set( OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries" )
 

@@ -11,7 +11,7 @@
 #include "AngelscriptUtils/wrapper/CASArguments.h"
 #include "AngelscriptUtils/wrapper/CASContext.h"
 
-#include "CASScheduler.h"
+#include "AngelscriptUtils/ScriptAPI/CASScheduler.h"
 
 void CASScheduler::CScheduledFunction::Remove( asIScriptEngine& engine )
 {

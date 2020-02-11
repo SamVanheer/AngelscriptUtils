@@ -2,7 +2,7 @@
 
 #include "AngelscriptUtils/util/ASUtil.h"
 
-#include "CASModuleReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/CASModuleReflectionGroup.h"
 
 asIScriptFunction* CASModuleReflectionGroup::FindGlobalFunction( const std::string& szName, bool bSearchByDecl )
 {

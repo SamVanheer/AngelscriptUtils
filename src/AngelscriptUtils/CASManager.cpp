@@ -6,17 +6,17 @@
 
 #include <angelscript.h>
 
-#include "ASUtilsConfig.h"
+#include "AngelscriptUtils/ASUtilsConfig.h"
 
-#include "util/ASLogging.h"
-#include "util/ASUtil.h"
+#include "AngelscriptUtils/util/ASLogging.h"
+#include "AngelscriptUtils/util/ASUtil.h"
 
-#include "IASContextResultHandler.h"
-#include "IASInitializer.h"
+#include "AngelscriptUtils/IASContextResultHandler.h"
+#include "AngelscriptUtils/IASInitializer.h"
 
-#include "CASManager.h"
+#include "AngelscriptUtils/CASManager.h"
 
-#include "std_make_unique.h"
+#include "AngelscriptUtils/std_make_unique.h"
 
 CASManager* CASManager::m_pActiveManager = nullptr;
 

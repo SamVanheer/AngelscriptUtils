@@ -2,7 +2,7 @@
 #include <memory>
 #include <sstream>
 
-#include "ASUtil.h"
+#include "AngelscriptUtils/util/ASUtil.h"
 
 namespace as
 {

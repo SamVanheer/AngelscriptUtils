@@ -13,7 +13,7 @@
 #include <unistd.h>
 #endif
 
-#include "ASPlatform.h"
+#include "AngelscriptUtils/util/ASPlatform.h"
 
 #ifdef WIN32
 void MakeDirectory( const char* pszDirectoryName )

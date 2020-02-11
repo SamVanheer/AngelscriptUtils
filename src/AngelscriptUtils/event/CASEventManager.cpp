@@ -8,10 +8,10 @@
 #include "AngelscriptUtils/CASModule.h"
 #include "AngelscriptUtils/CASModuleDescriptor.h"
 
-#include "CASEvent.h"
-#include "CASEventCaller.h"
+#include "AngelscriptUtils/event/CASEvent.h"
+#include "AngelscriptUtils/event/CASEventCaller.h"
 
-#include "CASEventManager.h"
+#include "AngelscriptUtils/event/CASEventManager.h"
 
 CASEventManager::CASEventManager( asIScriptEngine& engine, const char* const pszNamespace )
 	: m_Engine( engine )

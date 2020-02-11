@@ -3,9 +3,9 @@
 
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 
-#include "IASExtendAdapter.h"
+#include "AngelscriptUtils/util/IASExtendAdapter.h"
 
-#include "ASExtendAdapter.h"
+#include "AngelscriptUtils/util/ASExtendAdapter.h"
 
 namespace as
 {

@@ -16,61 +16,22 @@ find_package( Angelscript CONFIG 2.32.0 REQUIRED )
 set( ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID" )
 set( ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID" )
 
+set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/ASUtilsConfig.h.in
-	${CMAKE_CURRENT_SOURCE_DIR}/ASUtilsConfig.h
+	${INCLUDE_DIR}/AngelscriptUtils/ASUtilsConfig.h.in
+	${INCLUDE_DIR}/AngelscriptUtils/ASUtilsConfig.h
 	@ONLY
 )
 
-add_sources(
-	ASUtilsConfig.h
-	CASLoggingContextResultHandler.cpp
-	CASLoggingContextResultHandler.h
-	CASManager.cpp
-	CASManager.h
-	CASModuleDescriptor.cpp
-	CASModuleDescriptor.h
-	CASModule.cpp
-	CASModule.h
-	CASModuleManager.cpp
-	CASModuleManager.h
-	IASContextResultHandler.h
-	IASInitializer.h
-	IASModuleBuilder.h
-	add_on/scriptbuilder/scriptbuilder.cpp
-	add_on/scriptbuilder/scriptbuilder.h
-)
-
-add_includes(
-	ASUtilsConfig.h
-	CASLoggingContextResultHandler.h
-	CASManager.h
-	CASModuleDescriptor.h
-	CASModule.h
-	CASModuleManager.h
-	IASContextResultHandler.h
-	IASInitializer.h
-	IASModuleBuilder.h
-	std_make_unique.h
-	add_on/scriptbuilder/scriptbuilder.h
-)
-
-add_subdirectory( event )
-add_subdirectory( ScriptAPI )
-add_subdirectory( util )
-add_subdirectory( wrapper )
-
-preprocess_sources()
-
-add_library( ${TARGET_NAME} STATIC ${PREP_SRCS} )
+add_library(${TARGET_NAME} STATIC)
 
 set_target_properties(${TARGET_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 
-target_include_directories( ${TARGET_NAME} PRIVATE
-	${ROOT_SOURCE_DIR}
-)
+target_include_directories(${TARGET_NAME} PUBLIC
+	"$<BUILD_INTERFACE:${INCLUDE_DIR}>"
+	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 target_compile_definitions( ${TARGET_NAME} PRIVATE
 	${SHARED_DEFS}
@@ -86,14 +47,37 @@ set_target_properties( ${TARGET_NAME} PROPERTIES
 	LINK_FLAGS "${SHARED_LINK_FLAGS}"
 )
 
+target_sources(${TARGET_NAME}
+	PRIVATE
+		CASLoggingContextResultHandler.cpp
+		CASManager.cpp
+		CASModuleDescriptor.cpp
+		CASModule.cpp
+		CASModuleManager.cpp
+		add_on/scriptbuilder/scriptbuilder.cpp)
+
+add_subdirectory( event )
+add_subdirectory( ScriptAPI )
+add_subdirectory( util )
+add_subdirectory( wrapper )
+
+get_target_property(SOURCE_FILES ${TARGET_NAME} SOURCES)
+
+add_subdirectory(${INCLUDE_DIR}/AngelscriptUtils headers)
+
 set_pdb_names( ${TARGET_NAME} )
 
 #Create filters
-get_target_property(SOURCE_FILES ${TARGET_NAME} SOURCES)
+get_target_property(HEADER_FILES ${TARGET_NAME} SOURCES)
+
+foreach (header in LISTS ${SOURCE_FILES})
+	list(REMOVE_ITEM HEADER_FILES ${header})
+endforeach()
+
 source_group(TREE ${ROOT_SOURCE_DIR} FILES ${SOURCE_FILES})
+source_group(TREE ${INCLUDE_DIR} FILES ${HEADER_FILES})
 
 install_pdbs( ${TARGET_NAME} lib )
-install_includes( "${ROOT_SOURCE_DIR}" COMPONENT Devel )
 
 #See https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-packages for a detailed explanation about this part
 install( TARGETS ${TARGET_NAME} EXPORT AngelscriptUtilsTargets
@@ -102,6 +86,8 @@ install( TARGETS ${TARGET_NAME} EXPORT AngelscriptUtilsTargets
 	ARCHIVE DESTINATION lib
 	INCLUDES DESTINATION include
 )
+
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}../../include DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
 include( CMakePackageConfigHelpers )
 write_basic_package_version_file(
@@ -132,5 +118,3 @@ install(
 	DESTINATION ${ConfigPackageLocation}
 	COMPONENT Devel
 )
-
-clear_sources()

@@ -1,11 +1,11 @@
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/CASBaseClass.h"
 
-#include "IASReflectionGroup.h"
-#include "CASEngineReflectionGroup.h"
-#include "CASModuleReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/IASReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/CASEngineReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/CASModuleReflectionGroup.h"
 
-#include "ASReflection.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
 
 namespace as
 {

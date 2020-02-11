@@ -7,7 +7,7 @@
 #include "AngelscriptUtils/wrapper/CASContext.h"
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 
-#include "ContextUtils.h"
+#include "AngelscriptUtils/util/ContextUtils.h"
 
 namespace ctx
 {

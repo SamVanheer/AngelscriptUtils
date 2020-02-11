@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "CASEvent.h"
+#include "AngelscriptUtils/event/CASEvent.h"
 
 CASEvent::CASEvent( const char* const pszName, const char* pszArguments, const char* const pszCategory, const asDWORD accessMask, const EventStopMode stopMode )
 	: CASBaseEvent( accessMask )

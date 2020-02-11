@@ -1,6 +1,6 @@
-#include "util/ASUtil.h"
+#include "AngelscriptUtils/util/ASUtil.h"
 
-#include "CASLoggingContextResultHandler.h"
+#include "AngelscriptUtils/CASLoggingContextResultHandler.h"
 
 CASLoggingContextResultHandler::CASLoggingContextResultHandler( const Flags_t flags )
 {

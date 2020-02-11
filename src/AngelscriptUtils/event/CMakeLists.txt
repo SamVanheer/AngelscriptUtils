@@ -1,19 +1,7 @@
-add_sources(
-	CASBaseEvent.h
-	CASBaseEvent.cpp
-	CASBaseEventCaller.h
-	CASEvent.h
-	CASEvent.cpp
-	CASEventCaller.h
-	CASEventCaller.cpp
-	CASEventManager.h
-	CASEventManager.cpp
-)
-
-add_includes(
-	CASBaseEvent.h
-	CASBaseEventCaller.h
-	CASEvent.h
-	CASEventCaller.h
-	CASEventManager.h
+target_sources(AngelscriptUtils
+	PRIVATE
+		CASBaseEvent.cpp
+		CASEvent.cpp
+		CASEventCaller.cpp
+		CASEventManager.cpp
 )

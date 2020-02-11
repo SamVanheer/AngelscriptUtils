@@ -1,4 +1,4 @@
-#include "ASLogging.h"
+#include "AngelscriptUtils/util/ASLogging.h"
 
 namespace as
 {

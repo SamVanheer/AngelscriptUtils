@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "CASModuleDescriptor.h"
+#include "AngelscriptUtils/CASModuleDescriptor.h"
 
 CASModuleDescriptor::CASModuleDescriptor( const char* const pszName, const asDWORD accessMask, const as::ModulePriority_t priority, const as::DescriptorID_t descriptorID )
 	: m_pszName( pszName )

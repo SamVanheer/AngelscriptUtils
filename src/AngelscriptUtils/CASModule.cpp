@@ -2,9 +2,9 @@
 
 #include <angelscript.h>
 
-#include "ScriptAPI/CASScheduler.h"
+#include "AngelscriptUtils/ScriptAPI/CASScheduler.h"
 
-#include "CASModule.h"
+#include "AngelscriptUtils/CASModule.h"
 
 CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, IASModuleUserData* pUserData )
 	: m_pModule( pModule )

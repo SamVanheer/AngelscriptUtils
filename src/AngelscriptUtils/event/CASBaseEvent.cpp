@@ -6,7 +6,7 @@
 
 #include "AngelscriptUtils/CASModule.h"
 
-#include "CASBaseEvent.h"
+#include "AngelscriptUtils/event/CASBaseEvent.h"
 
 CASBaseEvent::CASBaseEvent( const asDWORD accessMask )
 	: m_AccessMask( accessMask )

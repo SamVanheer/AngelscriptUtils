@@ -8,7 +8,7 @@
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
 
-#include "CASArguments.h"
+#include "AngelscriptUtils/wrapper/CASArguments.h"
 
 CASArgument::~CASArgument()
 {

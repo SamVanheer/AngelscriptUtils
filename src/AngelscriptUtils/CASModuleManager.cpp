@@ -1,17 +1,17 @@
 #include <algorithm>
 #include <cassert>
 
-#include "add_on/scriptbuilder/scriptbuilder.h"
+#include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
 
-#include "event/CASEventManager.h"
+#include "AngelscriptUtils/event/CASEventManager.h"
 
-#include "CASModule.h"
+#include "AngelscriptUtils/CASModule.h"
 
-#include "IASModuleBuilder.h"
+#include "AngelscriptUtils/IASModuleBuilder.h"
 
-#include "CASModuleManager.h"
+#include "AngelscriptUtils/CASModuleManager.h"
 
-#include "std_make_unique.h"
+#include "AngelscriptUtils/std_make_unique.h"
 
 CASModuleManager::CASModuleManager( asIScriptEngine& engine, const std::shared_ptr<CASEventManager>& eventManager )
 	: m_Engine( engine )

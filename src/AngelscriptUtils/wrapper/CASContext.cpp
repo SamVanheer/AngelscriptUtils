@@ -2,7 +2,7 @@
 
 #include "AngelscriptUtils/IASContextResultHandler.h"
 
-#include "CASContext.h"
+#include "AngelscriptUtils/wrapper/CASContext.h"
 
 void CASOwningContext::Release()
 {

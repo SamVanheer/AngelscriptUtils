@@ -1,0 +1,14 @@
+target_sources(AngelscriptUtils
+	PRIVATE
+		ASExtendAdapter.h
+		ASLogging.h
+		ASPlatform.h
+		ASUtil.h
+		ContextUtils.h
+		CASBaseClass.h
+		CASExtendAdapter.h
+		CASRefPtr.h
+		CASObjPtr.h
+		IASExtendAdapter.h
+		StringUtils.h
+)

@@ -25,7 +25,7 @@ preprocess_sources()
 
 add_executable( ${TARGET_NAME} ${PREP_SRCS} )
 
-configure_msvc_runtime( ${TARGET_NAME} ${MSVC_RUNTIME_CONFIG} )
+set_target_properties(${TARGET_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 
 target_include_directories( ${TARGET_NAME} PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}

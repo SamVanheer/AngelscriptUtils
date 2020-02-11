@@ -11,19 +11,19 @@ list( APPEND CMAKE_MODULE_PATH
 )
 
 include( InputFilesList )
-include( MSVCRuntime )
 include( PDBUtils )
 include( Ternary )
+
+option(UseDynamicMSVCRuntime "Use dynamic MSVC runtime" ON)
+
+if(UseDynamicMSVCRuntime)
+	set(MSVC_RUNTIME_SUFFIX "DLL")
+endif()
 
 project(AngelscriptUtils
 	VERSION 2.0
 	DESCRIPTION "Utility code for the Angelscript scripting library"
 	LANGUAGES CXX)
-
-set( MSVC_RUNTIME "dynamic" CACHE STRING "Runtime to use for MSVC" )
-set_property( CACHE MSVC_RUNTIME PROPERTY STRINGS dynamic static )
-
-string( TOUPPER ${MSVC_RUNTIME} MSVC_RUNTIME_CONFIG )
 
 #C++11 support
 #Targets that use VS2013 are also supported, so C++14 cannot be used

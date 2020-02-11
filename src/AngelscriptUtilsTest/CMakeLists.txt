@@ -31,10 +31,16 @@ target_include_directories( ${TARGET_NAME} PRIVATE
 	${ROOT_SOURCE_DIR}
 )
 
-set_target_properties( ${TARGET_NAME} PROPERTIES
-	COMPILE_FLAGS "${SHARED_COMPILE_FLAGS}"
-	LINK_FLAGS "${SHARED_LINK_FLAGS}"
-)
+target_compile_options(${TARGET_NAME} PRIVATE
+	#All warnings.
+	#No unknown pragma directives.
+	#No attributes.
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+          -Wall -Wno-unknown-pragmas -Wno-attributes>
+	#Warning level 4. Wall shows warnings in standard headers so we can't compile if that's enabled.
+	#Treat warnings as errors.
+     $<$<CXX_COMPILER_ID:MSVC>:
+          /W4 /WX>)
 
 #Create filters
 get_target_property(SOURCE_FILES ${TARGET_NAME} SOURCES)

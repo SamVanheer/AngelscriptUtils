@@ -11,7 +11,6 @@ list( APPEND CMAKE_MODULE_PATH
 )
 
 include( PDBUtils )
-include( Ternary )
 
 option(UseDynamicMSVCRuntime "Use dynamic MSVC runtime" ON)
 
@@ -33,32 +32,6 @@ set( CMAKE_CXX_STANDARD_REQUIRED ON )
 if( NOT CMAKE_DEBUG_POSTFIX )
   set( CMAKE_DEBUG_POSTFIX d )
 endif()
-
-ternary( LINUX_32BIT_FLAG UNIX "-m32" "" )
-
-set( SHARED_COMPILE_FLAGS
-	${LINUX_32BIT_FLAG}
-)
-
-#Set global compiler settings.
-if( MSVC )
-	#Warning level 4. Wall shows warnings in standard headers so we can't compile if that's enabled.
-	#Treat warnings as errors.
-	set( SHARED_COMPILE_FLAGS
-		"${SHARED_COMPILE_FLAGS} /W4 /WX"
-	)
-else()
-	#All warnings.
-	#No unknown pragma directives.
-	#No attributes.
-	set( SHARED_COMPILE_FLAGS
-		"${SHARED_COMPILE_FLAGS} -Wall -Wno-unknown-pragmas -Wno-attributes"
-	)
-endif()
-
-set( SHARED_LINK_FLAGS
-	${LINUX_32BIT_FLAG}
-)
 
 set( OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries" )
 

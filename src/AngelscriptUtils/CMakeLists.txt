@@ -64,8 +64,6 @@ preprocess_sources()
 
 add_library( ${TARGET_NAME} STATIC ${PREP_SRCS} )
 
-check_winxp_support( ${TARGET_NAME} )
-
 configure_msvc_runtime( ${TARGET_NAME} ${MSVC_RUNTIME_CONFIG} )
 
 target_include_directories( ${TARGET_NAME} PRIVATE

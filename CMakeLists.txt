@@ -13,7 +13,6 @@ list( APPEND CMAKE_MODULE_PATH
 include( InputFilesList )
 include( MSVCRuntime )
 include( PDBUtils )
-include( WinXPSupport )
 include( Ternary )
 
 project(AngelscriptUtils

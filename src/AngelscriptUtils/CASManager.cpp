@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_sinks.h>
 
 #include <angelscript.h>
 

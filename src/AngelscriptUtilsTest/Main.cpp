@@ -2,6 +2,8 @@
 #include <vector>
 
 #include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_sinks.h>
+#include <spdlog/sinks/daily_file_sink.h>
 
 #include <angelscript.h>
 
@@ -271,9 +273,7 @@ int main( int, char*[] )
 		auto console = std::make_shared<spdlog::sinks::stdout_sink_mt>();
 		auto file = std::make_shared<spdlog::sinks::daily_file_sink_mt>( "logs/L", 0, 0 );
 
-		std::vector<spdlog::sink_ptr> sinks{ console, file };
-
-		auto logger = spdlog::create( "ASUtils", sinks.begin(), sinks.end() );
+		auto logger = std::make_shared<spdlog::logger>( "ASUtils", spdlog::sinks_init_list{ console, file } );
 
 		as::log = logger;
 	}

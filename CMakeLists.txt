@@ -16,7 +16,10 @@ include( PDBUtils )
 include( WinXPSupport )
 include( Ternary )
 
-project( AngelscriptUtils LANGUAGES CXX )
+project(AngelscriptUtils
+	VERSION 2.0
+	DESCRIPTION "Utility code for the Angelscript scripting library"
+	LANGUAGES CXX)
 
 set( MSVC_RUNTIME "dynamic" CACHE STRING "Runtime to use for MSVC" )
 set_property( CACHE MSVC_RUNTIME PROPERTY STRINGS dynamic static )

@@ -31,10 +31,6 @@ target_include_directories( ${TARGET_NAME} PRIVATE
 	${ROOT_SOURCE_DIR}
 )
 
-target_compile_definitions( ${TARGET_NAME} PRIVATE
-	${SHARED_DEFS}
-)
-
 set_target_properties( ${TARGET_NAME} PROPERTIES
 	COMPILE_FLAGS "${SHARED_COMPILE_FLAGS}"
 	LINK_FLAGS "${SHARED_LINK_FLAGS}"

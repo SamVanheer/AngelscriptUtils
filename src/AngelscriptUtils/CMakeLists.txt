@@ -33,10 +33,6 @@ target_include_directories(${TARGET_NAME} PUBLIC
 	"$<BUILD_INTERFACE:${INCLUDE_DIR}>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
-target_compile_definitions( ${TARGET_NAME} PRIVATE
-	${SHARED_DEFS}
-)
-
 target_link_libraries( ${TARGET_NAME}
 	Angelscript::angelscript
 	spdlog::spdlog

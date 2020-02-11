@@ -60,10 +60,6 @@ set( SHARED_LINK_FLAGS
 	${LINUX_32BIT_FLAG}
 )
 
-set( SHARED_DEFS
-	$<$<CXX_COMPILER_ID:MSVC>:_CRT_SECURE_NO_WARNINGS>
-)
-
 set( OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries" )
 
 #Copy all resources to the destination directory

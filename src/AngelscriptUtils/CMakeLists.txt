@@ -16,6 +16,8 @@ find_package( Angelscript CONFIG 2.32.0 REQUIRED )
 set( ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID" )
 set( ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID" )
 
+set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
 configure_file(
 	${CMAKE_CURRENT_SOURCE_DIR}/ASUtilsConfig.h.in
 	${CMAKE_CURRENT_SOURCE_DIR}/ASUtilsConfig.h
@@ -67,7 +69,7 @@ add_library( ${TARGET_NAME} STATIC ${PREP_SRCS} )
 set_target_properties(${TARGET_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 
 target_include_directories( ${TARGET_NAME} PRIVATE
-	${SRC_DIR}
+	${ROOT_SOURCE_DIR}
 )
 
 target_compile_definitions( ${TARGET_NAME} PRIVATE
@@ -87,10 +89,11 @@ set_target_properties( ${TARGET_NAME} PROPERTIES
 set_pdb_names( ${TARGET_NAME} )
 
 #Create filters
-create_source_groups( "${SRC_DIR}" )
+get_target_property(SOURCE_FILES ${TARGET_NAME} SOURCES)
+source_group(TREE ${ROOT_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 install_pdbs( ${TARGET_NAME} lib )
-install_includes( "${SRC_DIR}" COMPONENT Devel )
+install_includes( "${ROOT_SOURCE_DIR}" COMPONENT Devel )
 
 #See https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-packages for a detailed explanation about this part
 install( TARGETS ${TARGET_NAME} EXPORT AngelscriptUtilsTargets

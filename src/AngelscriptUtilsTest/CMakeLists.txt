@@ -4,6 +4,8 @@
 
 set( TARGET_NAME AngelscriptUtilsTest )
 
+set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
 add_sources( 
 	ASCBaseEntity.h
 	CBaseEntity.cpp
@@ -29,7 +31,7 @@ set_target_properties(${TARGET_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThrea
 
 target_include_directories( ${TARGET_NAME} PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
-	${SRC_DIR}
+	${ROOT_SOURCE_DIR}
 )
 
 target_compile_definitions( ${TARGET_NAME} PRIVATE
@@ -42,7 +44,8 @@ set_target_properties( ${TARGET_NAME} PROPERTIES
 )
 
 #Create filters
-create_source_groups( "${SRC_DIR}" )
+get_target_property(SOURCE_FILES ${TARGET_NAME} SOURCES)
+source_group(TREE ${ROOT_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 # Indicate which libraries to include during the link process.
 target_link_libraries( ${TARGET_NAME}
@@ -60,6 +63,6 @@ set_target_properties( ${TARGET_NAME} PROPERTIES
 )
 
 install( TARGETS ${TARGET_NAME} DESTINATION bin )
-install_includes( "${SRC_DIR}" )
+install_includes( "${ROOT_SOURCE_DIR}" )
 
 clear_sources()

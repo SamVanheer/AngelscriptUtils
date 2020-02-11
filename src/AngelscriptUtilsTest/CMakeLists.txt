@@ -6,7 +6,9 @@ set( TARGET_NAME AngelscriptUtilsTest )
 
 set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
-add_sources( 
+add_executable( ${TARGET_NAME} ${PREP_SRCS} )
+
+target_sources(${TARGET_NAME} PRIVATE
 	ASCBaseEntity.h
 	CBaseEntity.cpp
 	CBaseEntity.h
@@ -20,12 +22,7 @@ add_sources(
 	add_on/scriptdictionary/scriptdictionary.h
 	add_on/scriptstdstring/scriptstdstring.cpp
 	add_on/scriptstdstring/scriptstdstring_utils.cpp
-	add_on/scriptstdstring/scriptstdstring.h
-)
-
-preprocess_sources()
-
-add_executable( ${TARGET_NAME} ${PREP_SRCS} )
+	add_on/scriptstdstring/scriptstdstring.h)
 
 set_target_properties(${TARGET_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 
@@ -63,6 +60,3 @@ set_target_properties( ${TARGET_NAME} PROPERTIES
 )
 
 install( TARGETS ${TARGET_NAME} DESTINATION bin )
-install_includes( "${ROOT_SOURCE_DIR}" )
-
-clear_sources()

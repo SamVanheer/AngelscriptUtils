@@ -120,6 +120,26 @@ void Event::Dispatch(EventArgs& arguments)
 	m_Context->Unprepare();
 }
 
+void Event::Dispatch(PreemptableEventArgs& arguments)
+{
+	for (auto function : m_EventHandlers)
+	{
+		//TODO: error handling
+		m_Context->Prepare(function.Get());
+
+		m_Context->SetArgObject(0, &arguments);
+
+		m_Context->Execute();
+
+		if (arguments.IsHandled())
+		{
+			break;
+		}
+	}
+
+	m_Context->Unprepare();
+}
+
 void Event::RemoveHandlersOfModule(asIScriptModule& module)
 {
 	m_EventHandlers.erase(std::remove_if(m_EventHandlers.begin(), m_EventHandlers.end(), [&](const auto& function)

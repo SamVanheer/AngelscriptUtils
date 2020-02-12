@@ -30,4 +30,22 @@ public:
 		}
 	}
 };
+
+/**
+*	@brief Base class for events that can be preempted by handlers by setting the Handled property to true
+*/
+class PreemptableEventArgs : public EventArgs
+{
+public:
+
+	bool IsHandled() const { return m_Handled; }
+
+	void SetHandled(bool value)
+	{
+		m_Handled = value;
+	}
+
+private:
+	bool m_Handled = false;
+};
 }

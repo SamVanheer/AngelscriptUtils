@@ -1,6 +1,5 @@
 #pragma once
 
-#include <type_traits>
 #include <vector>
 
 #include "AngelscriptUtils/util/CASBaseClass.h"
@@ -57,6 +56,11 @@ protected:
 	*	@brief Dispatches the given arguments object to all listeners
 	*/
 	void Dispatch(EventArgs& arguments);
+
+	/**
+	*	@brief Dispatches the given arguments object to all listeners
+	*/
+	void Dispatch(PreemptableEventArgs& arguments);
 
 private:
 	bool ValidateFunctionFormat(asIScriptFunction& function) const;

@@ -30,6 +30,19 @@ void RegisterEventAPI(asIScriptEngine& engine);
 
 std::string FormatEventHandlerFuncdef(const char* className);
 
+template<typename T, std::enable_if_t<std::is_base_of<PreemptableEventArgs, T>::value, int> = 0>
+inline void RegisterPreemptableEventClass(asIScriptEngine& engine, const char* className)
+{
+	engine.RegisterObjectMethod(className, "bool get_Handled() const property", asMETHOD(T, IsHandled), asCALL_THISCALL);
+	engine.RegisterObjectMethod(className, "void set_Handled(bool value) property", asMETHOD(T, SetHandled), asCALL_THISCALL);
+}
+
+template<typename T, std::enable_if_t<!std::is_base_of<PreemptableEventArgs, T>::value, int> = 0>
+inline void RegisterPreemptableEventClass(asIScriptEngine& engine, const char* className)
+{
+	//Nothing
+}
+
 /**
 *	@brief Registers an event type as well as a funcdef for the handler
 *	@tparam C++ type of the event
@@ -44,5 +57,7 @@ inline void RegisterEventClass(asIScriptEngine& engine, const char* className)
 
 	//Also register a funcdef to make casting object methods easier
 	engine.RegisterFuncdef((FormatEventHandlerFuncdef(className)).c_str());
+
+	RegisterPreemptableEventClass<T>(engine, className);
 }
 }

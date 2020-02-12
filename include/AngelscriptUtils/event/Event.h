@@ -13,19 +13,23 @@ class asIScriptFunction;
 
 namespace asutils
 {
+struct EventMetaData;
+
 /**
 *	@brief Represents an event, stores listeners, handles dispatching
 */
 class Event : public CASRefCountedBaseClass
 {
 protected:
-	Event(const CASRefPtr<asIScriptContext>& context);
+	Event(const EventMetaData& metaData, const CASRefPtr<asIScriptContext>& context);
 
 public:
 	virtual ~Event();
 
 	Event(const Event&) = delete;
 	Event& operator=(const Event&) = delete;
+
+	const EventMetaData& GetMetaData() const { return m_MetaData; }
 
 	bool IsSubscribed(asIScriptFunction& function) const;
 
@@ -53,6 +57,11 @@ protected:
 	void Dispatch(EventArgs& arguments);
 
 private:
+	bool ValidateFunctionFormat(asIScriptFunction& function) const;
+
+private:
+	const EventMetaData& m_MetaData;
+
 	//TODO: could store a reference to the event system and allow the context to be swapped out there
 	CASRefPtr<asIScriptContext> m_Context;
 
@@ -66,8 +75,8 @@ template<typename T>
 class TypedEvent : public Event
 {
 public:
-	TypedEvent(const CASRefPtr<asIScriptContext>& context)
-		: Event(context)
+	TypedEvent(const EventMetaData& metaData, const CASRefPtr<asIScriptContext>& context)
+		: Event(metaData, context)
 	{
 	}
 

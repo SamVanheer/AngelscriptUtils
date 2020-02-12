@@ -33,7 +33,7 @@ Event& EventSystem::InternalGetEvent(EventMetaData* metaData)
 	}
 
 	//Create on demand
-	auto event = metaData->factory(m_Context);
+	auto event = metaData->factory(*metaData, m_Context);
 
 	auto result = m_Events.emplace(metaData, std::move(event));
 

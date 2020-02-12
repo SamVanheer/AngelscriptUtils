@@ -22,9 +22,9 @@ struct EventMetaData final
 {
 	const asITypeInfo& type;
 
-	const std::function<CASRefPtr<Event>(asIScriptContext*)> factory;
+	const std::function<CASRefPtr<Event>(const EventMetaData&, asIScriptContext*)> factory;
 
-	EventMetaData(const asITypeInfo& type, std::function<CASRefPtr<Event>(asIScriptContext*)> factory)
+	EventMetaData(const asITypeInfo& type, std::function<CASRefPtr<Event>(const EventMetaData&, asIScriptContext*)> factory)
 		: type(type)
 		, factory(factory)
 	{
@@ -74,9 +74,9 @@ public:
 	template<typename T, std::enable_if_t<std::is_base_of<EventArgs, T>::value, int> = 0>
 	void Register(const asITypeInfo& type)
 	{
-		auto data = std::make_unique<EventMetaData>(type, [](asIScriptContext* context) -> CASRefPtr<Event>
+		auto data = std::make_unique<EventMetaData>(type, [](const EventMetaData& metaData, asIScriptContext* context) -> CASRefPtr<Event>
 			{
-				return CASRefPtr<Event>(new TypedEvent<T>(context));
+				return CASRefPtr<Event>(new TypedEvent<T>(metaData, context));
 			});
 
 		m_ASTypeToData[&type] = data.get();

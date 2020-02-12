@@ -1,11 +1,16 @@
 #include <algorithm>
+#include <string>
+
+#include <angelscript.h>
 
 #include "AngelscriptUtils/event/Event.h"
+#include "AngelscriptUtils/event/EventRegistry.h"
 
 namespace asutils
 {
-Event::Event(const CASRefPtr<asIScriptContext>& context)
-	: m_Context(context)
+Event::Event(const EventMetaData& metaData, const CASRefPtr<asIScriptContext>& context)
+	: m_MetaData(metaData)
+	, m_Context(context)
 {
 }
 
@@ -33,10 +38,52 @@ bool Event::IsSubscribed(asIScriptFunction& function) const
 
 void Event::Subscribe(asIScriptFunction& function)
 {
+	if (!ValidateFunctionFormat(function))
+	{
+		auto context = asGetActiveContext();
+
+		auto name = GetMetaData().type.GetName();
+
+		context->SetException((std::string{"Event handler must have the format void "} +name + "Callback(" + name + "@)").c_str(), false);
+		return;
+	}
+
+	//TODO: verify that the function is compatible with this event
 	if (!IsSubscribed(function))
 	{
 		m_Functions.emplace_back(&function);
 	}
+}
+
+bool Event::ValidateFunctionFormat(asIScriptFunction& function) const
+{
+	if (function.GetReturnTypeId() != asTYPEID_VOID)
+	{
+		return false;
+	}
+
+	if (function.GetParamCount() != 1)
+	{
+		return false;
+	}
+
+	int typeId;
+
+	function.GetParam(0, &typeId);
+
+	if (!(typeId & asTYPEID_OBJHANDLE))
+	{
+		return false;
+	}
+
+	typeId &= ~asTYPEID_OBJHANDLE;
+
+	if (GetMetaData().type.GetTypeId() != typeId)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void Event::Unsubscribe(asIScriptFunction& function)

@@ -78,7 +78,14 @@ void Event::RemoveFunctionsOfModule(asIScriptModule& module)
 {
 	m_Functions.erase(std::remove_if(m_Functions.begin(), m_Functions.end(), [&](const auto& function)
 		{
-			return function->GetModule() == &module;
+			if (function->GetFuncType() == asFUNC_DELEGATE)
+			{
+				return function->GetDelegateFunction()->GetModule() == &module;
+			}
+			else
+			{
+				return function->GetModule() == &module;
+			}
 		}), m_Functions.end());
 }
 }

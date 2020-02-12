@@ -42,6 +42,10 @@
 #include "CScriptBaseEntity.h"
 #include "ASCBaseEntity.h"
 
+#include "AngelscriptUtils/event/EventArgs.h"
+#include "AngelscriptUtils/event/EventScriptAPI.h"
+#include "AngelscriptUtils/event/EventSystem.h"
+
 namespace ModuleAccessMask
 {
 /**
@@ -118,6 +122,34 @@ bool UseEventManager()
 	return USE_EVENT_MANAGER;
 }
 
+class MyEvent : public asutils::EventArgs
+{
+public:
+	MyEvent() = default;
+
+	MyEvent(const MyEvent&) = default;
+
+	bool ShouldHide() const { return m_ShouldHide; }
+
+	void SetShouldHide(bool value)
+	{
+		m_ShouldHide = value;
+	}
+
+private:
+	bool m_ShouldHide = false;
+};
+
+void RegisterMyEvent(asIScriptEngine& engine)
+{
+	const auto className = "MyEvent";
+
+	asutils::RegisterEventClass<MyEvent>(engine, className);
+
+	engine.RegisterObjectMethod(className, "bool get_ShouldHide() const property", asMETHOD(MyEvent, ShouldHide), asCALL_THISCALL);
+	engine.RegisterObjectMethod(className, "void set_ShouldHide(bool value) property", asMETHOD(MyEvent, SetShouldHide), asCALL_THISCALL);
+}
+
 /*
 *	An event to test out the event system.
 *	Stops as soon as it's handled.
@@ -128,8 +160,9 @@ CASEvent testEvent( "Main", "const string& in", "", ModuleAccessMask::ALL, Event
 class CASTestInitializer : public IASInitializer
 {
 public:
-	CASTestInitializer( CASManager& manager )
+	CASTestInitializer( CASManager& manager, asutils::EventRegistry& eventRegistry)
 		: m_Manager( manager )
+		, m_EventRegistry(eventRegistry)
 	{
 	}
 
@@ -150,6 +183,14 @@ public:
 		RegisterScriptReflection( *manager.GetEngine() );
 
 		RegisterScriptEventAPI( *manager.GetEngine() );
+
+		asutils::RegisterEventAPI(*manager.GetEngine());
+
+		RegisterMyEvent(*manager.GetEngine());
+
+		m_EventSystem = std::make_unique<asutils::EventSystem>(m_EventRegistry, CASRefPtr<asIScriptContext>(manager.GetEngine()->RequestContext(), true));
+
+		manager.GetEngine()->RegisterGlobalProperty("EventSystem g_EventSystem", m_EventSystem.get());
 
 		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
 
@@ -192,8 +233,16 @@ public:
 		return true;
 	}
 
+	asutils::EventSystem& GetEventSystem()
+	{
+		return *m_EventSystem;
+	}
+
 private:
 	CASManager& m_Manager;
+	asutils::EventRegistry& m_EventRegistry;
+
+	std::unique_ptr<asutils::EventSystem> m_EventSystem;
 
 private:
 	CASTestInitializer( const CASTestInitializer& ) = delete;
@@ -282,11 +331,15 @@ int main( int, char*[] )
 
 	CASManager manager;
 
-	CASTestInitializer initializer( manager );
+	asutils::EventRegistry registry;
+
+	CASTestInitializer initializer( manager, registry);
 
 	if( manager.Initialize( initializer ) )
 	{
 		auto pEngine = manager.GetEngine();
+
+		registry.Register<MyEvent>(*pEngine->GetTypeInfoByName("MyEvent"));
 
 		//Create the declaration used for script entity base classes.
 		const auto szDecl = as::CreateExtendBaseclassDeclaration( "CScriptBaseEntity", "IScriptEntity", "CBaseEntity", "BaseEntity" );
@@ -308,6 +361,8 @@ int main( int, char*[] )
 
 		if( pModule )
 		{
+			auto& eventSystem = initializer.GetEventSystem();
+
 			//Call the main function.
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "main" ) )
 			{
@@ -326,6 +381,12 @@ int main( int, char*[] )
 
 					caller.Call( testEvent, pEngine, &szString, true );
 				}
+
+				MyEvent event;
+
+				eventSystem.GetEvent<MyEvent>().Dispatch(event);
+
+				std::cout << "Should hide: " << event.ShouldHide() << std::endl;
 			}
 
 			//Test the object pointer.
@@ -497,6 +558,8 @@ int main( int, char*[] )
 			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
 
 			manager.GetEventManager()->DumpHookedFunctions();
+
+			eventSystem.RemoveFunctionsOfModule(*pModule->GetModule());
 
 			//Remove the module.
 			manager.GetModuleManager().RemoveModule( pModule );

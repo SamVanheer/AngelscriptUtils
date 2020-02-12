@@ -125,10 +125,24 @@ class HookEvent
 	}
 }
 
+class EventTest
+{
+	void EventCallback(MyEvent@ args)
+	{
+		Print("Event callback\n");
+		
+		args.ShouldHide = true;
+	}
+}
+
+EventTest g_EventTest;
+
 int main( const string& in szString, const bool bInEvent )
 {
 	Print( "foo\nbar\n" );
 	Print( szString );
+	
+	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventCallback(g_EventTest.EventCallback));
 	
 	if( !bInEvent )
 	{

@@ -5,4 +5,9 @@ target_sources(AngelscriptUtils
 		CASEvent.h
 		CASEventCaller.h
 		CASEventManager.h
+		Event.h
+		EventArgs.h
+		EventRegistry.h
+		EventScriptAPI.h
+		EventSystem.h
 )

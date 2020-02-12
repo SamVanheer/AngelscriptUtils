@@ -33,6 +33,11 @@ public:
 	{
 		auto metaData = m_Registry.Lookup<T>();
 
+		if (metaData == nullptr)
+		{
+			throw std::invalid_argument("The type T is an unregistered event type");
+		}
+
 		return static_cast<TypedEvent<T>&>(InternalGetEvent(metaData));
 	}
 
@@ -40,11 +45,19 @@ public:
 	*	@brief Gets an event by script type
 	*	Should not be used directly
 	*/
-	Event& GetEvent(const asITypeInfo& type)
+	bool TryGetEvent(const asITypeInfo& type, Event*& event)
 	{
 		auto metaData = m_Registry.Lookup(type);
 
-		return InternalGetEvent(metaData);
+		if (metaData == nullptr)
+		{
+			event = nullptr;
+			return false;
+		}
+
+		event = &InternalGetEvent(metaData);
+
+		return true;
 	}
 
 	/**

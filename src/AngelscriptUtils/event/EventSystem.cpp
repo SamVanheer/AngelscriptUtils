@@ -29,11 +29,6 @@ void EventSystem::RemoveAllHandlers()
 
 Event& EventSystem::InternalGetEvent(EventMetaData* metaData)
 {
-	if (metaData == nullptr)
-	{
-		throw std::invalid_argument("The type T is an unregistered event type");
-	}
-
 	auto it = m_Events.find(metaData);
 
 	if (it != m_Events.end())

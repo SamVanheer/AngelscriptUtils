@@ -1,4 +1,5 @@
 #include <new>
+#include <string>
 
 #include <angelscript.h>
 
@@ -15,9 +16,17 @@ class EventLocator final
 {
 public:
 	EventLocator(asITypeInfo* type, EventSystem* eventSystem)
-		: m_Event(eventSystem->GetEvent(*type->GetSubType()))
-		, m_Engine(*type->GetEngine())
+		: m_Engine(*type->GetEngine())
 	{
+		auto& eventType = *type->GetSubType();
+
+		if (!eventSystem->TryGetEvent(eventType, m_Event))
+		{
+			auto context = asGetActiveContext();
+
+			context->SetException((std::string{"The type \""} + eventType.GetName() + "\" is not an event type").c_str(), false);
+		}
+
 		m_Engine.AddRef();
 	}
 
@@ -32,7 +41,7 @@ public:
 
 		if (function)
 		{
-			return m_Event.IsSubscribed(*function);
+			return m_Event->IsSubscribed(*function);
 		}
 
 		return false;
@@ -44,7 +53,7 @@ public:
 
 		if (function)
 		{
-			m_Event.Subscribe(*function);
+			m_Event->Subscribe(*function);
 		}
 	}
 
@@ -54,7 +63,7 @@ public:
 
 		if (function)
 		{
-			m_Event.Unsubscribe(*function);
+			m_Event->Unsubscribe(*function);
 		}
 	}
 
@@ -92,7 +101,7 @@ private:
 	}
 
 private:
-	Event& m_Event;
+	Event* m_Event;
 	asIScriptEngine& m_Engine;
 };
 

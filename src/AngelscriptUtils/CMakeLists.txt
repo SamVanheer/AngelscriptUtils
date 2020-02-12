@@ -5,7 +5,7 @@ set(PROJECT_VERSION ${ANGELSCRIPTUTILS_VERSION_MAJOR}.${ANGELSCRIPTUTILS_VERSION
 
 find_package(Threads REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-find_package(Angelscript CONFIG 2.32.0 REQUIRED)
+find_package(Angelscript CONFIG 2.34.0 REQUIRED)
 
 set(ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID")
 set(ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID")

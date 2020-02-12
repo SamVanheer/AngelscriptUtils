@@ -1,4 +1,4 @@
-target_sources(${TARGET_NAME}
+target_sources(AngelscriptUtils
 	PRIVATE
 		ASUtilsConfig.h
 		CASLoggingContextResultHandler.h

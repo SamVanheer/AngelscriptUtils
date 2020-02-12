@@ -1,9 +1,3 @@
-#
-#   AngelscriptUtils library
-#
-
-set(TARGET_NAME AngelscriptUtils)
-
 set(ANGELSCRIPTUTILS_VERSION_MAJOR 0)
 set(ANGELSCRIPTUTILS_VERSION_MINOR 1)
 set(ANGELSCRIPTUTILS_VERSION_PATCH 0)
@@ -24,19 +18,19 @@ configure_file(
 	${INCLUDE_DIR}/AngelscriptUtils/ASUtilsConfig.h
 	@ONLY)
 
-add_library(${TARGET_NAME} STATIC)
+add_library(AngelscriptUtils STATIC)
 
-set_target_properties(${TARGET_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
+set_target_properties(AngelscriptUtils PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 
-target_include_directories(${TARGET_NAME} PUBLIC
+target_include_directories(AngelscriptUtils PUBLIC
 	"$<BUILD_INTERFACE:${INCLUDE_DIR}>"
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
-target_link_libraries( ${TARGET_NAME}
+target_link_libraries(AngelscriptUtils
 	Angelscript::angelscript
 	spdlog::spdlog)
 
-target_compile_options(${TARGET_NAME} PRIVATE
+target_compile_options(AngelscriptUtils PRIVATE
 	#All warnings.
 	#No unknown pragma directives.
 	#No attributes.
@@ -47,7 +41,7 @@ target_compile_options(${TARGET_NAME} PRIVATE
      $<$<CXX_COMPILER_ID:MSVC>:
           /W4 /WX>)
 
-target_sources(${TARGET_NAME}
+target_sources(AngelscriptUtils
 	PRIVATE
 		CASLoggingContextResultHandler.cpp
 		CASManager.cpp
@@ -61,14 +55,14 @@ add_subdirectory(ScriptAPI)
 add_subdirectory(util)
 add_subdirectory(wrapper)
 
-get_target_property(SOURCE_FILES ${TARGET_NAME} SOURCES)
+get_target_property(SOURCE_FILES AngelscriptUtils SOURCES)
 
 add_subdirectory(${INCLUDE_DIR}/AngelscriptUtils headers)
 
-set_pdb_names(${TARGET_NAME})
+set_pdb_names(AngelscriptUtils)
 
 #Create filters
-get_target_property(HEADER_FILES ${TARGET_NAME} SOURCES)
+get_target_property(HEADER_FILES AngelscriptUtils SOURCES)
 
 foreach (header in LISTS ${SOURCE_FILES})
 	list(REMOVE_ITEM HEADER_FILES ${header})
@@ -77,10 +71,10 @@ endforeach()
 source_group(TREE ${ROOT_SOURCE_DIR} FILES ${SOURCE_FILES})
 source_group(TREE ${INCLUDE_DIR} FILES ${HEADER_FILES})
 
-install_pdbs(${TARGET_NAME} lib)
+install_pdbs(AngelscriptUtils lib)
 
 #See https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-packages for a detailed explanation about this part
-install(TARGETS ${TARGET_NAME} EXPORT AngelscriptUtilsTargets
+install(TARGETS AngelscriptUtils EXPORT AngelscriptUtilsTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib

@@ -1,14 +1,8 @@
-#
-#   AngelscriptUtils Test project
-#
-
-set(TARGET_NAME AngelscriptUtilsTest)
-
 set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
-add_executable(${TARGET_NAME} ${PREP_SRCS})
+add_executable(AngelscriptUtilsTest ${PREP_SRCS})
 
-target_sources(${TARGET_NAME} PRIVATE
+target_sources(AngelscriptUtilsTest PRIVATE
 	ASCBaseEntity.h
 	CBaseEntity.cpp
 	CBaseEntity.h
@@ -24,13 +18,13 @@ target_sources(${TARGET_NAME} PRIVATE
 	add_on/scriptstdstring/scriptstdstring_utils.cpp
 	add_on/scriptstdstring/scriptstdstring.h)
 
-set_target_properties(${TARGET_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
+set_target_properties(AngelscriptUtilsTest PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 
-target_include_directories(${TARGET_NAME} PRIVATE
+target_include_directories(AngelscriptUtilsTest PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${ROOT_SOURCE_DIR})
 
-target_compile_options(${TARGET_NAME} PRIVATE
+target_compile_options(AngelscriptUtilsTest PRIVATE
 	#All warnings.
 	#No unknown pragma directives.
 	#No attributes.
@@ -42,20 +36,20 @@ target_compile_options(${TARGET_NAME} PRIVATE
           /W4 /WX>)
 
 #Create filters
-get_target_property(SOURCE_FILES ${TARGET_NAME} SOURCES)
+get_target_property(SOURCE_FILES AngelscriptUtilsTest SOURCES)
 source_group(TREE ${ROOT_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 # Indicate which libraries to include during the link process.
-target_link_libraries(${TARGET_NAME}
+target_link_libraries(AngelscriptUtilsTest
 	AngelscriptUtils)
 
 #CMake places libraries in /Debug or /Release on Windows, so explicitly set the paths for both.
 #On Linux, it uses LIBRARY_OUTPUT_DIRECTORY
-set_target_properties(${TARGET_NAME} PROPERTIES
+set_target_properties(AngelscriptUtilsTest PROPERTIES
 	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
 	RUNTIME_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
 	RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
 	RUNTIME_OUTPUT_MINSIZEREL "${OUTPUT_DIR}"
 	RUNTIME_OUTPUT_RELWITHDEBINFO "${OUTPUT_DIR}")
 
-install(TARGETS ${TARGET_NAME} DESTINATION bin)
+install(TARGETS AngelscriptUtilsTest DESTINATION bin)

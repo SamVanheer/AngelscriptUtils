@@ -10,8 +10,6 @@
 #undef VOID
 
 #include "AngelscriptUtils/CASManager.h"
-#include "AngelscriptUtils/event/CASEvent.h"
-#include "AngelscriptUtils/event/CASEventCaller.h"
 #include "AngelscriptUtils/CASModule.h"
 #include "AngelscriptUtils/CASLoggingContextResultHandler.h"
 #include "AngelscriptUtils/IASInitializer.h"
@@ -114,14 +112,6 @@ void DestroyScriptContext( asIScriptEngine*, asIScriptContext* pContext, void* )
 		pContext->Release();
 }
 
-const bool USE_EVENT_MANAGER = true;
-
-//This gets around conditional expression is constant warnings
-bool UseEventManager()
-{
-	return USE_EVENT_MANAGER;
-}
-
 class MyEvent : public asutils::EventArgs
 {
 public:
@@ -150,13 +140,6 @@ void RegisterMyEvent(asIScriptEngine& engine)
 	engine.RegisterObjectMethod(className, "void set_ShouldHide(bool value) property", asMETHOD(MyEvent, SetShouldHide), asCALL_THISCALL);
 }
 
-/*
-*	An event to test out the event system.
-*	Stops as soon as it's handled.
-*	Can be hooked by calling Events::Main.Hook( @MainHook( ... ) );
-*/
-CASEvent testEvent( "Main", "const string& in", "", ModuleAccessMask::ALL, EventStopMode::ON_HANDLED );
-
 class CASTestInitializer : public IASInitializer
 {
 public:
@@ -165,8 +148,6 @@ public:
 		, m_EventRegistry(eventRegistry)
 	{
 	}
-
-	bool UseEventManager() override { return USE_EVENT_MANAGER; }
 
 	void OnInitBegin()
 	{
@@ -182,8 +163,6 @@ public:
 		RegisterScriptScheduler( manager.GetEngine() );
 		RegisterScriptReflection( *manager.GetEngine() );
 
-		RegisterScriptEventAPI( *manager.GetEngine() );
-
 		asutils::RegisterEventAPI(*manager.GetEngine());
 
 		RegisterMyEvent(*manager.GetEngine());
@@ -193,14 +172,6 @@ public:
 		manager.GetEngine()->RegisterGlobalProperty("EventSystem g_EventSystem", m_EventSystem.get());
 
 		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
-
-		return true;
-	}
-
-	bool AddEvents( CASManager&, CASEventManager& eventManager ) override
-	{
-		//Add an event. Scripts will be able to hook these, when it's invoked by C++ code all hooked functions are called.
-		eventManager.AddEvent( &testEvent );
 
 		return true;
 	}
@@ -369,19 +340,9 @@ int main( int, char*[] )
 				std::string szString = "Hello World!\n";
 
 				//Note: main takes a const string& in, so pass the address here. References are handled as pointers.
-				as::Call( pFunction, &szString, false );
+				as::Call( pFunction, &szString );
 
-				if( UseEventManager() )
-				{
-					//Add main as a hook.
-					testEvent.AddFunction( pFunction );
-
-					//Trigger the event.
-					CASEventCaller caller;
-
-					caller.Call( testEvent, pEngine, &szString, true );
-				}
-
+				//TODO: implement the ability to stop events by setting a Handled property to true
 				MyEvent event;
 
 				eventSystem.GetEvent<MyEvent>().Dispatch(event);
@@ -556,8 +517,6 @@ int main( int, char*[] )
 			}
 
 			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
-
-			manager.GetEventManager()->DumpHookedFunctions();
 
 			eventSystem.RemoveFunctionsOfModule(*pModule->GetModule());
 

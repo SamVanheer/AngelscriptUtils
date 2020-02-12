@@ -1,9 +1,5 @@
 target_sources(AngelscriptUtils
 	PRIVATE
-		CASBaseEvent.cpp
-		CASEvent.cpp
-		CASEventCaller.cpp
-		CASEventManager.cpp
 		Event.cpp
 		EventScriptAPI.cpp
 		EventSystem.cpp

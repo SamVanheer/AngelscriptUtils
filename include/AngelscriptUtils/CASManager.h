@@ -6,7 +6,6 @@
 #include "util/ASPlatform.h"
 
 #include "CASModuleManager.h"
-#include "event/CASEventManager.h"
 
 class asIScriptEngine;
 struct asSMessageInfo;
@@ -70,11 +69,6 @@ public:
 	CASModuleManager& GetModuleManager() { return *m_ModuleManager; }
 
 	/**
-	*	@return The event manager.
-	*/
-	CASEventManager* GetEventManager() { return m_EventManager.get(); }
-
-	/**
 	*	Initializes the manager.
 	*	On success, makes this the active manager.
 	*	@param initializer Initializer to use.
@@ -100,7 +94,6 @@ private:
 	asIScriptEngine* m_pScriptEngine = nullptr;
 
 	std::unique_ptr<CASModuleManager> m_ModuleManager;
-	std::shared_ptr<CASEventManager> m_EventManager;
 
 private:
 	CASManager( const CASManager& ) = delete;

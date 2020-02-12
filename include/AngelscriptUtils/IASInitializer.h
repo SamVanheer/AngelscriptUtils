@@ -12,7 +12,6 @@
 */
 
 class CASManager;
-class CASEventManager;
 
 /**
 *	Used by the manager to initialize itself.
@@ -43,16 +42,6 @@ public:
 	virtual bool GetMessageCallback( asSFuncPtr& outFuncPtr, void*& pOutObj, asDWORD& outCallConv );
 
 	/**
-	*	@return Whether to create an event manager.
-	*/
-	virtual bool UseEventManager() { return false; }
-
-	/**
-	*	Gets the namespace in which events should be registered. Default "Events".
-	*/
-	virtual const char* GetEventNamespace() { return "Events"; }
-
-	/**
 	*	Should register the core API, including the following types:
 	*	string
 	*	dictionary
@@ -61,14 +50,6 @@ public:
 	*	@return true on success, false otherwise.
 	*/
 	virtual bool RegisterCoreAPI( CASManager& manager ) = 0;
-
-	/**
-	*	Should register events.
-	*	@param manager Manager.
-	*	@param eventManager Event manager.
-	*	@return true on success, false otherwise.
-	*/
-	virtual bool AddEvents( CASManager& manager, CASEventManager& eventManager );
 
 	/**
 	*	Should register the remainder of the API.
@@ -89,11 +70,6 @@ inline void IASInitializer::OnInitEnd( const bool )
 inline bool IASInitializer::GetMessageCallback( asSFuncPtr&, void*&, asDWORD& )
 {
 	return false;
-}
-
-inline bool IASInitializer::AddEvents( CASManager&, CASEventManager& )
-{
-	return true;
 }
 
 /** @} */

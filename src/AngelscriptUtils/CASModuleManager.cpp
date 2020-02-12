@@ -3,8 +3,6 @@
 
 #include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
 
-#include "AngelscriptUtils/event/CASEventManager.h"
-
 #include "AngelscriptUtils/CASModule.h"
 
 #include "AngelscriptUtils/IASModuleBuilder.h"
@@ -13,9 +11,8 @@
 
 #include "AngelscriptUtils/std_make_unique.h"
 
-CASModuleManager::CASModuleManager( asIScriptEngine& engine, const std::shared_ptr<CASEventManager>& eventManager )
+CASModuleManager::CASModuleManager( asIScriptEngine& engine )
 	: m_Engine( engine )
-	, m_EventManager( eventManager )
 {
 	m_Engine.AddRef();
 }
@@ -290,12 +287,6 @@ void CASModuleManager::RemoveModule( CASModule* pModule )
 
 	if( it == m_Modules.end() )
 		return;
-
-	if( m_EventManager )
-	{
-		//Unhook the functions that the module registered.
-		m_EventManager->UnhookModuleFunctions( pModule );
-	}
 
 	( *it )->Discard();
 	( *it )->Release();

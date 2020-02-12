@@ -101,14 +101,7 @@ bool CASManager::Initialize( IASInitializer& initializer )
 	//Set the cleanup callback for the result handler.
 	m_pScriptEngine->SetContextUserDataCleanupCallback( as::FreeContextResultHandler, ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID );
 
-	const bool bUseEventManager = initializer.UseEventManager();
-
-	if( bUseEventManager )
-	{
-		m_EventManager = std::make_unique<CASEventManager>( *m_pScriptEngine, initializer.GetEventNamespace() );
-	}
-
-	m_ModuleManager = std::make_unique<CASModuleManager>( *m_pScriptEngine, m_EventManager );
+	m_ModuleManager = std::make_unique<CASModuleManager>( *m_pScriptEngine );
 
 	asSFuncPtr msgCallback;
 	void* pObj;
@@ -128,15 +121,6 @@ bool CASManager::Initialize( IASInitializer& initializer )
 	if( !initializer.RegisterCoreAPI( *this ) )
 		return false;
 
-	if( bUseEventManager )
-	{
-		if( !initializer.AddEvents( *this, *m_EventManager ) )
-			return false;
-	
-		//Registers all events. One-time event that happens on startup.
-		m_EventManager->RegisterEvents( *GetEngine() );
-	}
-
 	if( !initializer.RegisterAPI( *this ) )
 		return false;
 
@@ -153,14 +137,6 @@ void CASManager::Shutdown()
 	}
 
 	Activate();
-
-	if( m_EventManager )
-	{
-		//Unhook all functions to prevent dangling pointers.
-		m_EventManager->UnhookAllFunctions();
-
-		m_EventManager.reset();
-	}
 
 	if( m_ModuleManager )
 	{

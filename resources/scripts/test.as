@@ -20,10 +20,9 @@ enum E
 
 class Foo
 {
-	HookReturnCode Func( const string& in szString )
+	void Func(MyEvent@ args)
 	{
-		Print( "method " + szString );
-		return HOOK_CONTINUE;
+		Print("method " + (args.ShouldHide ? "true" : "false"));
 	}
 }
 
@@ -36,11 +35,9 @@ bool Function( int integer, Foo@ pFoo, E e, FuncPtr@ pFunc, const string& in szS
 	return true;
 }
 
-HookReturnCode MainFunc( const string& in szString )
+void MainFunc(MyEvent@ args)
 {
 	Print( "hook called\n" );
-
-	return HOOK_CONTINUE;
 }
 
 void Func( const string& in szString )
@@ -115,13 +112,11 @@ class Baz
 
 class HookEvent
 {
-	HookReturnCode Hook( const string& in szString )
+	void Hook(MyEvent@ args)
 	{
 		Print( "HookEvent lookup works\n" );
 		
-		g_EventManager.UnhookEvent( "Main", @MainHook( HookEvent().Hook ) );
-		
-		return HOOK_CONTINUE;
+		Event<MyEvent>(@g_EventSystem).Unsubscribe(@MyEventCallback(HookEvent().Hook));
 	}
 }
 
@@ -137,34 +132,15 @@ class EventTest
 
 EventTest g_EventTest;
 
-int main( const string& in szString, const bool bInEvent )
+int main( const string& in szString )
 {
 	Print( "foo\nbar\n" );
 	Print( szString );
 	
 	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventCallback(g_EventTest.EventCallback));
 	
-	if( !bInEvent )
-	{
-		Events::Main.Hook( MainFunc );
-		Events::Main.Hook( @MainHook( Foo().Func ) );
-		
-		g_EventManager.HookEvent( "Main", @MainHook( HookEvent().Hook ) );
-	}
-	
-	CEvent@ pEvent = g_EventManager.FindEventByName( "Main" );
-	
-	Print( "Event was found: " + ( pEvent !is null ? "yes" : "no" ) + "\n" );
-	
-	dictionary foo;
-	
-	foo.set( "bar", @MainHook( @Foo().Func ) );
-	
-	MainHook@ pFunc;
-	
-	foo.get( "bar", @pFunc );
-	
-	pFunc( "test\n" );
+	Event<MyEvent>(@g_EventSystem).Subscribe(@MainFunc);
+	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventCallback(Foo().Func));
 	
 	Scheduler.SetTimeout( "Func", 5, "what's going on" );
 	

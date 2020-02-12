@@ -52,6 +52,8 @@ public:
 	*/
 	void RemoveFunctionsOfModule(asIScriptModule& module);
 
+	void RemoveAllFunctions();
+
 private:
 	Event& InternalGetEvent(EventMetaData* metaData);
 

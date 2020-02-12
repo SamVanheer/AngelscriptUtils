@@ -50,6 +50,8 @@ public:
 	*/
 	void RemoveFunctionsOfModule(asIScriptModule& module);
 
+	void RemoveAllFunctions();
+
 protected:
 	/**
 	*	@brief Dispatches the given arguments object to all listeners

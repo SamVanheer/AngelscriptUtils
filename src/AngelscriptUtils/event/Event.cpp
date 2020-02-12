@@ -135,4 +135,9 @@ void Event::RemoveFunctionsOfModule(asIScriptModule& module)
 			}
 		}), m_Functions.end());
 }
+
+void Event::RemoveAllFunctions()
+{
+	m_Functions.clear();
+}
 }

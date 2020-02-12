@@ -18,6 +18,15 @@ void EventSystem::RemoveFunctionsOfModule(asIScriptModule& module)
 	}
 }
 
+void EventSystem::RemoveAllFunctions()
+{
+	//Technically we could just clear the entire events map and achieve the same result
+	for (auto event : m_Events)
+	{
+		event.second->RemoveAllFunctions();
+	}
+}
+
 Event& EventSystem::InternalGetEvent(EventMetaData* metaData)
 {
 	if (metaData == nullptr)

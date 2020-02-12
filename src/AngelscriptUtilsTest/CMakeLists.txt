@@ -1,5 +1,3 @@
-set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
-
 add_executable(AngelscriptUtilsTest ${PREP_SRCS})
 
 target_sources(AngelscriptUtilsTest PRIVATE
@@ -21,8 +19,7 @@ target_sources(AngelscriptUtilsTest PRIVATE
 set_target_properties(AngelscriptUtilsTest PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 
 target_include_directories(AngelscriptUtilsTest PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}
-	${ROOT_SOURCE_DIR})
+	${CMAKE_CURRENT_SOURCE_DIR})
 
 target_compile_options(AngelscriptUtilsTest PRIVATE
 	#All warnings.
@@ -37,7 +34,7 @@ target_compile_options(AngelscriptUtilsTest PRIVATE
 
 #Create filters
 get_target_property(SOURCE_FILES AngelscriptUtilsTest SOURCES)
-source_group(TREE ${ROOT_SOURCE_DIR} FILES ${SOURCE_FILES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${SOURCE_FILES})
 
 # Indicate which libraries to include during the link process.
 target_link_libraries(AngelscriptUtilsTest

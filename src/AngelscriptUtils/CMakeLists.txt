@@ -11,7 +11,6 @@ set(ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule
 set(ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID")
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
-set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 
 configure_file(
 	${INCLUDE_DIR}/AngelscriptUtils/ASUtilsConfig.h.in
@@ -68,7 +67,7 @@ foreach (header in LISTS ${SOURCE_FILES})
 	list(REMOVE_ITEM HEADER_FILES ${header})
 endforeach()
 
-source_group(TREE ${ROOT_SOURCE_DIR} FILES ${SOURCE_FILES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${SOURCE_FILES})
 source_group(TREE ${INCLUDE_DIR} FILES ${HEADER_FILES})
 
 install_pdbs(AngelscriptUtils lib)

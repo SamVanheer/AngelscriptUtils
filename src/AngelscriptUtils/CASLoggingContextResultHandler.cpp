@@ -92,6 +92,11 @@ void CASLoggingContextResultHandler::ProcessExecuteResult( asIScriptFunction& fu
 
 				const int iLineNumber = context.GetExceptionLineNumber( &iColumn, &pszSection );
 
+				if (pszSection == nullptr)
+				{
+					pszSection = "Unknown section";
+				}
+
 				as::log->warn(
 					"Exception occurred while executing function \"{}\"\nFunction \"{}\" at line {}, column {} in section \"{}\":\n{}",
 					szFunctionName, szExceptionFunction, iLineNumber, iColumn, pszSection, context.GetExceptionString()

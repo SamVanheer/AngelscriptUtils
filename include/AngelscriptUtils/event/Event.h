@@ -16,7 +16,7 @@ namespace asutils
 struct EventMetaData;
 
 /**
-*	@brief Represents an event, stores listeners, handles dispatching
+*	@brief Represents an event, stores handlers, handles dispatching
 */
 class Event : public CASRefCountedBaseClass
 {
@@ -46,11 +46,11 @@ public:
 	}
 
 	/**
-	*	@brief Removes all functions defined in the given module from this event
+	*	@brief Removes all event handlers defined in the given module from this event
 	*/
-	void RemoveFunctionsOfModule(asIScriptModule& module);
+	void RemoveHandlersOfModule(asIScriptModule& module);
 
-	void RemoveAllFunctions();
+	void RemoveAllHandlers();
 
 protected:
 	/**
@@ -67,7 +67,7 @@ private:
 	//TODO: could store a reference to the event system and allow the context to be swapped out there
 	CASRefPtr<asIScriptContext> m_Context;
 
-	std::vector<CASRefPtr<asIScriptFunction>> m_Functions;
+	std::vector<CASRefPtr<asIScriptFunction>> m_EventHandlers;
 };
 
 /**

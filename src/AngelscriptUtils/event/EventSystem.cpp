@@ -10,20 +10,20 @@ EventSystem::EventSystem(EventRegistry& registry, const CASRefPtr<asIScriptConte
 
 EventSystem::~EventSystem() = default;
 
-void EventSystem::RemoveFunctionsOfModule(asIScriptModule& module)
+void EventSystem::RemoveHandlersOfModule(asIScriptModule& module)
 {
 	for (auto event : m_Events)
 	{
-		event.second->RemoveFunctionsOfModule(module);
+		event.second->RemoveHandlersOfModule(module);
 	}
 }
 
-void EventSystem::RemoveAllFunctions()
+void EventSystem::RemoveAllHandlers()
 {
 	//Technically we could just clear the entire events map and achieve the same result
 	for (auto event : m_Events)
 	{
-		event.second->RemoveAllFunctions();
+		event.second->RemoveAllHandlers();
 	}
 }
 

@@ -48,11 +48,11 @@ public:
 	}
 
 	/**
-	*	@brief Removes all functions defined in the given module from all events
+	*	@brief Removes all event handlers defined in the given module from all events
 	*/
-	void RemoveFunctionsOfModule(asIScriptModule& module);
+	void RemoveHandlersOfModule(asIScriptModule& module);
 
-	void RemoveAllFunctions();
+	void RemoveAllHandlers();
 
 private:
 	Event& InternalGetEvent(EventMetaData* metaData);

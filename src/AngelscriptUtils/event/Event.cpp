@@ -5,6 +5,7 @@
 
 #include "AngelscriptUtils/event/Event.h"
 #include "AngelscriptUtils/event/EventRegistry.h"
+#include "AngelscriptUtils/event/EventScriptAPI.h"
 
 namespace asutils
 {
@@ -21,18 +22,18 @@ bool Event::IsSubscribed(asIScriptFunction& function) const
 	if (function.GetFuncType() == asFUNC_DELEGATE)
 	{
 		//Test for the underlying method instead
-		return std::find_if(m_Functions.begin(), m_Functions.end(), [&](const auto& ptr)
+		return std::find_if(m_EventHandlers.begin(), m_EventHandlers.end(), [&](const auto& ptr)
 			{
 				return ptr->GetDelegateObject() == function.GetDelegateObject() &&
 					ptr->GetDelegateFunction() == function.GetDelegateFunction();
-			}) != m_Functions.end();
+			}) != m_EventHandlers.end();
 	}
 	else
 	{
-		return std::find_if(m_Functions.begin(), m_Functions.end(), [&](const auto& ptr)
+		return std::find_if(m_EventHandlers.begin(), m_EventHandlers.end(), [&](const auto& ptr)
 			{
 				return ptr.Get() == &function;
-			}) != m_Functions.end();
+			}) != m_EventHandlers.end();
 	}
 }
 
@@ -42,16 +43,14 @@ void Event::Subscribe(asIScriptFunction& function)
 	{
 		auto context = asGetActiveContext();
 
-		auto name = GetMetaData().type.GetName();
-
-		context->SetException((std::string{"Event handler must have the format void "} +name + "Callback(" + name + "@)").c_str(), false);
+		context->SetException(("Event handler must have the format " + FormatEventHandlerFuncdef(GetMetaData().type.GetName())).c_str(), false);
 		return;
 	}
 
 	//TODO: verify that the function is compatible with this event
 	if (!IsSubscribed(function))
 	{
-		m_Functions.emplace_back(&function);
+		m_EventHandlers.emplace_back(&function);
 	}
 }
 
@@ -91,7 +90,7 @@ void Event::Unsubscribe(asIScriptFunction& function)
 	if (function.GetFuncType() == asFUNC_DELEGATE)
 	{
 		//Test for the underlying method instead
-		m_Functions.erase(std::find_if(m_Functions.begin(), m_Functions.end(), [&](const auto& ptr)
+		m_EventHandlers.erase(std::find_if(m_EventHandlers.begin(), m_EventHandlers.end(), [&](const auto& ptr)
 			{
 				return ptr->GetDelegateObject() == function.GetDelegateObject() &&
 					ptr->GetDelegateFunction() == function.GetDelegateFunction();
@@ -99,7 +98,7 @@ void Event::Unsubscribe(asIScriptFunction& function)
 	}
 	else
 	{
-		m_Functions.erase(std::find_if(m_Functions.begin(), m_Functions.end(), [&](const auto& ptr)
+		m_EventHandlers.erase(std::find_if(m_EventHandlers.begin(), m_EventHandlers.end(), [&](const auto& ptr)
 			{
 				return ptr.Get() == &function;
 			}));
@@ -108,7 +107,7 @@ void Event::Unsubscribe(asIScriptFunction& function)
 
 void Event::Dispatch(EventArgs& arguments)
 {
-	for (auto function : m_Functions)
+	for (auto function : m_EventHandlers)
 	{
 		//TODO: error handling
 		m_Context->Prepare(function.Get());
@@ -121,9 +120,9 @@ void Event::Dispatch(EventArgs& arguments)
 	m_Context->Unprepare();
 }
 
-void Event::RemoveFunctionsOfModule(asIScriptModule& module)
+void Event::RemoveHandlersOfModule(asIScriptModule& module)
 {
-	m_Functions.erase(std::remove_if(m_Functions.begin(), m_Functions.end(), [&](const auto& function)
+	m_EventHandlers.erase(std::remove_if(m_EventHandlers.begin(), m_EventHandlers.end(), [&](const auto& function)
 		{
 			if (function->GetFuncType() == asFUNC_DELEGATE)
 			{
@@ -133,11 +132,11 @@ void Event::RemoveFunctionsOfModule(asIScriptModule& module)
 			{
 				return function->GetModule() == &module;
 			}
-		}), m_Functions.end());
+		}), m_EventHandlers.end());
 }
 
-void Event::RemoveAllFunctions()
+void Event::RemoveAllHandlers()
 {
-	m_Functions.clear();
+	m_EventHandlers.clear();
 }
 }

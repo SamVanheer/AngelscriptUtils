@@ -16,20 +16,22 @@ namespace asutils
 *
 *	Event subscription in scripts is handled by combining both:
 *	\code{.unparsed}
-*	Event<MyEvent>(scriptEventSystem).Subscribe(@MyEventCallback);
+*	Event<MyEvent>(scriptEventSystem).Subscribe(@MyEventHandler);
 *   \endcode
 *
 *	Event unsubscription works the same way:
 *	\code{.unparsed}
-*	Event<MyEvent>(scriptEventSystem).Unsubscribe(@MyEventCallback);
+*	Event<MyEvent>(scriptEventSystem).Unsubscribe(@MyEventHandler);
 *   \endcode
 *
-*	Repeated Subscribe calls with the same callback will be silently ignored
+*	Repeated Subscribe calls with the same handler will be silently ignored
 */
 void RegisterEventAPI(asIScriptEngine& engine);
 
+std::string FormatEventHandlerFuncdef(const char* className);
+
 /**
-*	@brief Registers an event type as well as a funcdef for the callback
+*	@brief Registers an event type as well as a funcdef for the handler
 *	@tparam C++ type of the event
 *	@param className Script type of the event
 */
@@ -41,6 +43,6 @@ inline void RegisterEventClass(asIScriptEngine& engine, const char* className)
 	as::RegisterRefCountedBaseClass<T>(&engine, className);
 
 	//Also register a funcdef to make casting object methods easier
-	engine.RegisterFuncdef((std::string{"void "} + className + "Callback(" + className + "@ args)").c_str());
+	engine.RegisterFuncdef((FormatEventHandlerFuncdef(className)).c_str());
 }
 }

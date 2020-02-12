@@ -138,4 +138,9 @@ void RegisterEventAPI(asIScriptEngine& engine)
 
 	RegisterEventLocator(engine);
 }
+
+std::string FormatEventHandlerFuncdef(const char* className)
+{
+	return std::string{"void "} + className + "Handler(" + className + "@ args)";
+}
 }

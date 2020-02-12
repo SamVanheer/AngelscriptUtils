@@ -518,7 +518,7 @@ int main( int, char*[] )
 
 			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
 
-			eventSystem.RemoveFunctionsOfModule(*pModule->GetModule());
+			eventSystem.RemoveHandlersOfModule(*pModule->GetModule());
 
 			//Remove the module.
 			manager.GetModuleManager().RemoveModule( pModule );

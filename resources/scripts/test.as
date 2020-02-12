@@ -116,7 +116,7 @@ class HookEvent
 	{
 		Print( "HookEvent lookup works\n" );
 		
-		Event<MyEvent>(@g_EventSystem).Unsubscribe(@MyEventCallback(HookEvent().Hook));
+		Event<MyEvent>(@g_EventSystem).Unsubscribe(@MyEventHandler(HookEvent().Hook));
 	}
 }
 
@@ -137,10 +137,10 @@ int main( const string& in szString )
 	Print( "foo\nbar\n" );
 	Print( szString );
 	
-	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventCallback(g_EventTest.EventCallback));
+	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(g_EventTest.EventCallback));
 	
 	Event<MyEvent>(@g_EventSystem).Subscribe(@MainFunc);
-	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventCallback(Foo().Func));
+	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(Foo().Func));
 	
 	Scheduler.SetTimeout( "Func", 5, "what's going on" );
 	

@@ -7,10 +7,9 @@ cmake_minimum_required(VERSION 3.16)
 
 # Source additional modules from the "cmake" directory
 list( APPEND CMAKE_MODULE_PATH
-	"${CMAKE_CURRENT_LIST_DIR}/cmake"
-)
+	"${CMAKE_CURRENT_LIST_DIR}/cmake")
 
-include( PDBUtils )
+include(PDBUtils)
 
 option(UseDynamicMSVCRuntime "Use dynamic MSVC runtime" ON)
 
@@ -25,23 +24,23 @@ project(AngelscriptUtils
 
 #C++11 support
 #Targets that use VS2013 are also supported, so C++14 cannot be used
-set( CMAKE_CXX_STANDARD 11 )
-set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #Debug builds should have a distinct name.
-if( NOT CMAKE_DEBUG_POSTFIX )
-  set( CMAKE_DEBUG_POSTFIX d )
+if(NOT CMAKE_DEBUG_POSTFIX)
+  set(CMAKE_DEBUG_POSTFIX d)
 endif()
 
-set( OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries" )
+set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries")
 
 #Copy all resources to the destination directory
-message( STATUS "Copying resources..." )
-file( COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${OUTPUT_DIR} )
-message( STATUS "Done" )
+message(STATUS "Copying resources...")
+file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${OUTPUT_DIR})
+message(STATUS "Done")
 
 #include the subdirectory containing our libs
-add_subdirectory( src )
+add_subdirectory(src)
 
 #Default to test project
-set_property( DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT AngelscriptUtilsTest )
+set_property(DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT AngelscriptUtilsTest)

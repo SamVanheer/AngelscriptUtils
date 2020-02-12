@@ -2,19 +2,19 @@
 #   AngelscriptUtils library
 #
 
-set( TARGET_NAME AngelscriptUtils )
+set(TARGET_NAME AngelscriptUtils)
 
-set( ANGELSCRIPTUTILS_VERSION_MAJOR 0 )
-set( ANGELSCRIPTUTILS_VERSION_MINOR 1 )
-set( ANGELSCRIPTUTILS_VERSION_PATCH 0 )
-set( PROJECT_VERSION ${ANGELSCRIPTUTILS_VERSION_MAJOR}.${ANGELSCRIPTUTILS_VERSION_MINOR}.${ANGELSCRIPTUTILS_VERSION_PATCH} )
+set(ANGELSCRIPTUTILS_VERSION_MAJOR 0)
+set(ANGELSCRIPTUTILS_VERSION_MINOR 1)
+set(ANGELSCRIPTUTILS_VERSION_PATCH 0)
+set(PROJECT_VERSION ${ANGELSCRIPTUTILS_VERSION_MAJOR}.${ANGELSCRIPTUTILS_VERSION_MINOR}.${ANGELSCRIPTUTILS_VERSION_PATCH})
 
-find_package( Threads REQUIRED )
-find_package( spdlog CONFIG REQUIRED )
-find_package( Angelscript CONFIG 2.32.0 REQUIRED )
+find_package(Threads REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
+find_package(Angelscript CONFIG 2.32.0 REQUIRED)
 
-set( ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID" )
-set( ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID" )
+set(ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID")
+set(ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID")
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
@@ -22,8 +22,7 @@ set(ROOT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
 configure_file(
 	${INCLUDE_DIR}/AngelscriptUtils/ASUtilsConfig.h.in
 	${INCLUDE_DIR}/AngelscriptUtils/ASUtilsConfig.h
-	@ONLY
-)
+	@ONLY)
 
 add_library(${TARGET_NAME} STATIC)
 
@@ -35,8 +34,7 @@ target_include_directories(${TARGET_NAME} PUBLIC
 
 target_link_libraries( ${TARGET_NAME}
 	Angelscript::angelscript
-	spdlog::spdlog
-)
+	spdlog::spdlog)
 
 target_compile_options(${TARGET_NAME} PRIVATE
 	#All warnings.
@@ -58,16 +56,16 @@ target_sources(${TARGET_NAME}
 		CASModuleManager.cpp
 		add_on/scriptbuilder/scriptbuilder.cpp)
 
-add_subdirectory( event )
-add_subdirectory( ScriptAPI )
-add_subdirectory( util )
-add_subdirectory( wrapper )
+add_subdirectory(event)
+add_subdirectory(ScriptAPI)
+add_subdirectory(util)
+add_subdirectory(wrapper)
 
 get_target_property(SOURCE_FILES ${TARGET_NAME} SOURCES)
 
 add_subdirectory(${INCLUDE_DIR}/AngelscriptUtils headers)
 
-set_pdb_names( ${TARGET_NAME} )
+set_pdb_names(${TARGET_NAME})
 
 #Create filters
 get_target_property(HEADER_FILES ${TARGET_NAME} SOURCES)
@@ -79,44 +77,42 @@ endforeach()
 source_group(TREE ${ROOT_SOURCE_DIR} FILES ${SOURCE_FILES})
 source_group(TREE ${INCLUDE_DIR} FILES ${HEADER_FILES})
 
-install_pdbs( ${TARGET_NAME} lib )
+install_pdbs(${TARGET_NAME} lib)
 
 #See https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html#creating-packages for a detailed explanation about this part
-install( TARGETS ${TARGET_NAME} EXPORT AngelscriptUtilsTargets
+install(TARGETS ${TARGET_NAME} EXPORT AngelscriptUtilsTargets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
-	INCLUDES DESTINATION include
-)
+	INCLUDES DESTINATION include)
 
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}../../include DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
 
-include( CMakePackageConfigHelpers )
+include(CMakePackageConfigHelpers)
+
 write_basic_package_version_file(
 	"${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsConfigVersion.cmake"
 	VERSION ${PROJECT_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
+	COMPATIBILITY AnyNewerVersion)
 
-export( EXPORT AngelscriptUtilsTargets
+export(EXPORT AngelscriptUtilsTargets
 	FILE "${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsTargets.cmake"
-	NAMESPACE AngelscriptUtils::
-)
-configure_file( cmake/AngelscriptUtilsConfig.cmake
+	NAMESPACE AngelscriptUtils::)
+	
+configure_file(cmake/AngelscriptUtilsConfig.cmake
 	"${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsConfig.cmake"
-	COPYONLY
-)
+	COPYONLY)
 
 set( ConfigPackageLocation lib/cmake/AngelscriptUtils)
-install( EXPORT AngelscriptUtilsTargets
+
+install(EXPORT AngelscriptUtilsTargets
 	FILE AngelscriptUtilsTargets.cmake
 	NAMESPACE AngelscriptUtils::
-	DESTINATION ${ConfigPackageLocation}
-)
+	DESTINATION ${ConfigPackageLocation})
+	
 install(
 	FILES
 		cmake/AngelscriptUtilsConfig.cmake
 		"${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsConfigVersion.cmake"
 	DESTINATION ${ConfigPackageLocation}
-	COMPONENT Devel
-)
+	COMPONENT Devel)

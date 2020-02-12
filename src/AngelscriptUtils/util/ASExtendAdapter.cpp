@@ -30,7 +30,7 @@ std::string CreateExtendBaseclassDeclaration(
 		<< "\t{" << std::endl
 		<< "\t\t@this.m_pSelf = self;" << std::endl
 		<< "\t}" << std::endl
-		<< "\t" << pszCPPClassName << "@ get_self() const { return m_pSelf; }" << std::endl;
+		<< "\t" << pszCPPClassName << "@ self { get const { return m_pSelf; } }" << std::endl;
 
 	//If the user has provided a baseclass type, provide the BaseClass member.
 	if( pszCPPBaseClassName )
@@ -41,7 +41,7 @@ std::string CreateExtendBaseclassDeclaration(
 			<< "\t{" << std::endl
 			<< "\t\t@this.m_pBaseClass = BaseClass;" << std::endl
 			<< "\t}" << std::endl 
-			<< "\t" << pszCPPBaseClassName << "@ get_BaseClass() const { return m_pBaseClass; }" << std::endl;
+			<< "\t" << pszCPPBaseClassName << "@ BaseClass { get const { return m_pBaseClass; } }" << std::endl;
 	}
 
 	if( pszClassContents )

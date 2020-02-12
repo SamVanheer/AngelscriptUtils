@@ -38,7 +38,7 @@ inline void RegisterPreemptableEventClass(asIScriptEngine& engine, const char* c
 }
 
 template<typename T, std::enable_if_t<!std::is_base_of<PreemptableEventArgs, T>::value, int> = 0>
-inline void RegisterPreemptableEventClass(asIScriptEngine& engine, const char* className)
+inline void RegisterPreemptableEventClass(asIScriptEngine&, const char*)
 {
 	//Nothing
 }

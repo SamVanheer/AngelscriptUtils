@@ -9,8 +9,6 @@
 #include "AngelscriptUtils/util/ASPlatform.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
 
-#include "AngelscriptUtils/IASContextResultHandler.h"
-
 #include "ASCallableConst.h"
 #include "CASContext.h"
 
@@ -48,11 +46,6 @@ bool CallFunction( CALLABLE& callable, CallFlags_t, const ARGS& args )
 
 	auto result = pContext->Prepare( &function );
 
-	auto pResultHandler = as::GetContextResultHandler( *pContext );
-
-	if( pResultHandler )
-		pResultHandler->ProcessPrepareResult( function, *pContext, result );
-
 	if( result < 0 )
 	{
 		return false;
@@ -70,9 +63,6 @@ bool CallFunction( CALLABLE& callable, CallFlags_t, const ARGS& args )
 		return false;
 
 	result = pContext->Execute();
-
-	if( pResultHandler )
-		pResultHandler->ProcessExecuteResult( function, *pContext, result );
 
 	if( !callable.PostExecute( result ) )
 		return false;

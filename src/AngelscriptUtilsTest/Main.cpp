@@ -11,7 +11,6 @@
 
 #include "AngelscriptUtils/CASManager.h"
 #include "AngelscriptUtils/CASModule.h"
-#include "AngelscriptUtils/CASLoggingContextResultHandler.h"
 #include "AngelscriptUtils/IASInitializer.h"
 #include "AngelscriptUtils/IASModuleBuilder.h"
 
@@ -30,6 +29,7 @@
 
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 #include "AngelscriptUtils/wrapper/CASContext.h"
+#include "AngelscriptUtils/wrapper/WrappedScriptContext.h"
 
 #include "add_on/scriptany/scriptany.h"
 #include "add_on/scriptarray/scriptarray.h"
@@ -94,20 +94,19 @@ int NSTest()
 
 asIScriptContext* CreateScriptContext( asIScriptEngine* pEngine, void* )
 {
-	auto pContext = pEngine->CreateContext();
+	auto context = pEngine->CreateContext();
 
 	//TODO: add test to see if suspending will log an error.
-	auto pResultHandler = new CASLoggingContextResultHandler( CASLoggingContextResultHandler::Flag::SUSPEND_IS_ERROR );
+	auto wrapper = new asutils::LoggingScriptContext(*context, as::log, true);
 
-	as::SetContextResultHandler( *pContext, pResultHandler );
+	context->Release();
 
-	pResultHandler->Release();
-
-	return pContext;
+	return wrapper;
 }
 
 void DestroyScriptContext( asIScriptEngine*, asIScriptContext* pContext, void* )
 {
+	//Releases both the wrapper and context at once if this is a wrapped context
 	if( pContext )
 		pContext->Release();
 }

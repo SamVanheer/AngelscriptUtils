@@ -16,9 +16,4 @@
 */
 const asPWORD ASUTILS_CASMODULE_USER_DATA_ID = @ASUTILS_CASMODULE_USER_DATA_ID@;
 
-/**
-*	@brief The user data key for the context result handler user data entry
-*/
-const asPWORD ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID = @ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID@;
-
 #endif //ANGELSCRIPTUTILS_CONFIG_H

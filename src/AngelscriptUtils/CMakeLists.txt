@@ -8,7 +8,6 @@ find_package(spdlog CONFIG REQUIRED)
 find_package(Angelscript CONFIG 2.34.0 REQUIRED)
 
 set(ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID")
-set(ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID "20001" CACHE STRING "Value for the context result handler user data ID")
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 
@@ -42,7 +41,6 @@ target_compile_options(AngelscriptUtils PRIVATE
 
 target_sources(AngelscriptUtils
 	PRIVATE
-		CASLoggingContextResultHandler.cpp
 		CASManager.cpp
 		CASModuleDescriptor.cpp
 		CASModule.cpp

@@ -11,7 +11,6 @@
 #include "AngelscriptUtils/util/ASLogging.h"
 #include "AngelscriptUtils/util/ASUtil.h"
 
-#include "AngelscriptUtils/IASContextResultHandler.h"
 #include "AngelscriptUtils/IASInitializer.h"
 
 #include "AngelscriptUtils/CASManager.h"
@@ -97,9 +96,6 @@ bool CASManager::Initialize( IASInitializer& initializer )
 	InitEndCaller initEndCaller( initializer );
 
 	initializer.OnInitBegin();
-
-	//Set the cleanup callback for the result handler.
-	m_pScriptEngine->SetContextUserDataCleanupCallback( as::FreeContextResultHandler, ASUTILS_CONTEXT_RESULTHANDLER_USERDATA_ID );
 
 	m_ModuleManager = std::make_unique<CASModuleManager>( *m_pScriptEngine );
 

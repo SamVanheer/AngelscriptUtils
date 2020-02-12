@@ -4,4 +4,5 @@ target_sources(AngelscriptUtils
 		ASCallableConst.h
 		CASArguments.h
 		CASContext.h
+		WrappedScriptContext.h
 )

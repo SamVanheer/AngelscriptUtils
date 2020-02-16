@@ -9,8 +9,6 @@
 
 #include <angelscript.h>
 
-#include "util/StringUtils.h"
-
 #include "CASModuleDescriptor.h"
 
 class CASModule;

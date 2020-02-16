@@ -18,8 +18,6 @@
 
 #include "ASPlatform.h"
 
-#include "StringUtils.h"
-
 /**
 *	@defgroup ASUtil Angelscript Utility Code
 *

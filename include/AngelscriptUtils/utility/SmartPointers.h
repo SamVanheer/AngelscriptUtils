@@ -70,6 +70,14 @@ public:
     static constexpr bool value = type::value;
 };
 
+template<typename T>
+struct HasAddRefAndRelease
+{
+    static constexpr bool value =
+        (HasAddRef<T, void>::value || HasAddRef<T, int>::value) &&
+        (HasRelease<T, void>::value || HasRelease<T, int>::value);
+};
+
 /**
 *   @brief Allows calling AddRef and Release on types that may not have such methods
 *   If the type is missing either method no reference handling is performed
@@ -116,9 +124,7 @@ struct OptionalReferenceAdapter
 };
 
 template<typename T>
-struct OptionalReferenceAdapter<T, typename std::enable_if<
-    (HasAddRef<T, void>::value || HasAddRef<T, int>::value) &&
-    (HasRelease<T, void>::value || HasRelease<T, int>::value)>::type>
+struct OptionalReferenceAdapter<T, typename std::enable_if<HasAddRefAndRelease<T>::value>::type>
 {
     OptionalReferenceAdapter() = delete;
 

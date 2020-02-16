@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "AngelscriptUtils/util/ASUtil.h"
+#include "AngelscriptUtils/utility/TypeInfo.h"
 
 namespace as
 {
@@ -45,24 +46,9 @@ void ReleaseVarArg( asIScriptEngine& engine, void* pObject, const int iTypeId )
 	}
 }
 
-bool HasDefaultConstructor( const asITypeInfo& type )
-{
-	//Non-object types return 0 factories here.
-	for( asUINT uiIndex = 0; uiIndex < type.GetFactoryCount(); ++uiIndex )
-	{
-		asIScriptFunction* pFactory = type.GetFactoryByIndex( uiIndex );
-
-		//A default constructor has 0 parameters
-		if( pFactory->GetParamCount() == 0 )
-			return true;
-	}
-
-	return false;
-}
-
 void* CreateObjectInstance( asIScriptEngine& engine, const asITypeInfo& type )
 {
-	if( !HasDefaultConstructor( type ) )
+	if( !asutils::HasDefaultConstructor( type ) )
 		return nullptr;
 
 	return engine.CreateScriptObject( &type );
@@ -194,7 +180,7 @@ std::string SPrintf( const char* pszFormat, size_t uiFirstParamIndex, asIScriptG
 
 					void* pValue = arguments.GetArgAddress( uiArgIndex );
 
-					if( as::IsPrimitive( iTypeId ) )
+					if( asutils::IsPrimitive( iTypeId ) )
 					{
 						stream << PODToString( pValue, iTypeId );
 					}

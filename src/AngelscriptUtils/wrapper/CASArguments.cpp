@@ -7,6 +7,7 @@
 #include "AngelscriptUtils/util/ASLogging.h"
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
+#include "AngelscriptUtils/utility/TypeInfo.h"
 
 #include "AngelscriptUtils/wrapper/CASArguments.h"
 
@@ -116,7 +117,7 @@ void CASArgument::Reset()
 	if( HasValue() )
 	{
 		//Release reference if needed
-		if( !as::IsPrimitive( m_iTypeId ) && !as::IsEnum( m_iTypeId ) )
+		if( !asutils::IsPrimitive( m_iTypeId ) && !asutils::IsEnum( m_iTypeId ) )
 		{
 			auto pEngine = CASManager::GetActiveManager()->GetEngine();
 

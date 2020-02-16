@@ -8,6 +8,7 @@
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 
 #include "AngelscriptUtils/util/ContextUtils.h"
+#include "AngelscriptUtils/utility/TypeInfo.h"
 
 namespace ctx
 {
@@ -192,7 +193,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 	else //Primitive type (including enum)
 	{
 		//Primitive type taken by reference
-		if( ( as::IsPrimitive( iTypeId ) ) && ( uiFlags & ( asTM_INREF | asTM_OUTREF ) ) )
+		if( ( asutils::IsPrimitive( iTypeId ) ) && ( uiFlags & ( asTM_INREF | asTM_OUTREF ) ) )
 		{
 			const void* pAddress = bAllowPrimitiveReferences ? value.pValue : &value.qword;
 			bSuccess = context.SetArgAddress( uiIndex, const_cast<void*>( pAddress ) ) >= 0;
@@ -238,7 +239,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 					bWasPrimitive = false;
 
 					//It's an enum
-					if( as::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
+					if(asutils::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
 					{
 						if( uiFlags & ( asTM_INREF | asTM_OUTREF ) )
 						{
@@ -307,7 +308,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 		bool bWasPrimitive = true;
 
 		//In/Out reference
-		if( as::IsPrimitive( iTypeId ) && ( uiTMFlags & ( asTM_INREF | asTM_OUTREF ) ) )
+		if(asutils::IsPrimitive( iTypeId ) && ( uiTMFlags & ( asTM_INREF | asTM_OUTREF ) ) )
 		{
 			value.pValue = va_arg( list.list, void* );
 		}
@@ -341,7 +342,7 @@ bool GetArgumentFromVarargs( ArgumentValue& value, int iTypeId, asDWORD uiTMFlag
 				bWasPrimitive = false;
 
 				//It's an enum
-				if( as::IsEnum( iTypeId ) )
+				if(asutils::IsEnum( iTypeId ) )
 				{
 					if( pOutArgType )
 						*pOutArgType = ArgType::ENUM;
@@ -402,7 +403,7 @@ bool ConvertInputArgToLargest( int iTypeId, const ArgumentValue& value, asINT64&
 	default:
 
 		//It's an enum
-		if( as::IsEnum( iTypeId ) )
+		if(asutils::IsEnum( iTypeId ) )
 		{
 			uiValue = value.dword;
 		}
@@ -438,11 +439,11 @@ ArgType::ArgType ArgumentTypeFromTypeId( const int iTypeId, const asDWORD uiObjF
 		else if( uiObjFlags & asOBJ_VALUE )
 			argType = ArgType::VALUE;
 	}
-	else if( as::IsPrimitive( iTypeId ) )
+	else if(asutils::IsPrimitive( iTypeId ) )
 	{
 		argType = ArgType::PRIMITIVE;
 	}
-	else if( as::IsEnum( iTypeId ) )
+	else if(asutils::IsEnum( iTypeId ) )
 	{
 		argType = ArgType::ENUM;
 	}
@@ -454,7 +455,7 @@ bool ConvertEnumToPrimitive( const CASArgument& arg, const int iTypeId, Argument
 {
 	//Enums can convert to integral types
 	//Enum have their type id set to int32, so handle both
-	if( !as::IsEnum( arg.GetTypeId() ) && arg.GetTypeId() != asTYPEID_INT32 )
+	if( !asutils::IsEnum( arg.GetTypeId() ) && arg.GetTypeId() != asTYPEID_INT32 )
 	{
 		return false;
 	}
@@ -506,7 +507,7 @@ bool ConvertEnumToPrimitive( const CASArgument& arg, const int iTypeId, Argument
 
 bool ConvertPrimitiveToEnum( const CASArgument& arg, ArgumentValue& outValue )
 {
-	if( !as::IsPrimitive( arg.GetTypeId() ) )
+	if( !asutils::IsPrimitive( arg.GetTypeId() ) )
 	{
 		return false;
 	}
@@ -683,7 +684,7 @@ bool SetObjectArgument( asIScriptEngine& engine, void* pObject, int iTypeId, CAS
 	else
 	{
 		//Check if it's an enum.
-		if( as::IsEnum( iTypeId ) )
+		if(asutils::IsEnum( iTypeId ) )
 		{
 			argType = ArgType::ENUM;
 			value.dword = *reinterpret_cast<asDWORD*>( pObject );
@@ -811,7 +812,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, CA
 				argType = ArgType::PRIMITIVE;
 			else
 			{
-				if( as::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
+				if(asutils::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
 				{
 					argType = ArgType::ENUM;
 					value.dword = context.GetReturnDWord();
@@ -950,7 +951,7 @@ bool GetReturnValue( asIScriptContext& context, int iTypeId, asDWORD uiFlags, vo
 		{
 			if( !bWasPrimitive )
 			{
-				if( as::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
+				if(asutils::IsEnum( iTypeId & asTYPEID_MASK_SEQNBR ) )
 				{
 					*reinterpret_cast<asDWORD*>( pReturnValue ) = context.GetReturnDWord();
 				}

@@ -50,6 +50,7 @@ target_sources(AngelscriptUtils
 add_subdirectory(event)
 add_subdirectory(ScriptAPI)
 add_subdirectory(util)
+add_subdirectory(utility)
 add_subdirectory(wrapper)
 
 get_target_property(SOURCE_FILES AngelscriptUtils SOURCES)

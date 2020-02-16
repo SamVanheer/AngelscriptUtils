@@ -34,67 +34,6 @@ namespace as
 const char* PrimitiveTypeIdToString( const int iTypeId );
 
 /**
-*	Returns whether the given type id is that of void.
-*	Exists mostly for completeness.
-*	@param iTypeId Type Id.
-*	@return true if it is void, false otherwise.
-*/
-inline bool IsVoid( const int iTypeId )
-{
-	return asTYPEID_VOID == iTypeId;
-}
-
-/**
-*	Returns whether a given type id is that of a primitive type.
-*	@param iTypeId Type Id.
-*	@return true if it is a primitive type, false otherwise.
-*/
-inline bool IsPrimitive( const int iTypeId )
-{
-	return asTYPEID_BOOL <= iTypeId && iTypeId <= asTYPEID_DOUBLE;
-}
-
-/**
-*	Returns whether a given type id is that of an enum type.
-*	@param iTypeId Type Id.
-*	@return true if it is an enum type, false otherwise.
-*/
-inline bool IsEnum( const int iTypeId )
-{
-	return ( iTypeId > asTYPEID_DOUBLE && ( iTypeId & asTYPEID_MASK_OBJECT ) == 0 );
-}
-
-/**
-*	Returns whether a given type id is that of an integer type.
-*	@param iTypeId Type Id.
-*	@return true if it is an integer type, false otherwise.
-*/
-inline bool IsInteger( const int iTypeId )
-{
-	return ( ( iTypeId >= asTYPEID_INT8 ) && ( iTypeId <= asTYPEID_UINT64 ) );
-}
-
-/**
-*	Returns whether a given type id is that of a float type.
-*	@param iTypeId Type Id.
-*	@return true if it is a float type, false otherwise.
-*/
-inline bool IsFloat( const int iTypeId )
-{
-	return ( ( iTypeId >= asTYPEID_FLOAT ) && ( iTypeId <= asTYPEID_DOUBLE ) );
-}
-
-/**
-*	Returns whether a given type id is that of a primitive type.
-*	@param iTypeId Type Id.
-*	@return true if it is a primitive type, false otherwise.
-*/
-inline bool IsObject( const int iTypeId )
-{
-	return ( iTypeId & asTYPEID_MASK_OBJECT ) != 0;
-}
-
-/**
 *	Formats a function name and returns it.
 *	The format for global functions is \<namespace>::\<name>.
 *	The format for member functions is \<namespace>::\<classname>::\<name>.
@@ -146,12 +85,6 @@ inline std::string FormatFunctionName( const asIScriptFunction& function )
 *	@param iTypeId Type Id.
 */
 void ReleaseVarArg( asIScriptEngine& engine, void* pObject, const int iTypeId );
-
-/**
-*	@param type Object type.
-*	@return Whether the given type has a default constructor.
-*/
-bool HasDefaultConstructor( const asITypeInfo& type );
 
 /**
 *	Creates an instance of an object using its default constructor.

@@ -6,6 +6,7 @@
 #include "AngelscriptUtils/util/ASLogging.h"
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
+#include "AngelscriptUtils/utility/Introspection.h"
 #include "AngelscriptUtils/utility/RegistrationUtils.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
 #include "AngelscriptUtils/utility/TypeStringUtils.h"
@@ -185,7 +186,7 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 			{
 				if( pType->GetFlags() & asOBJ_REF )
 				{
-					pFunction = as::FindFunction( *pEngine, as::CASMethodIterator( *pType ), szFunctionName, *pArgs );
+					pFunction = asutils::FindFunction( *pEngine, asutils::MethodIterator( *pType ), szFunctionName, *pArgs );
 				}
 				else
 				{
@@ -200,7 +201,7 @@ void CASScheduler::SetInterval( void* pThis, int iTypeId, const std::string& szF
 		}
 		else
 		{
-			pFunction = as::FindFunction( *pEngine, as::CASFunctionIterator( *m_OwningModule.GetModule() ), szFunctionName, *pArgs );
+			pFunction = asutils::FindFunction( *pEngine, asutils::FunctionIterator( *m_OwningModule.GetModule() ), szFunctionName, *pArgs );
 		}
 
 		if( pFunction )

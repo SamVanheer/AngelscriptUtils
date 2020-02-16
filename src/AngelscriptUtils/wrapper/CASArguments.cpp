@@ -5,7 +5,6 @@
 
 #include "AngelscriptUtils/CASManager.h"
 #include "AngelscriptUtils/util/ASLogging.h"
-#include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
 #include "AngelscriptUtils/utility/TypeInfo.h"
 #include "AngelscriptUtils/utility/TypeStringUtils.h"

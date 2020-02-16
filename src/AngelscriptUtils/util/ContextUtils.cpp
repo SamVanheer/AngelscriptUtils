@@ -2,7 +2,6 @@
 #include <cstdarg>
 
 #include "AngelscriptUtils/util/ASLogging.h"
-#include "AngelscriptUtils/util/ASUtil.h"
 
 #include "AngelscriptUtils/wrapper/CASContext.h"
 #include "AngelscriptUtils/wrapper/ASCallable.h"

@@ -3,7 +3,6 @@ target_sources(AngelscriptUtils
 		ASExtendAdapter.h
 		ASLogging.h
 		ASPlatform.h
-		ASUtil.h
 		ContextUtils.h
 		CASBaseClass.h
 		CASExtendAdapter.h

@@ -22,8 +22,10 @@
 #include "AngelscriptUtils/util/CASBaseClass.h"
 #include "AngelscriptUtils/util/ASExtendAdapter.h"
 #include "AngelscriptUtils/util/ASLogging.h"
-#include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/CASExtendAdapter.h"
+
+#include "AngelscriptUtils/utility/Objects.h"
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 #include "AngelscriptUtils/wrapper/CASContext.h"
@@ -41,8 +43,6 @@
 #include "AngelscriptUtils/event/EventArgs.h"
 #include "AngelscriptUtils/event/EventScriptAPI.h"
 #include "AngelscriptUtils/event/EventSystem.h"
-
-#include "AngelscriptUtils/utility/SmartPointers.h"
 
 namespace ModuleAccessMask
 {
@@ -257,7 +257,7 @@ public:
 		auto& scriptModule = *pModule->GetModule();
 
 		//Set the scheduler instance.
-		if( !as::SetGlobalByName( scriptModule, "Scheduler", pModule->GetScheduler() ) )
+		if( !asutils::SetGlobalByName( scriptModule, "Scheduler", pModule->GetScheduler() ) )
 			return false;
 
 		return true;

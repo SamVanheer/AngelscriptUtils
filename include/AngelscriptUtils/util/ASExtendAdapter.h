@@ -6,6 +6,7 @@
 
 #include <angelscript.h>
 
+#include "AngelscriptUtils/utility/Objects.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
 #include "AngelscriptUtils/utility/TypeStringUtils.h"
 
@@ -63,7 +64,7 @@ CLASS* CreateExtensionClassInstance(
 {
 	assert( pszCPPClassName );
 
-	if( auto pInstance = as::CreateObjectInstance( engine, typeInfo ) )
+	if( auto pInstance = asutils::CreateObjectInstance( engine, typeInfo ) )
 	{
 		auto* pCPPInstance = new CLASS(asutils::ObjectPointer(pInstance, asutils::ReferencePointer<asITypeInfo>(&typeInfo), true));
 

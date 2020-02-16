@@ -9,7 +9,6 @@
 #include "AngelscriptUtils/ASUtilsConfig.h"
 
 #include "AngelscriptUtils/util/ASLogging.h"
-#include "AngelscriptUtils/util/ASUtil.h"
 
 #include "AngelscriptUtils/IASInitializer.h"
 

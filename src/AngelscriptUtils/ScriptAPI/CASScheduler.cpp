@@ -4,7 +4,6 @@
 #include "AngelscriptUtils/CASModule.h"
 
 #include "AngelscriptUtils/util/ASLogging.h"
-#include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
 #include "AngelscriptUtils/utility/Introspection.h"
 #include "AngelscriptUtils/utility/RegistrationUtils.h"

@@ -1,6 +1,5 @@
 #include <cassert>
 
-#include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/utility/ContextUtils.h"
 #include "AngelscriptUtils/utility/TypeStringUtils.h"
 #include "AngelscriptUtils/wrapper/WrappedScriptContext.h"

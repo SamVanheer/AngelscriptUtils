@@ -3,8 +3,6 @@
 
 #include <memory>
 
-#include "util/ASPlatform.h"
-
 #include "CASModuleManager.h"
 
 class asIScriptEngine;

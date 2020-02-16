@@ -6,7 +6,6 @@
 
 #include <angelscript.h>
 
-#include "AngelscriptUtils/util/ASPlatform.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
 
 #include "ASCallableConst.h"

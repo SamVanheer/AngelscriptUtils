@@ -3,8 +3,6 @@
 
 #include <angelscript.h>
 
-#include "util/ASPlatform.h"
-
 /**
 *	@addtogroup ASManager
 *

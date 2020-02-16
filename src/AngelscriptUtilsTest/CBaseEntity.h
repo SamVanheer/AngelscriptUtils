@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include "AngelscriptUtils/util/ASPlatform.h"
-
 class CBaseEntity
 {
 public:

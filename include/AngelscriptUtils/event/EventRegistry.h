@@ -11,7 +11,7 @@
 #include "AngelscriptUtils/event/Event.h"
 #include "AngelscriptUtils/event/EventArgs.h"
 
-#include "AngelscriptUtils/util/CASRefPtr.h"
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 namespace asutils
 {
@@ -22,9 +22,9 @@ struct EventMetaData final
 {
 	const asITypeInfo& type;
 
-	const std::function<CASRefPtr<Event>(const EventMetaData&, asIScriptContext*)> factory;
+	const std::function<ReferencePointer<Event>(const EventMetaData&, asIScriptContext*)> factory;
 
-	EventMetaData(const asITypeInfo& type, std::function<CASRefPtr<Event>(const EventMetaData&, asIScriptContext*)> factory)
+	EventMetaData(const asITypeInfo& type, std::function<ReferencePointer<Event>(const EventMetaData&, asIScriptContext*)> factory)
 		: type(type)
 		, factory(factory)
 	{
@@ -74,9 +74,9 @@ public:
 	template<typename T, std::enable_if_t<std::is_base_of<EventArgs, T>::value, int> = 0>
 	void Register(const asITypeInfo& type)
 	{
-		auto data = std::make_unique<EventMetaData>(type, [](const EventMetaData& metaData, asIScriptContext* context) -> CASRefPtr<Event>
+		auto data = std::make_unique<EventMetaData>(type, [](const EventMetaData& metaData, asIScriptContext* context) -> ReferencePointer<Event>
 			{
-				return CASRefPtr<Event>(new TypedEvent<T>(metaData, context));
+				return ReferencePointer<Event>(new TypedEvent<T>(metaData, ReferencePointer<asIScriptContext>(context)));
 			});
 
 		m_ASTypeToData[&type] = data.get();

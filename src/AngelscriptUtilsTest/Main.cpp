@@ -24,8 +24,6 @@
 #include "AngelscriptUtils/util/ASLogging.h"
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/CASExtendAdapter.h"
-#include "AngelscriptUtils/util/CASRefPtr.h"
-#include "AngelscriptUtils/util/CASObjPtr.h"
 
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 #include "AngelscriptUtils/wrapper/CASContext.h"
@@ -43,6 +41,8 @@
 #include "AngelscriptUtils/event/EventArgs.h"
 #include "AngelscriptUtils/event/EventScriptAPI.h"
 #include "AngelscriptUtils/event/EventSystem.h"
+
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 namespace ModuleAccessMask
 {
@@ -166,7 +166,7 @@ public:
 
 		RegisterMyEvent(*manager.GetEngine());
 
-		m_EventSystem = std::make_unique<asutils::EventSystem>(m_EventRegistry, CASRefPtr<asIScriptContext>(manager.GetEngine()->RequestContext(), true));
+		m_EventSystem = std::make_unique<asutils::EventSystem>(m_EventRegistry, asutils::ReferencePointer<asIScriptContext>(manager.GetEngine()->RequestContext(), true));
 
 		manager.GetEngine()->RegisterGlobalProperty("EventSystem g_EventSystem", m_EventSystem.get());
 
@@ -358,7 +358,7 @@ int main( int, char*[] )
 
 				if( func.Call( CallFlag::NONE ) )
 				{
-					CASObjPtr ptr;
+					asutils::ObjectPointer ptr;
 
 					void* pThis;
 
@@ -366,7 +366,7 @@ int main( int, char*[] )
 					{
 						const int iTypeId = pFunction->GetReturnTypeId();
 
-						ptr.Set( pThis, manager.GetEngine()->GetTypeInfoById( iTypeId ) );
+						ptr.Reset(pThis, asutils::ReferencePointer<asITypeInfo>{manager.GetEngine()->GetTypeInfoById(iTypeId)});
 					}
 
 					if( ptr )
@@ -385,19 +385,19 @@ int main( int, char*[] )
 			{
 				{
 					//Test the smart pointer.
-					CASRefPtr<asIScriptFunction> func;
+					asutils::ReferencePointer<asIScriptFunction> func;
 
-					CASRefPtr<asIScriptFunction> func2( pFunction );
+					asutils::ReferencePointer<asIScriptFunction> func2( pFunction );
 
 					func = func2;
 
 					func = std::move( func2 );
 
-					CASRefPtr<asIScriptFunction> func3( func );
+					asutils::ReferencePointer<asIScriptFunction> func3( func );
 
-					CASRefPtr<asIScriptFunction> func4( std::move( func ) );
+					asutils::ReferencePointer<asIScriptFunction> func4( std::move( func ) );
 
-					func.Set( pFunction );
+					func.Reset( pFunction );
 
 					auto pPtr = func.Get();
 

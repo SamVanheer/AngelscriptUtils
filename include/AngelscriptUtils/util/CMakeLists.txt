@@ -7,8 +7,6 @@ target_sources(AngelscriptUtils
 		ContextUtils.h
 		CASBaseClass.h
 		CASExtendAdapter.h
-		CASRefPtr.h
-		CASObjPtr.h
 		IASExtendAdapter.h
 		StringUtils.h
 )

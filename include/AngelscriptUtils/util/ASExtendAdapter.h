@@ -8,7 +8,7 @@
 
 #include "ASUtil.h"
 
-#include "CASObjPtr.h"
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 class IASExtendAdapter;
 
@@ -66,7 +66,7 @@ CLASS* CreateExtensionClassInstance(
 
 	if( auto pInstance = as::CreateObjectInstance( engine, typeInfo ) )
 	{
-		auto* pCPPInstance = new CLASS( CASObjPtr( pInstance, &typeInfo, true ) );
+		auto* pCPPInstance = new CLASS(asutils::ObjectPointer(pInstance, asutils::ReferencePointer<asITypeInfo>(&typeInfo), true));
 
 		if( as::InitializeExtendClass( *pCPPInstance, pCPPInstance, pszCPPClassName, pszCPPBaseClassName ) )
 		{

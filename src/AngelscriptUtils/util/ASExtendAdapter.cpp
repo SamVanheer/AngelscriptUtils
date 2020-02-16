@@ -91,7 +91,7 @@ bool InitializeExtendClass( IASExtendAdapter& adapter, void* const pThis, const 
 	{
 		CASOwningContext ctx( *pFunction->GetEngine() );
 
-		CASMethod method( *pFunction, ctx, *obj );
+		CASMethod method( *pFunction, ctx, obj.Get() );
 
 		assert( method.IsValid() );
 
@@ -116,7 +116,7 @@ bool InitializeExtendClass( IASExtendAdapter& adapter, void* const pThis, const 
 		{
 			CASOwningContext ctx( *pFunction->GetEngine() );
 
-			CASMethod method( *pFunction, ctx, *obj );
+			CASMethod method( *pFunction, ctx, obj.Get() );
 
 			assert( method.IsValid() );
 

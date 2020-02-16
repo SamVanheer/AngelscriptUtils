@@ -2,7 +2,7 @@
 
 namespace asutils
 {
-EventSystem::EventSystem(EventRegistry& registry, const CASRefPtr<asIScriptContext>& context)
+EventSystem::EventSystem(EventRegistry& registry, const ReferencePointer<asIScriptContext>& context)
 	: m_Registry(registry)
 	, m_Context(context)
 {
@@ -37,7 +37,7 @@ Event& EventSystem::InternalGetEvent(EventMetaData* metaData)
 	}
 
 	//Create on demand
-	auto event = metaData->factory(*metaData, m_Context);
+	auto event = metaData->factory(*metaData, m_Context.Get());
 
 	auto result = m_Events.emplace(metaData, std::move(event));
 

@@ -6,6 +6,7 @@
 #include "AngelscriptUtils/util/ASLogging.h"
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 #include "AngelscriptUtils/wrapper/CASArguments.h"
@@ -34,7 +35,7 @@ void CASScheduler::CScheduledFunction::Remove( asIScriptEngine& engine )
 		m_pThis = nullptr;
 	}
 
-	as::SetRefPointer<asIScriptFunction>( m_pFunction, nullptr );
+	asutils::SetPointer<asIScriptFunction>(m_pFunction, nullptr);
 }
 
 CASScheduler::CScheduledFunction::~CScheduledFunction()

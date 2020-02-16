@@ -9,7 +9,7 @@
 
 namespace asutils
 {
-Event::Event(const EventMetaData& metaData, const CASRefPtr<asIScriptContext>& context)
+Event::Event(const EventMetaData& metaData, const ReferencePointer<asIScriptContext>& context)
 	: m_MetaData(metaData)
 	, m_Context(context)
 {

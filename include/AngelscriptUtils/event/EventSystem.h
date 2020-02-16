@@ -9,7 +9,7 @@
 #include "AngelscriptUtils/std_make_unique.h"
 #include "AngelscriptUtils/event/Event.h"
 #include "AngelscriptUtils/event/EventRegistry.h"
-#include "AngelscriptUtils/util/CASRefPtr.h"
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 namespace asutils
 {
@@ -19,7 +19,7 @@ namespace asutils
 class EventSystem final
 {
 public:
-	EventSystem(EventRegistry& registry, const CASRefPtr<asIScriptContext>& context);
+	EventSystem(EventRegistry& registry, const ReferencePointer<asIScriptContext>& context);
 	~EventSystem();
 
 	EventSystem(const EventSystem&) = delete;
@@ -73,8 +73,8 @@ private:
 private:
 	EventRegistry& m_Registry;
 
-	CASRefPtr<asIScriptContext> m_Context;
+	ReferencePointer<asIScriptContext> m_Context;
 
-	std::unordered_map<EventMetaData*, CASRefPtr<Event>> m_Events;
+	std::unordered_map<EventMetaData*, ReferencePointer<Event>> m_Events;
 };
 }

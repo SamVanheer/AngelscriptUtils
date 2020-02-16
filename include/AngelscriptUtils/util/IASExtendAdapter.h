@@ -1,7 +1,7 @@
 #ifndef ANGELSCRIPT_UTIL_IASEXTENDADAPTER_H
 #define ANGELSCRIPT_UTIL_IASEXTENDADAPTER_H
 
-#include "CASObjPtr.h"
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 /**
 *	@addtogroup ASExtend
@@ -20,12 +20,12 @@ public:
 	/**
 	*	@return The object pointer.
 	*/
-	virtual const CASObjPtr& GetObject() const = 0;
+	virtual const asutils::ObjectPointer& GetObject() const = 0;
 
 	/**
 	*	@copydoc GetObject() const
 	*/
-	virtual CASObjPtr GetObject() = 0;
+	virtual asutils::ObjectPointer GetObject() = 0;
 };
 
 inline IASExtendAdapter::~IASExtendAdapter()

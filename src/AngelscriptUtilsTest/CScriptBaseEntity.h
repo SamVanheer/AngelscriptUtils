@@ -14,7 +14,7 @@ public:
 	typedef CScriptBaseEntity ThisClass;
 
 public:
-	CScriptBaseEntity( CASObjPtr object )
+	CScriptBaseEntity(const asutils::ObjectPointer& object )
 		: CASExtendAdapter( object )
 	{
 	}

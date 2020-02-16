@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "AngelscriptUtils/util/CASBaseClass.h"
-#include "AngelscriptUtils/util/CASRefPtr.h"
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 #include "AngelscriptUtils/event/EventArgs.h"
 
@@ -20,7 +20,7 @@ struct EventMetaData;
 class Event : public CASRefCountedBaseClass
 {
 protected:
-	Event(const EventMetaData& metaData, const CASRefPtr<asIScriptContext>& context);
+	Event(const EventMetaData& metaData, const ReferencePointer<asIScriptContext>& context);
 
 public:
 	virtual ~Event();
@@ -69,9 +69,9 @@ private:
 	const EventMetaData& m_MetaData;
 
 	//TODO: could store a reference to the event system and allow the context to be swapped out there
-	CASRefPtr<asIScriptContext> m_Context;
+	ReferencePointer<asIScriptContext> m_Context;
 
-	std::vector<CASRefPtr<asIScriptFunction>> m_EventHandlers;
+	std::vector<ReferencePointer<asIScriptFunction>> m_EventHandlers;
 };
 
 /**
@@ -81,7 +81,7 @@ template<typename T>
 class TypedEvent : public Event
 {
 public:
-	TypedEvent(const EventMetaData& metaData, const CASRefPtr<asIScriptContext>& context)
+	TypedEvent(const EventMetaData& metaData, const ReferencePointer<asIScriptContext>& context)
 		: Event(metaData, context)
 	{
 	}
@@ -93,7 +93,7 @@ public:
 	void Dispatch(const T& args)
 	{
 		//Create a dynamically allocated instance so scripts won't retain a reference to the stack
-		CASRefPtr<T> object{new T(args)};
+		ReferencePointer<T> object{new T(args)};
 
 		Event::Dispatch(*object);
 	}

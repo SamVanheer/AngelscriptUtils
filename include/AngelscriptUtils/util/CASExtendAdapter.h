@@ -5,7 +5,7 @@
 
 #include "IASExtendAdapter.h"
 
-#include "CASObjPtr.h"
+#include "AngelscriptUtils/utility/SmartPointers.h"
 
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 
@@ -33,7 +33,7 @@ public:
 	*	Constructor.
 	*	@param object Script object that extends this object.
 	*/
-	CASExtendAdapter( CASObjPtr object )
+	CASExtendAdapter(const asutils::ObjectPointer& object )
 		: BASECLASS()
 		, m_Object( object )
 	{
@@ -47,7 +47,7 @@ public:
 	*	@tparam ARGS Argument types for the baseclass constructor.
 	*/
 	template<typename... ARGS>
-	CASExtendAdapter( CASObjPtr object, ARGS&&... args )
+	CASExtendAdapter(const asutils::ObjectPointer& object, ARGS&&... args )
 		: BASECLASS( std::move( args )... )
 		, m_Object( object )
 	{
@@ -57,7 +57,7 @@ public:
 	/**
 	*	@return The object instance.
 	*/
-	const CASObjPtr& GetObject() const override final
+	const asutils::ObjectPointer& GetObject() const override final
 	{
 		return m_Object;
 	}
@@ -65,13 +65,13 @@ public:
 	/**
 	*	@copydoc GetObject() const
 	*/
-	CASObjPtr GetObject() override final
+	asutils::ObjectPointer GetObject() override final
 	{
 		return m_Object;
 	}
 
 private:
-	CASObjPtr m_Object;
+	asutils::ObjectPointer m_Object;
 
 private:
 	//TODO: consider adding support for copying.

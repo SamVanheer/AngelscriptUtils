@@ -2,6 +2,7 @@
 #define ANGELSCRIPT_CASMODULEMANAGER_H
 
 #include <memory>
+#include <string>
 #include <utility>
 #include <unordered_map>
 #include <vector>
@@ -27,10 +28,6 @@ class IASModuleUserData;
 */
 class CASModuleManager final
 {
-private:
-	typedef std::unordered_map<const char*, std::unique_ptr<CASModuleDescriptor>, as::Hash_C_String<const char*>, as::EqualTo_C_String<const char*>> Descriptors_t;
-	typedef std::vector<CASModule*> Modules_t;
-
 public:
 	/**
 	*	Constructor.
@@ -155,11 +152,11 @@ public:
 private:
 	asIScriptEngine& m_Engine;
 
-	Descriptors_t m_Descriptors;
+	std::unordered_map<std::string, std::unique_ptr<CASModuleDescriptor>> m_Descriptors;
 
 	as::DescriptorID_t m_NextDescriptorID = as::FIRST_DESCRIPTOR_ID;
 
-	Modules_t m_Modules;
+	std::vector<CASModule*> m_Modules;
 
 private:
 	CASModuleManager( const CASModuleManager& ) = delete;

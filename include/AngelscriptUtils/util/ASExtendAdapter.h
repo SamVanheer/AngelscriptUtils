@@ -6,9 +6,8 @@
 
 #include <angelscript.h>
 
-#include "ASUtil.h"
-
 #include "AngelscriptUtils/utility/SmartPointers.h"
+#include "AngelscriptUtils/utility/TypeStringUtils.h"
 
 class IASExtendAdapter;
 
@@ -97,7 +96,7 @@ CLASS* CreateExtensionClassInstance(
 
 	const std::string szOldNS = module.GetDefaultNamespace();
 
-	const std::string szNS = as::ExtractNameFromName( pszClassName );
+	const std::string szNS = asutils::ExtractNameFromName( pszClassName );
 
 	module.SetDefaultNamespace( szNS.c_str() );
 

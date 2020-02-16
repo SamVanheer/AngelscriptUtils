@@ -1,3 +1,4 @@
 target_sources(AngelscriptUtils
 	PRIVATE
-		TypeInfo.cpp)
+		TypeInfo.cpp
+		TypeStringUtils.cpp)

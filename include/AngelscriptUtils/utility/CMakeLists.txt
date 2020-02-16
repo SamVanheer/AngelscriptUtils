@@ -3,4 +3,5 @@ target_sources(AngelscriptUtils
 		ContextUtils.h
 		RegistrationUtils.h
 		SmartPointers.h
-		TypeInfo.h)
+		TypeInfo.h
+		TypeStringUtils.h)

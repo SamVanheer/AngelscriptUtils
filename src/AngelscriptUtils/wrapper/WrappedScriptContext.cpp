@@ -2,6 +2,7 @@
 
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/utility/ContextUtils.h"
+#include "AngelscriptUtils/utility/TypeStringUtils.h"
 #include "AngelscriptUtils/wrapper/WrappedScriptContext.h"
 
 namespace asutils
@@ -12,7 +13,7 @@ int LoggingScriptContext::Execute()
 
 	if (result != asEXECUTION_FINISHED)
 	{
-		const auto szFunctionName = as::FormatFunctionName(*m_Context.GetFunction());
+		const auto szFunctionName = FormatFunctionName(*m_Context.GetFunction());
 
 		switch (result)
 		{
@@ -46,7 +47,7 @@ int LoggingScriptContext::Execute()
 
 		case asEXECUTION_EXCEPTION:
 		{
-			const auto szExceptionFunction = as::FormatFunctionName(*m_Context.GetExceptionFunction());
+			const auto szExceptionFunction = FormatFunctionName(*m_Context.GetExceptionFunction());
 
 			asutils::LocationInfo info;
 
@@ -97,7 +98,7 @@ void LoggingScriptContext::LogCurrentFunction(const char* const action)
 
 	if (currentFunction)
 	{
-		const auto functionName = as::FormatFunctionName(*currentFunction);
+		const auto functionName = FormatFunctionName(*currentFunction);
 
 		m_Logger->error("{} while in function \"{}\" at line {}, column {} in section \"{}\"", action, functionName, info.line, info.column, info.section);
 	}

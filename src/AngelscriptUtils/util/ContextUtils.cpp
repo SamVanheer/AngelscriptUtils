@@ -9,6 +9,7 @@
 
 #include "AngelscriptUtils/util/ContextUtils.h"
 #include "AngelscriptUtils/utility/TypeInfo.h"
+#include "AngelscriptUtils/utility/TypeStringUtils.h"
 
 namespace ctx
 {
@@ -18,7 +19,7 @@ bool SetArguments( const asIScriptFunction& targetFunc, asIScriptContext& contex
 
 	if( uiArgCount != arguments.GetArgumentCount() )
 	{
-		const auto szFunctionName = as::FormatFunctionName( targetFunc );
+		const auto szFunctionName = asutils::FormatFunctionName( targetFunc );
 
 		as::log->critical( "ctx::SetArguments: argument count for function '{}' is incorrect: expected {}, got {}!",
 						   szFunctionName, uiArgCount, arguments.GetArgumentCount() );
@@ -262,7 +263,7 @@ bool SetContextArgument( asIScriptEngine& engine, const asIScriptFunction& targe
 					if( iTypeId != iSourceTypeId )
 					{
 						as::log->critical( "ctx::SetContextArgument: Attempted to set primitive value of type '{}' to value of type '{}', aborting!",
-										 as::PrimitiveTypeIdToString( iTypeId ), as::PrimitiveTypeIdToString( iSourceTypeId ) );
+										 asutils::PrimitiveTypeIdToString( iTypeId ), asutils::PrimitiveTypeIdToString( iSourceTypeId ) );
 						bSuccess = false;
 					}
 				}

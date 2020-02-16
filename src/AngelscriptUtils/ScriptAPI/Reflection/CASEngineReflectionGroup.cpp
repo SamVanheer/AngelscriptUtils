@@ -1,6 +1,6 @@
 #include <cassert>
 
-#include "AngelscriptUtils/util/ASUtil.h"
+#include "AngelscriptUtils/utility/TypeStringUtils.h"
 
 #include "AngelscriptUtils/ScriptAPI/Reflection/CASEngineReflectionGroup.h"
 
@@ -14,7 +14,7 @@ asIScriptFunction* CASEngineReflectionGroup::FindGlobalFunction( const std::stri
 	{
 		const std::string szOldNS = m_pEngine->GetDefaultNamespace();
 
-		const std::string szNS = as::ExtractNamespaceFromDecl( szName );
+		const std::string szNS = asutils::ExtractNamespaceFromDecl( szName );
 
 		m_pEngine->SetDefaultNamespace( szNS.c_str() );
 
@@ -24,8 +24,8 @@ asIScriptFunction* CASEngineReflectionGroup::FindGlobalFunction( const std::stri
 	}
 	else
 	{
-		const std::string szNS = as::ExtractNamespaceFromName( szName );
-		const std::string szActualName = as::ExtractNameFromName( szName );
+		const std::string szNS = asutils::ExtractNamespaceFromName( szName );
+		const std::string szActualName = asutils::ExtractNameFromName( szName );
 
 		const asUINT uiCount = m_pEngine->GetGlobalFunctionCount();
 
@@ -77,7 +77,7 @@ asITypeInfo* CASEngineReflectionGroup::FindTypeInfo( const std::string& szName, 
 
 	if( bSearchByDecl )
 	{
-		const std::string szNS = as::ExtractNamespaceFromDecl( szName, false );
+		const std::string szNS = asutils::ExtractNamespaceFromDecl( szName, false );
 
 		m_pEngine->SetDefaultNamespace( szNS.c_str() );
 
@@ -85,8 +85,8 @@ asITypeInfo* CASEngineReflectionGroup::FindTypeInfo( const std::string& szName, 
 	}
 	else
 	{
-		const std::string szNS = as::ExtractNamespaceFromName( szName );
-		const std::string szActualName = as::ExtractNameFromName( szName );
+		const std::string szNS = asutils::ExtractNamespaceFromName( szName );
+		const std::string szActualName = asutils::ExtractNameFromName( szName );
 
 		m_pEngine->SetDefaultNamespace( szNS.c_str() );
 

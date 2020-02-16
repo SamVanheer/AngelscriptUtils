@@ -7,6 +7,7 @@
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
+#include "AngelscriptUtils/utility/TypeStringUtils.h"
 
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 #include "AngelscriptUtils/wrapper/CASArguments.h"
@@ -346,7 +347,7 @@ void CASScheduler::Think( const float flCurrentTime )
 
 					if( !bSuccess )
 					{
-						const auto szFunctionName = as::FormatFunctionName( *pFunction );
+						const auto szFunctionName = asutils::FormatFunctionName( *pFunction );
 						as::log->critical( "Error: CScheduler::Think: execution of function {} failed!\n", 
 										   szFunctionName );
 					}

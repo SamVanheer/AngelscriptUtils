@@ -13,6 +13,7 @@
 #include "AngelscriptUtils/wrapper/CASArguments.h"
 
 #include "AngelscriptUtils/util/ContextUtils.h"
+#include "AngelscriptUtils/utility/TypeStringUtils.h"
 
 #include "ASLogging.h"
 
@@ -26,58 +27,6 @@
 
 namespace as
 {
-/**
-*	Returns a string representation of a primitive type id.
-*	@param iTypeId Type Id.
-*	@return String representation, or null if the type id is not a primitive type.
-*/
-const char* PrimitiveTypeIdToString( const int iTypeId );
-
-/**
-*	Formats a function name and returns it.
-*	The format for global functions is \<namespace>::\<name>.
-*	The format for member functions is \<namespace>::\<classname>::\<name>.
-*	@param function Function whose name should be formatted
-*	@return Formatted function name
-*/
-inline std::string FormatFunctionName( const asIScriptFunction& function )
-{
-	const asIScriptFunction* pFunction = &function;
-
-	{
-		//If this is a delegate, get the original function.
-		auto pDelegate = pFunction->GetDelegateFunction();
-
-		if( pDelegate )
-			pFunction = pDelegate;
-	}
-
-	auto pszNamespace = pFunction->GetNamespace();
-	auto pszObjName = pFunction->GetObjectName();
-	auto pszName = pFunction->GetName();
-
-	const char szNSSep[] = "::";
-
-	std::string szName;
-
-	//Can copy up to a certain amount of the namespace name.
-	if( pszNamespace && *pszNamespace )
-	{
-		szName += pszNamespace;
-		szName += szNSSep;
-	}
-
-	if( pszObjName )
-	{
-		szName += pszObjName;
-		szName += szNSSep;
-	}
-
-	szName += pszName;
-
-	return szName;
-}
-
 /**
 *	Releases a vararg argument.
 *	@param engine Script engine.
@@ -146,22 +95,6 @@ void SetAny( ANY& any, void* pObject, int iTypeId )
 
 	any.Store( pObject, iTypeId );
 }
-
-/**
-*	Converts a primitive type to its string representation
-*	@param pObject pointer to primitive value
-*	@param iTypeId Type Id
-*/
-std::string PODToString( const void* pObject, const int iTypeId );
-
-/**
-*	Printf function used by script functions
-*	@param pszFormat Format string
-*	@param uiFirstParamIndex Index of the first parameter to use
-*	@param arguments Generic arguments instance
-*	@return Formatted string
-*/
-std::string SPrintf( const char* pszFormat, size_t uiFirstParamIndex, asIScriptGeneric& arguments );
 
 /**
 *	Registers a varargs function.
@@ -445,7 +378,7 @@ inline asIScriptFunction* FindFunction(
 
 			if( pFunction->GetParam( uiParamIndex, &iTypeId, &uiFlags ) < 0 )
 			{
-				const auto szCandidateFuncName = as::FormatFunctionName( *pFunction );
+				const auto szCandidateFuncName = asutils::FormatFunctionName( *pFunction );
 				as::log->critical( "as::FindFunction: Failed to retrieve parameter {} for function {}!", uiParamIndex, szCandidateFuncName );
 				break;
 			}
@@ -543,120 +476,6 @@ inline bool SetGlobalByDecl( asIScriptModule& module, const char* const pszDecl,
 	}
 
 	return false;
-}
-
-/**
-*	Creates a function signature that can be called with the given arguments.
-*	@param engine Script engine.
-*	@param function Stream that will receive the signature.
-*	@param pszReturnType Return type.
-*	@param pszFunctionName Function name.
-*	@param args Argument list.
-*	@param uiStartIndex First argument in the generic call instance to check.
-*	@param arguments Generic call instance whose arguments will be used for type information.
-*	@return true on success, false otherwise.
-*/
-bool CreateFunctionSignature(
-	asIScriptEngine& engine,
-	std::stringstream& function, const char* const pszReturnType, const char* const pszFunctionName,
-	const CASArguments& args,
-	const asUINT uiStartIndex, asIScriptGeneric& arguments );
-
-/**
-*	Extracts a namespace from a name.
-*	Namespaces are denoted by double colons. For example, "String::EMPTY_STRING"
-*	@param szName Name.
-*	@return If a namespace is contained in the name, returns a string containing that namespace. Otherwise, returns an empty string.
-*/
-inline std::string ExtractNamespaceFromName( const std::string& szName )
-{
-	if( szName.empty() )
-		return "";
-
-	size_t uiIndex = szName.rfind( "::" );
-
-	if( uiIndex == std::string::npos )
-		return "";
-
-	return szName.substr( 0, uiIndex );
-}
-
-/**
-*	Extracts a name from a name that may contain a namespace.
-*	Namespaces are denoted by double colons. For example, "String::EMPTY_STRING"
-*	@param szName Name.
-*	@return If a name is contained in the name, returns a string containing that name. Otherwise, returns an empty string.
-*/
-inline std::string ExtractNameFromName( const std::string& szName )
-{
-	if( szName.empty() )
-		return "";
-
-	size_t uiIndex = szName.rfind( "::" );
-
-	if( uiIndex == std::string::npos )
-		return szName;
-
-	return szName.substr( uiIndex + 2 );
-}
-
-/**
-*	Extracts a namespace from a declaration.
-*	Namespaces are denoted by double colons. For example, "void String::Compare(const string& in lhs, const string& in rhs)"
-*	@param szDecl Name.
-*	@param bIsFunctionDecl Whether this is a function or a class declaration.
-*	@return If a namespace is contained in the declaration, returns a string containing that namespace. Otherwise, returns an empty string.
-*/
-inline std::string ExtractNamespaceFromDecl( const std::string& szDecl, const bool bIsFunctionDecl = true )
-{
-	if( szDecl.empty() )
-		return "";
-
-	size_t uiStart;
-
-	bool bFoundWhitespace = false;
-
-	for( uiStart = 0; uiStart < szDecl.length(); ++uiStart )
-	{
-		if( !bFoundWhitespace )
-		{
-			if( isspace( szDecl[ uiStart ] ) )
-			{
-				bFoundWhitespace = true;
-			}
-		}
-		else
-		{
-			if( !isspace( szDecl[ uiStart ] ) )
-			{
-				break;
-			}
-		}
-	}
-
-	if( uiStart >= szDecl.length() )
-		return "";
-
-	size_t uiEnd;
-	
-	if( bIsFunctionDecl )
-	{
-		uiEnd = szDecl.find( '(', uiStart + 1 );
-
-		if( uiEnd == std::string::npos )
-			return "";
-	}
-	else
-	{
-		uiEnd = std::string::npos;
-	}
-
-	size_t uiNSEnd = szDecl.rfind( "::", uiEnd );
-
-	if( uiNSEnd == std::string::npos || uiNSEnd <= uiStart )
-		return "";
-
-	return szDecl.substr( uiStart, uiNSEnd - uiStart );
 }
 }
 

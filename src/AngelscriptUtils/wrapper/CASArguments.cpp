@@ -8,6 +8,7 @@
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
 #include "AngelscriptUtils/utility/TypeInfo.h"
+#include "AngelscriptUtils/utility/TypeStringUtils.h"
 
 #include "AngelscriptUtils/wrapper/CASArguments.h"
 
@@ -298,7 +299,7 @@ bool CASArguments::SetArguments( asIScriptFunction& targetFunc, va_list list )
 		}
 		else
 		{
-			const auto szFunctionName = as::FormatFunctionName( targetFunc );
+			const auto szFunctionName = asutils::FormatFunctionName( targetFunc );
 
 			as::log->critical( "CASArguments::SetArguments(va_list): Function '{}': failed to set argument {}, aborting!",
 							   szFunctionName, uiIndex );

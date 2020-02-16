@@ -807,54 +807,6 @@ inline std::string ExtractNamespaceFromDecl( const std::string& szDecl, const bo
 
 	return szDecl.substr( uiStart, uiNSEnd - uiStart );
 }
-
-/**
-*	Contains caller info.
-*	@see GetCallerInfo
-*/
-struct CASCallerInfo
-{
-	const char* pszSection = nullptr;
-	int iLine = 0;
-	int iColumn = 0;
-};
-
-/**
-*	Gets information about the calling script.
-*	@param[ out ] pszSection Name of the section, or "Unknown" if it couldn't be retrieved.
-*	@param[ out ] iLine Line number, or 0 if it couldn't be retrieved.
-*	@param[ out ] iColumn Column, or 0 if it couldn't be retrieved.
-*	@param pContext Optional. Context to retrieve the info from. If null, calls asGetActiveContext.
-*	@return Whether the context was valid.
-*/
-inline bool GetCallerInfo( const char*& pszSection, int& iLine, int& iColumn, asIScriptContext* pContext = nullptr )
-{
-	if( !pContext )
-		pContext = asGetActiveContext();
-
-	pszSection = nullptr;
-	iColumn = 0;
-	iLine = 0;
-
-	if( pContext )
-		iLine = pContext->GetLineNumber( 0, &iColumn, &pszSection );
-
-	if( !pszSection )
-		pszSection = "Unknown";
-
-	return pContext != nullptr;
-}
-
-/**
-*	Gets information about the calling script.
-*	@param[ out ] info Caller info.
-*	@param pContext Optional. Context to retrieve the info from. If null, calls asGetActiveContext.
-*	@return Whether the context was valid.
-*/
-inline bool GetCallerInfo( CASCallerInfo& info, asIScriptContext* pContext = nullptr )
-{
-	return GetCallerInfo( info.pszSection, info.iLine, info.iColumn, pContext );
-}
 }
 
 /** @} */

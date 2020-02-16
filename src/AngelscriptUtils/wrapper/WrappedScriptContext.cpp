@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "AngelscriptUtils/util/ASUtil.h"
+#include "AngelscriptUtils/utility/ContextUtils.h"
 #include "AngelscriptUtils/wrapper/WrappedScriptContext.h"
 
 namespace asutils
@@ -47,19 +48,13 @@ int LoggingScriptContext::Execute()
 		{
 			const auto szExceptionFunction = as::FormatFunctionName(*m_Context.GetExceptionFunction());
 
-			int iColumn = 0;
-			const char* pszSection = nullptr;
+			asutils::LocationInfo info;
 
-			const int iLineNumber = m_Context.GetExceptionLineNumber(&iColumn, &pszSection);
-
-			if (pszSection == nullptr)
-			{
-				pszSection = "Unknown section";
-			}
+			asutils::GetExceptionInfo(m_Context, info);
 
 			m_Logger->warn(
 				"Exception occurred while executing function \"{}\"\nFunction \"{}\" at line {}, column {} in section \"{}\":\n{}",
-				szFunctionName, szExceptionFunction, iLineNumber, iColumn, pszSection, m_Context.GetExceptionString()
+				szFunctionName, szExceptionFunction, info.line, info.column, info.section, m_Context.GetExceptionString()
 			);
 
 			break;
@@ -94,9 +89,9 @@ void LoggingScriptContext::LogCurrentFunction(const char* const action)
 	assert(action);
 	assert(*action);
 
-	as::CASCallerInfo info;
+	asutils::LocationInfo info;
 
-	as::GetCallerInfo(info, &m_Context);
+	asutils::GetCallerInfo(m_Context, info);
 
 	auto currentFunction = m_Context.GetFunction(m_Context.GetCallstackSize() - 1);
 
@@ -104,7 +99,7 @@ void LoggingScriptContext::LogCurrentFunction(const char* const action)
 	{
 		const auto functionName = as::FormatFunctionName(*currentFunction);
 
-		m_Logger->error("{} while in function \"{}\" at line {}, column {} in section \"{}\"", action, functionName, info.iLine, info.iColumn, info.pszSection);
+		m_Logger->error("{} while in function \"{}\" at line {}, column {} in section \"{}\"", action, functionName, info.line, info.column, info.section);
 	}
 	else
 	{

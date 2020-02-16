@@ -6,6 +6,7 @@
 #include "AngelscriptUtils/util/ASLogging.h"
 #include "AngelscriptUtils/util/ASUtil.h"
 #include "AngelscriptUtils/util/ContextUtils.h"
+#include "AngelscriptUtils/utility/RegistrationUtils.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
 #include "AngelscriptUtils/utility/TypeStringUtils.h"
 
@@ -487,13 +488,13 @@ void RegisterScriptScheduler( asIScriptEngine* pEngine )
 	*	SetTimeout variants
 	*/
 
-	as::RegisterVarArgsMethod(
+	asutils::RegisterVariadicMethod(
 		*pEngine, pszObjectName, 
 		"CScheduledFunction@", "SetTimeout", "const string& in szFunction, float flDelay",
 		0, 8, 
 		asFUNCTION( CASScheduler::SetTimeoutHandler ) );
 
-	as::RegisterVarArgsMethod(
+	asutils::RegisterVariadicMethod(
 		*pEngine, pszObjectName, 
 		"CScheduledFunction@",  "SetTimeout", "?& in thisObject, const string& in szFunction, float flDelay",
 		0, 8,
@@ -503,7 +504,7 @@ void RegisterScriptScheduler( asIScriptEngine* pEngine )
 	*	SetInterval variants
 	*/
 
-	as::RegisterVarArgsMethod(
+	asutils::RegisterVariadicMethod(
 		*pEngine, pszObjectName,
 		"CScheduledFunction@", "SetInterval", "const string& in szFunction, float flRepeatTime, int iRepeatCount",
 		0, 8, asFUNCTION( CASScheduler::SetIntervalHandler ) );
@@ -512,7 +513,7 @@ void RegisterScriptScheduler( asIScriptEngine* pEngine )
 		pszObjectName, "CScheduledFunction@ SetInterval(const string& in szFunction, float flRepeatTime)",
 		asFUNCTION( CASScheduler::SetInterval_NoArgs ), asCALL_GENERIC );
 
-	as::RegisterVarArgsMethod(
+	asutils::RegisterVariadicMethod(
 		*pEngine, pszObjectName,
 		"CScheduledFunction@", "SetInterval", "?& in thisObject, const string& in szFunction, float flRepeatTime, int iRepeatCount",
 		0, 8,

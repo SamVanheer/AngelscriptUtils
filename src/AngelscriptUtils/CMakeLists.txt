@@ -18,6 +18,11 @@ configure_file(
 
 add_library(AngelscriptUtils STATIC)
 
+set_target_properties(AngelscriptUtils
+	PROPERTIES
+		CXX_STANDARD 17
+		CXX_STANDARD_REQUIRED ON)
+
 set_target_properties(AngelscriptUtils PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 
 target_include_directories(AngelscriptUtils PUBLIC

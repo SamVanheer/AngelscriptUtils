@@ -176,10 +176,11 @@ T* SetPointer(T*& destination, T* source, bool transferOwnership = false)
 *   @param destination Pointer to set
 *   @param source Pointer to object to set destination to
 *   @param typeInfo Type info object of the underlying object
+*   @param dereferenceIfHandle If true and the type is a handle type, dereferences the pointer
 *   @param transferOwnership If true, ownership of the source reference is transferred to the destination reference
 *   @return Pointer to the new destination
 */
-inline void* SetPointer(void*& destination, void* source, const asITypeInfo& typeInfo, bool transferOwnership = false)
+inline void* SetPointer(void*& destination, void* source, const asITypeInfo& typeInfo, bool dereferenceIfHandle, bool transferOwnership)
 {
     //Add reference to object before releasing old in case both are the same object
     auto oldDestination = destination;
@@ -190,7 +191,20 @@ inline void* SetPointer(void*& destination, void* source, const asITypeInfo& typ
 
     if (destination && !transferOwnership)
     {
-        engine.AddRefScriptObject(destination, &typeInfo);
+        if (typeInfo.GetFlags() & asOBJ_REF)
+        {
+            //Always addref to avoid making tons of copies of objects
+            if (dereferenceIfHandle && (typeInfo.GetTypeId() & asTYPEID_OBJHANDLE))
+            {
+                destination = *reinterpret_cast<void**>(destination);
+            }
+
+            engine.AddRefScriptObject(destination, &typeInfo);
+        }
+        else
+        {
+            destination = engine.CreateScriptObjectCopy(destination, &typeInfo);
+        }
     }
 
     if (oldDestination)
@@ -348,7 +362,7 @@ public:
     */
     ObjectPointer(const ObjectPointer& other)
     {
-        Reset(other.m_Object, other.m_Type, false);
+        InternalReset(other.m_Object, other.m_Type, false, false);
     }
 
     /**
@@ -356,7 +370,7 @@ public:
     */
     ObjectPointer(ObjectPointer&& other)
     {
-        Reset(other.m_Object, other.m_Type, true);
+        InternalReset(other.m_Object, other.m_Type, false, true);
         other.m_Object = nullptr;
         other.m_Type.Reset();
     }
@@ -373,7 +387,7 @@ public:
     {
         if (this != &other)
         {
-            Reset(other.m_Object, other.m_Type, false);
+            InternalReset(other.m_Object, other.m_Type, false, false);
         }
 
         return *this;
@@ -386,7 +400,7 @@ public:
     {
         if (this != &other)
         {
-            Reset(other.m_Object, other.m_Type, true);
+            InternalReset(other.m_Object, other.m_Type, false, true);
             other.m_Object = nullptr;
             other.m_Type.Reset();
         }
@@ -413,6 +427,24 @@ public:
     */
     void Reset(void* object, const ReferencePointer<asITypeInfo>& type, bool transferOwnership = false)
     {
+        InternalReset(object, type, true, transferOwnership);
+    }
+
+    void Swap(ObjectPointer& other)
+    {
+        std::swap(m_Object, other.m_Object);
+        m_Type.Swap(other.m_Type);
+    }
+
+    void* Get() const { return m_Object; }
+
+    const ReferencePointer<asITypeInfo>& GetTypeInfo() const { return m_Type; }
+
+    explicit operator bool() const { return m_Object != nullptr; }
+
+private:
+    void InternalReset(void* object, const ReferencePointer<asITypeInfo>& type, bool dereferenceIfHandle, bool transferOwnership)
+    {
         if (((object != nullptr) && !type))
         {
             throw std::invalid_argument("The type must be valid if object is non-null");
@@ -427,7 +459,7 @@ public:
 
             if (object)
             {
-                SetPointer(m_Object, object, *type, transferOwnership);
+                SetPointer(m_Object, object, *type, dereferenceIfHandle, transferOwnership);
 
                 m_Type = type;
             }
@@ -443,18 +475,6 @@ public:
             }
         }
     }
-
-    void Swap(ObjectPointer& other)
-    {
-        std::swap(m_Object, other.m_Object);
-        m_Type.Swap(other.m_Type);
-    }
-
-    void* Get() const { return m_Object; }
-
-    const ReferencePointer<asITypeInfo>& GetTypeInfo() const { return m_Type; }
-
-    explicit operator bool() const { return m_Object != nullptr; }
 
 private:
     void* m_Object = nullptr;

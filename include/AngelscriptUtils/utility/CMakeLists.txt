@@ -6,4 +6,5 @@ target_sources(AngelscriptUtils
 		RegistrationUtils.h
 		SmartPointers.h
 		TypeInfo.h
-		TypeStringUtils.h)
+		TypeStringUtils.h
+		Variant.h)

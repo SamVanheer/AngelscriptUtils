@@ -103,4 +103,6 @@ bool CreateFunctionSignature(
 	std::stringstream& function, const std::string& returnType, const std::string& functionName,
 	const CASArguments& args,
 	const asUINT startIndex, asIScriptGeneric& arguments);
+
+std::string FormatObjectTypeName(const std::string& scriptNamespace, const std::string& scriptName);
 }

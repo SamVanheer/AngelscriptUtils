@@ -338,4 +338,14 @@ bool CreateFunctionSignature(
 
 	return true;
 }
+
+std::string FormatObjectTypeName(const std::string& scriptNamespace, const std::string& scriptName)
+{
+	if (scriptNamespace.empty())
+	{
+		return scriptName;
+	}
+
+	return scriptNamespace + "::" + scriptName;
+}
 }

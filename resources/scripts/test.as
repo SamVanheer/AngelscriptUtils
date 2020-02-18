@@ -249,3 +249,12 @@ void DoNullPointerException2()
 {
 	Naaa::NullAccess().TryAccess();
 }
+
+void TemplatedCallTest(int& out foo, int enumValue, MyEvent@ event, const string& in text)
+{
+	foo = 20;
+	
+	event.ShouldHide = true;
+	
+	Print("Value of foo is: " + formatInt(foo) + ", Text is: " + text + "\n");
+}

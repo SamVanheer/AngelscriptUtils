@@ -26,6 +26,7 @@
 
 #include "AngelscriptUtils/utility/Objects.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
+#include "AngelscriptUtils/utility/Variant.h"
 
 #include "AngelscriptUtils/wrapper/ASCallable.h"
 #include "AngelscriptUtils/wrapper/CASContext.h"
@@ -43,6 +44,12 @@
 #include "AngelscriptUtils/event/EventArgs.h"
 #include "AngelscriptUtils/event/EventScriptAPI.h"
 #include "AngelscriptUtils/event/EventSystem.h"
+
+#include "AngelscriptUtils/execution/Metadata.h"
+#include "AngelscriptUtils/execution/Execution.h"
+#include "AngelscriptUtils/execution/Packing.h"
+
+DEFINE_OBJECT_TYPE_SIMPLE(std::string, string, asOBJ_VALUE | asGetTypeTraits<std::string>())
 
 namespace ModuleAccessMask
 {
@@ -128,6 +135,15 @@ public:
 private:
 	bool m_ShouldHide = false;
 };
+
+DEFINE_OBJECT_TYPE_SIMPLE(MyEvent, MyEvent, asOBJ_REF | asGetTypeTraits<MyEvent>())
+
+enum class EnumType
+{
+	Value = 1
+};
+
+DEFINE_ENUM_TYPE_SIMPLE(EnumType, EnumType)
 
 void RegisterMyEvent(asIScriptEngine& engine)
 {
@@ -286,6 +302,26 @@ public:
 	}
 };
 
+struct CallHelper final
+{
+public:
+	CallHelper(asIScriptFunction& function, asIScriptContext& context)
+		: function(function)
+		, context(context)
+	{
+	}
+
+	template<typename... PARAMS>
+	void Call(PARAMS&&... params)
+	{
+		asutils::Call(function, context, std::forward<PARAMS>(params)...);
+	}
+
+private:
+	asIScriptFunction& function;
+	asIScriptContext& context;
+};
+
 int main( int, char*[] )
 {
 	{
@@ -309,6 +345,10 @@ int main( int, char*[] )
 	{
 		auto pEngine = manager.GetEngine();
 
+		asutils::Variant variant(10);
+
+		variant.Reset(10);
+
 		registry.Register<MyEvent>(*pEngine->GetTypeInfoByName("MyEvent"));
 
 		//Create the declaration used for script entity base classes.
@@ -331,17 +371,33 @@ int main( int, char*[] )
 
 		if( pModule )
 		{
+			auto pContext = pEngine->RequestContext();
+
 			auto& eventSystem = initializer.GetEventSystem();
+
+			if (auto pFunction = pModule->GetModule()->GetFunctionByName("TemplatedCallTest"))
+			{
+				auto parameters = asutils::CreateNativeParameterList(10, EnumType::Value, new MyEvent(), std::string{"Packed parameters"});
+
+				asutils::Call(*pFunction, parameters, *pContext);
+
+				int output = 10;
+				auto event = new MyEvent();
+				event->AddRef();
+				asutils::Call(*pFunction, *pContext, output, EnumType::Value, event, std::string{"Test string"});
+
+				std::cout << "C++ value of foo is " << output << std::endl;
+			}
 
 			//Call the main function.
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "main" ) )
 			{
 				std::string szString = "Hello World!\n";
 
-				//Note: main takes a const string& in, so pass the address here. References are handled as pointers.
-				as::Call( pFunction, &szString );
+				//Note: main takes a const string& in. We can pass by pointer or by reference, either will work the same way
+				//Constructing the string in the parameter list itself also works
+				asutils::Call( *pFunction, *pContext, &szString );
 
-				//TODO: implement the ability to stop events by setting a Handled property to true
 				MyEvent event;
 
 				eventSystem.GetEvent<MyEvent>().Dispatch(event);
@@ -404,54 +460,36 @@ int main( int, char*[] )
 					std::cout << "Smart pointer points to: 0x" << std::hex << reinterpret_cast<intptr_t>( pPtr ) << std::dec << std::endl;
 				}
 
-				//Regular varargs.
-				as::Call( pFunction );
-				//Argument list.
-				as::CallArgs( pFunction, CASArguments() );
+				//Regular variadic templates
+				asutils::Call(*pFunction, *pContext);
 
-				struct Helper final
-				{
-				public:
-					Helper( asIScriptFunction* pFunction )
-						: pFunction( pFunction )
-					{
-					}
+				//Argument list
+				auto parameterList = asutils::CreateNativeParameterList();
+				asutils::Call(*pFunction, parameterList, *pContext);
 
-					void Call( CallFlags_t flags, ... )
-					{
-						va_list list;
-
-						va_start( list, flags );
-
-						as::VCall( flags, pFunction, list );
-
-						va_end( list );
-					}
-
-				private:
-					asIScriptFunction* pFunction;
-				};
-
-				//va_list version.
-				Helper helper( pFunction );
-				helper.Call( CallFlag::NONE );
+				//Wrapper version
+				CallHelper helper(*pFunction, *pContext);
+				helper.Call();
 			}
 
 			//Call a function that triggers a null pointer exception.
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "DoNullPointerException" ) )
 			{
 				std::cout << "Triggering null pointer exception" << std::endl;
-				as::Call( pFunction );
+				asutils::Call( *pFunction, *pContext );
 			}
 
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "DoNullPointerException2" ) )
 			{
 				std::cout << "Triggering null pointer exception in object member function" << std::endl;
-				as::Call( pFunction );
+				asutils::Call(*pFunction, *pContext);
 			}
 
-			//Test the scheduler.
-			pModule->GetScheduler()->Think( 10 );
+			{
+				CASOwningContext context(*pEngine);
+				//Test the scheduler.
+				pModule->GetScheduler().Think(10, *context.GetContext());
+			}
 
 			//Get the parameter types. Angelscript's type info support isn't complete yet, so not all types have an asITypeInfo instance yet.
 			/*
@@ -516,6 +554,8 @@ int main( int, char*[] )
 			}
 
 			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
+
+			pEngine->ReturnContext(pContext);
 
 			eventSystem.RemoveHandlersOfModule(*pModule->GetModule());
 

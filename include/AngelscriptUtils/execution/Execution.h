@@ -8,6 +8,7 @@
 #include "AngelscriptUtils/execution/Metadata.h"
 #include "AngelscriptUtils/execution/Packing.h"
 #include "AngelscriptUtils/execution/Parameters.h"
+#include "AngelscriptUtils/execution/RequestContext.h"
 
 #include "AngelscriptUtils/utility/SmartPointers.h"
 #include "AngelscriptUtils/utility/TypeInfo.h"
@@ -390,6 +391,14 @@ class FunctionExecutor final
 public:
 	FunctionExecutor(asIScriptContext& context)
 		: m_Context(context)
+	{
+	}
+
+	/**
+	*	@brief Creates an executor that uses the context owned by the given request context
+	*/
+	FunctionExecutor(RequestContext& requestContext)
+		: m_Context(requestContext.GetContext())
 	{
 	}
 

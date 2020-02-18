@@ -483,11 +483,8 @@ int main( int, char*[] )
 				asutils::NativeCall(*pFunction, *pContext);
 			}
 
-			{
-				CASOwningContext context(*pEngine);
-				//Test the scheduler.
-				pModule->GetScheduler().Think(10, *context.GetContext());
-			}
+			//Test the scheduler.
+			pModule->GetScheduler().Think(10, *pContext);
 
 			//Get the parameter types. Angelscript's type info support isn't complete yet, so not all types have an asITypeInfo instance yet.
 			/*

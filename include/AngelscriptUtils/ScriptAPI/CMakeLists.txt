@@ -1,6 +1,6 @@
 target_sources(AngelscriptUtils
 	PRIVATE
-		CASScheduler.h
+		Scheduler.h
 )
 
 add_subdirectory( Reflection )

@@ -2,6 +2,7 @@
 #define ANGELSCRIPT_CASMODULE_H
 
 #include <cstring>
+#include <memory>
 
 #include "ASUtilsConfig.h"
 
@@ -10,7 +11,11 @@
 #include "CASModuleDescriptor.h"
 
 class asIScriptModule;
-class CASScheduler;
+
+namespace asutils
+{
+class Scheduler;
+}
 
 /**
 *	@defgroup ASModule Angelscript Module
@@ -81,7 +86,7 @@ public:
 	/**
 	*	@return The scheduler.
 	*/
-	CASScheduler* GetScheduler() { return m_pScheduler; }
+	asutils::Scheduler& GetScheduler() { return *m_Scheduler; }
 
 	/**
 	*	@return User data associated with this module.
@@ -104,7 +109,7 @@ private:
 
 	const CASModuleDescriptor* m_pDescriptor;
 
-	CASScheduler* m_pScheduler;
+	std::unique_ptr<asutils::Scheduler> m_Scheduler;
 
 	IASModuleUserData* m_pUserData = nullptr;
 

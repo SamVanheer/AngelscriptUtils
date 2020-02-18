@@ -16,7 +16,7 @@
 
 #include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
 
-#include "AngelscriptUtils/ScriptAPI/CASScheduler.h"
+#include "AngelscriptUtils/ScriptAPI/Scheduler.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
 
 #include "AngelscriptUtils/util/CASBaseClass.h"
@@ -175,7 +175,7 @@ public:
 		RegisterScriptArray( manager.GetEngine(), true );
 		RegisterScriptDictionary( manager.GetEngine() );
 		RegisterScriptAny( manager.GetEngine() );
-		RegisterScriptScheduler( manager.GetEngine() );
+		asutils::RegisterSchedulerAPI( *manager.GetEngine() );
 		RegisterScriptReflection( *manager.GetEngine() );
 
 		asutils::RegisterEventAPI(*manager.GetEngine());
@@ -252,7 +252,7 @@ public:
 		//TODO: figure out a better way.
 		auto result = builder.AddSectionFromMemory( 
 			"__Globals", 
-			"CScheduler@ Scheduler;" );
+			"ScriptScheduler@ Scheduler;" );
 
 		if( result < 0 )
 			return false;
@@ -273,7 +273,7 @@ public:
 		auto& scriptModule = *pModule->GetModule();
 
 		//Set the scheduler instance.
-		if( !asutils::SetGlobalByName( scriptModule, "Scheduler", pModule->GetScheduler() ) )
+		if( !asutils::SetGlobalByName( scriptModule, "Scheduler", &pModule->GetScheduler() ) )
 			return false;
 
 		return true;

@@ -42,7 +42,7 @@ void MainFunc(MyEvent@ args)
 
 void Func( const string& in szString )
 {
-	Print( szString + "\n" );
+	Print( "Scheduler callback: " + szString + "\n" );
 }
 
 void NoArgs()
@@ -142,7 +142,7 @@ int main( const string& in szString )
 	Event<MyEvent>(@g_EventSystem).Subscribe(@MainFunc);
 	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(Foo().Func));
 	
-	Scheduler.SetTimeout( "Func", 5, "what's going on" );
+	Scheduler.SetTimeout( @Func, 5, "what's going on" );
 	
 	//PrintReflection();
 	

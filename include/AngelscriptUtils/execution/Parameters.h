@@ -169,6 +169,86 @@ bool SetEnumParameter(asIScriptFunction&, asIScriptContext& context,
 	return false;
 }
 
+template<typename PARAM>
+inline bool SetObjectParameter(asIScriptContext& context, const asUINT index, const BaseObjectType& type, PARAM&& parameter, const int typeId)
+{
+	auto& engine = *context.GetEngine();
+
+	//Match the source with the destination type
+	auto destinationType = engine.GetTypeInfoById(typeId);
+
+	const auto destinationFlags = destinationType->GetFlags();
+
+	if (!AreObjectTypeFlagsSameType(destinationFlags, type.GetFlags()))
+	{
+		engine.WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
+			"Object parameters must be the same type (reference or value type)");
+		return false;
+	}
+
+	//For safety purposes reference types must be passed as a pointer to avoid pointing to a reference on the stack
+	if ((destinationFlags & asOBJ_REF) &&
+		!std::is_pointer<std::remove_reference_t<PARAM>>::value)
+	{
+		engine.WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
+			"Cannot pass reference counted reference by value");
+		return false;
+	}
+
+	//Don't forward here; we don't want the type to be a reference
+	void* object = ConvertObjectToPointer<std::remove_reference_t<PARAM>>(parameter);
+
+	bool performedCast = false;
+
+	//If the types don't match, perform a cast to make them compatible
+	if (strcmp(type.GetName(), destinationType->GetName()) ||
+		strcmp(type.GetNamespace(), destinationType->GetNamespace()))
+	{
+		if (destinationFlags & asOBJ_VALUE)
+		{
+			context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
+				"Value type conversion is not supported");
+			return false;
+		}
+
+		const auto sourceTypeName = FormatObjectTypeName(type.GetNamespace(), type.GetName());
+
+		auto sourceType = engine.GetTypeInfoByDecl(sourceTypeName.c_str());
+
+		if (!sourceType)
+		{
+			context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
+				(std::string{"The type \""} +sourceTypeName + "\" could not be found for reference casting").c_str());
+			return false;
+		}
+
+		void* newObject;
+
+		if (engine.RefCastObject(object, sourceType, destinationType, &newObject, false) < 0)
+		{
+			context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
+				(std::string{"Could not cast type \""} +sourceTypeName +
+					"\" to destination type \"" + FormatObjectTypeName(destinationType->GetNamespace(), destinationType->GetName()) +
+					"\"").c_str());
+			return false;
+		}
+
+		object = newObject;
+
+		performedCast = true;
+	}
+
+	const auto success = context.SetArgObject(index, object) >= 0;
+
+	//If we had to cast to pass the object release the reference we acquired as a result
+	if (performedCast)
+	{
+		engine.ReleaseScriptObject(object, destinationType);
+	}
+
+	return success;
+}
+
 /**
 *	@brief Sets a native parameter
 */
@@ -201,81 +281,7 @@ bool SetNativeParameter(asIScriptFunction& function, asIScriptContext& context, 
 	//Handle any object types
 	else if (IsObject(typeId) && (type.GetFlags() & (asOBJ_REF | asOBJ_VALUE)))
 	{
-		auto& engine = *context.GetEngine();
-
-		//Match the source with the destination type
-		auto destinationType = engine.GetTypeInfoById(typeId);
-
-		const auto destinationFlags = destinationType->GetFlags();
-
-		if (!AreObjectTypeFlagsSameType(destinationFlags, type.GetFlags()))
-		{
-			engine.WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
-				"Object parameters must be the same type (reference or value type)");
-			return false;
-		}
-
-		//For safety purposes reference types must be passed as a pointer to avoid pointing to a reference on the stack
-		if ((destinationFlags & asOBJ_REF) &&
-			!std::is_pointer<std::remove_reference_t<PARAM>>::value)
-		{
-			engine.WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
-				"Cannot pass reference counted reference by value");
-			return false;
-		}
-
-		//Don't forward here; we don't want the type to be a reference
-		void* object = ConvertObjectToPointer<std::remove_reference_t<PARAM>>(parameter);
-
-		bool performedCast = false;
-
-		//If the types don't match, perform a cast to make them compatible
-		if( strcmp(type.GetName(), destinationType->GetName()) ||
-			strcmp(type.GetNamespace(), destinationType->GetNamespace()))
-		{
-			if (destinationFlags & asOBJ_VALUE)
-			{
-				context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
-					"Value type conversion is not supported");
-				return false;
-			}
-
-			const auto sourceTypeName = FormatObjectTypeName(type.GetNamespace(), type.GetName());
-
-			auto sourceType = engine.GetTypeInfoByDecl(sourceTypeName.c_str());
-
-			if (!sourceType)
-			{
-				context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
-					(std::string{"The type \""} +sourceTypeName + "\" could not be found for reference casting").c_str());
-				return false;
-			}
-
-			void* newObject;
-
-			if (engine.RefCastObject(object, sourceType, destinationType, &newObject, false) < 0)
-			{
-				context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
-					(std::string{"Could not cast type \""} + sourceTypeName +
-						"\" to destination type \"" + FormatObjectTypeName(destinationType->GetNamespace(), destinationType->GetName()) +
-						"\"").c_str());
-				return false;
-			}
-
-			object = newObject;
-
-			performedCast = true;
-		}
-
-		const auto success = context.SetArgObject(index, object) >= 0;
-
-		//If we had to cast to pass the object release the reference we acquired as a result
-		if (performedCast)
-		{
-			engine.ReleaseScriptObject(object, destinationType);
-		}
-
-		return success;
+		return SetObjectParameter(context, index, type, std::forward<PARAM>(parameter), typeId);
 	}
 	else
 	{

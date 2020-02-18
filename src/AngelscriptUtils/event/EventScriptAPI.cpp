@@ -7,6 +7,8 @@
 #include "AngelscriptUtils/event/EventArgs.h"
 #include "AngelscriptUtils/event/EventSystem.h"
 
+#include "AngelscriptUtils/utility/Objects.h"
+
 namespace asutils
 {
 /**
@@ -84,20 +86,7 @@ private:
 
 	asIScriptFunction* InternalGetFunctionFromVariable(void* object, int typeId) const
 	{
-		//Verify that it is a function
-		if (!(typeId & asTYPEID_OBJHANDLE))
-		{
-			return nullptr;
-		}
-
-		auto type = m_Engine.GetTypeInfoById(typeId);
-
-		if (!(type->GetFlags() & asOBJ_FUNCDEF))
-		{
-			return nullptr;
-		}
-
-		return *reinterpret_cast<asIScriptFunction**>(object);
+		return TryGetFunctionFromVariableParameter(m_Engine, object, typeId);
 	}
 
 private:

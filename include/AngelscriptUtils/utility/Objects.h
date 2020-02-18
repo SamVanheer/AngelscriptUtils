@@ -18,6 +18,11 @@ void* CreateObjectInstance(asIScriptEngine& engine, const asITypeInfo& type);
 void ReleaseVarArg(asIScriptEngine& engine, void* pObject, const int typeId);
 
 /**
+*	@brief If the given object is a script function, this returns that function
+*/
+asIScriptFunction* TryGetFunctionFromVariableParameter(const asIScriptEngine& engine, void* object, const int typeId);
+
+/**
 *	@brief Sets a global variable by name
 *	@param module Module that contains the global variable
 *	@param globalName Name of the global variable to set

@@ -25,4 +25,21 @@ void ReleaseVarArg(asIScriptEngine& engine, void* pObject, const int iTypeId)
 		engine.ReleaseScriptObject(pObject, pTypeInfo);
 	}
 }
+
+asIScriptFunction* TryGetFunctionFromVariableParameter(const asIScriptEngine& engine, void* object, const int typeId)
+{
+	if (!(typeId & asTYPEID_OBJHANDLE))
+	{
+		return nullptr;
+	}
+
+	auto type = engine.GetTypeInfoById(typeId);
+
+	if (!(type->GetFlags() & asOBJ_FUNCDEF))
+	{
+		return nullptr;
+	}
+
+	return *reinterpret_cast<asIScriptFunction**>(object);
+}
 }

@@ -9,6 +9,7 @@
 
 #include "AngelscriptUtils/execution/Metadata.h"
 
+#include "AngelscriptUtils/utility/SmartPointers.h"
 #include "AngelscriptUtils/utility/TypeInfo.h"
 #include "AngelscriptUtils/utility/Variant.h"
 
@@ -206,7 +207,7 @@ inline bool SetObjectParameter(asIScriptContext& context, const asUINT index, co
 	{
 		if (destinationFlags & asOBJ_VALUE)
 		{
-			context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
+			engine.WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
 				"Value type conversion is not supported");
 			return false;
 		}
@@ -217,7 +218,7 @@ inline bool SetObjectParameter(asIScriptContext& context, const asUINT index, co
 
 		if (!sourceType)
 		{
-			context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
+			engine.WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
 				(std::string{"The type \""} +sourceTypeName + "\" could not be found for reference casting").c_str());
 			return false;
 		}
@@ -226,7 +227,7 @@ inline bool SetObjectParameter(asIScriptContext& context, const asUINT index, co
 
 		if (engine.RefCastObject(object, sourceType, destinationType, &newObject, false) < 0)
 		{
-			context.GetEngine()->WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
+			engine.WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
 				(std::string{"Could not cast type \""} +sourceTypeName +
 					"\" to destination type \"" + FormatObjectTypeName(destinationType->GetNamespace(), destinationType->GetName()) +
 					"\"").c_str());

@@ -61,6 +61,11 @@ class Lifetime
 	{
 		Print( "Lifetime destroyed\n" );
 	}
+	
+	void SayHi()
+	{
+		Print("Hi, i'm the Lifetime object\n");
+	}
 }
 
 Lifetime@ GetLifetime()

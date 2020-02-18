@@ -206,4 +206,44 @@ inline bool AreObjectTypeFlagsSameType(asDWORD left, asDWORD right)
 
 	return left == right;
 }
+
+template<typename T>
+T CastReturnValueToType(const int typeId, asIScriptContext& context)
+{
+#define PRIMITIVE_CASE(typeId, function)				\
+case typeId: return static_cast<T>(context.function())
+	switch (typeId)
+	{
+		PRIMITIVE_CASE(asTYPEID_BOOL, GetReturnByte);
+
+		PRIMITIVE_CASE(asTYPEID_INT8, GetReturnByte);
+		PRIMITIVE_CASE(asTYPEID_INT16, GetReturnWord);
+		PRIMITIVE_CASE(asTYPEID_INT32, GetReturnDWord);
+		PRIMITIVE_CASE(asTYPEID_INT64, GetReturnQWord);
+
+		PRIMITIVE_CASE(asTYPEID_UINT8, GetReturnByte);
+		PRIMITIVE_CASE(asTYPEID_UINT16, GetReturnWord);
+		PRIMITIVE_CASE(asTYPEID_UINT32, GetReturnDWord);
+		PRIMITIVE_CASE(asTYPEID_UINT64, GetReturnQWord);
+
+		PRIMITIVE_CASE(asTYPEID_FLOAT, GetReturnFloat);
+		PRIMITIVE_CASE(asTYPEID_DOUBLE, GetReturnDouble);
+
+	default: throw std::invalid_argument("Expected a primitive type");
+	}
+
+#undef PRIMITIVE_CASE
+}
+
+template<typename T, std::enable_if_t<std::is_pointer<T>::value, int> = 0>
+T ReturnNullPointerOrNothing()
+{
+	return nullptr;
+}
+
+template<typename T, std::enable_if_t<!std::is_pointer<T>::value, int> = 0>
+T ReturnNullPointerOrNothing()
+{
+	return {};
+}
 }

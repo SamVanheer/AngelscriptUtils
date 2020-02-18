@@ -408,30 +408,45 @@ int main( int, char*[] )
 			//Test the object pointer.
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "GetLifetime" ) )
 			{
-				CASOwningContext ctx( *manager.GetEngine() );
-
-				CASFunction func( *pFunction, ctx );
-
-				if( func.Call( CallFlag::NONE ) )
 				{
-					asutils::ObjectPointer ptr;
+					asutils::FunctionExecutor executor(*pContext);
 
-					void* pThis;
+					auto functionCaller = executor.Global(*pFunction);
 
-					if( func.GetReturnValue( &pThis ) )
+					if (functionCaller.NativeCall())
 					{
-						const int iTypeId = pFunction->GetReturnTypeId();
+						asutils::ObjectPointer ptr;
 
-						ptr.Reset(pThis, asutils::ReferencePointer<asITypeInfo>{manager.GetEngine()->GetTypeInfoById(iTypeId)});
-					}
+						auto result = functionCaller.GetObjectReturnValue();
 
-					if( ptr )
-					{
-						std::cout << "Object stored" << std::endl << "Type: " << ptr.GetTypeInfo()->GetName() << std::endl;
-					}
-					else
-					{
-						std::cout << "Object not stored" << std::endl;
+						if (result)
+						{
+							const int iTypeId = pFunction->GetReturnTypeId();
+
+							ptr = result;
+						}
+
+						if (ptr)
+						{
+							std::cout << "Object stored" << std::endl << "Type: " << ptr.GetTypeInfo()->GetName() << std::endl;
+
+							auto memberFunction = ptr.GetTypeInfo()->GetMethodByName("SayHi");
+
+							if (memberFunction)
+							{
+								auto memberCaller = executor.Member(*memberFunction);
+
+								memberCaller.NativeCall(ptr.Get());
+							}
+							else
+							{
+								std::cout << "Couldn't get SayHi method" << std::endl;
+							}
+						}
+						else
+						{
+							std::cout << "Object not stored" << std::endl;
+						}
 					}
 				}
 			}

@@ -236,7 +236,7 @@ inline ScriptParameters CreateGenericParameterList(asIScriptGeneric& parameters,
 }
 
 template<typename T>
-inline bool SetScriptParameters(asIScriptFunction& function, const T& parameters, asIScriptContext& context)
+inline bool SetScriptParameters(asIScriptFunction& function, asIScriptContext& context, const T& parameters)
 {
 	asUINT index = 0;
 

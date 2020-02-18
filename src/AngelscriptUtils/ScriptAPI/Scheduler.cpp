@@ -56,7 +56,7 @@ bool Scheduler::ExecuteFunction(ScheduledFunction& function, asIScriptContext& c
 	m_CurrentFunctionID = function.m_ID;
 
 	//Call will log any errors if the context has logging enabled
-	Call(*function.m_Function, function.m_Parameters, context);
+	PackedCall(*function.m_Function, context, function.m_Parameters);
 
 	m_CurrentFunctionID = INVALID_ID;
 

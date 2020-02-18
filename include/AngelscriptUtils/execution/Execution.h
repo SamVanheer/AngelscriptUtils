@@ -92,7 +92,7 @@ public:
 
 				if (result >= 0)
 				{
-					if (SetScriptParameters(function, parameters, context))
+					if (SetScriptParameters(function, context, parameters))
 					{
 						result = context.Execute();
 					}
@@ -431,7 +431,7 @@ private:
 *	@return Whether execution succeeded without errors
 */
 template<typename... PARAMS>
-bool Call(asIScriptFunction& function, asIScriptContext& context, PARAMS&&... parameters)
+bool NativeCall(asIScriptFunction& function, asIScriptContext& context, PARAMS&&... parameters)
 {
 	return SingleShotGlobalFunctionCallExecutor{}.NativeCall(function, context, std::forward<PARAMS>(parameters)...);
 }
@@ -441,7 +441,7 @@ bool Call(asIScriptFunction& function, asIScriptContext& context, PARAMS&&... pa
 *	@return Whether execution succeeded without errors
 */
 template<typename T>
-inline bool Call(asIScriptFunction& function, const T& parameters, asIScriptContext& context)
+inline bool PackedCall(asIScriptFunction& function, asIScriptContext& context, const T& parameters)
 {
 	return SingleShotGlobalFunctionCallExecutor{}.PackedCall(function, context, parameters);
 }

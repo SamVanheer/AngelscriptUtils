@@ -314,7 +314,7 @@ public:
 	template<typename... PARAMS>
 	void Call(PARAMS&&... params)
 	{
-		asutils::Call(function, context, std::forward<PARAMS>(params)...);
+		asutils::NativeCall(function, context, std::forward<PARAMS>(params)...);
 	}
 
 private:
@@ -379,12 +379,12 @@ int main( int, char*[] )
 			{
 				auto parameters = asutils::CreateNativeParameterList(10, EnumType::Value, new MyEvent(), std::string{"Packed parameters"});
 
-				asutils::Call(*pFunction, parameters, *pContext);
+				asutils::PackedCall(*pFunction, *pContext, parameters);
 
 				int output = 10;
 				auto event = new MyEvent();
 				event->AddRef();
-				asutils::Call(*pFunction, *pContext, output, EnumType::Value, event, std::string{"Test string"});
+				asutils::NativeCall(*pFunction, *pContext, output, EnumType::Value, event, std::string{"Test string"});
 
 				std::cout << "C++ value of foo is " << output << std::endl;
 			}
@@ -396,7 +396,7 @@ int main( int, char*[] )
 
 				//Note: main takes a const string& in. We can pass by pointer or by reference, either will work the same way
 				//Constructing the string in the parameter list itself also works
-				asutils::Call( *pFunction, *pContext, &szString );
+				asutils::NativeCall( *pFunction, *pContext, &szString );
 
 				MyEvent event;
 
@@ -476,11 +476,11 @@ int main( int, char*[] )
 				}
 
 				//Regular variadic templates
-				asutils::Call(*pFunction, *pContext);
+				asutils::NativeCall(*pFunction, *pContext);
 
 				//Argument list
 				auto parameterList = asutils::CreateNativeParameterList();
-				asutils::Call(*pFunction, parameterList, *pContext);
+				asutils::PackedCall(*pFunction, *pContext, parameterList);
 
 				//Wrapper version
 				CallHelper helper(*pFunction, *pContext);
@@ -491,13 +491,13 @@ int main( int, char*[] )
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "DoNullPointerException" ) )
 			{
 				std::cout << "Triggering null pointer exception" << std::endl;
-				asutils::Call( *pFunction, *pContext );
+				asutils::NativeCall( *pFunction, *pContext );
 			}
 
 			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "DoNullPointerException2" ) )
 			{
 				std::cout << "Triggering null pointer exception in object member function" << std::endl;
-				asutils::Call(*pFunction, *pContext);
+				asutils::NativeCall(*pFunction, *pContext);
 			}
 
 			{

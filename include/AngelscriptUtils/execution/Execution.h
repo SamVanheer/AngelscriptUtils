@@ -15,6 +15,196 @@
 
 namespace asutils
 {
+class FunctionExecutor;
+
+/**
+*	@brief Implements the actual execution logic for native and packed calls
+*	Uses the curiously recurring template pattern for compile time context-specific calls (global vs member function, single vs repeated call)
+*/
+template<typename DERIVED>
+class CallExecutor
+{
+public:
+	CallExecutor() = default;
+	CallExecutor(const CallExecutor&) = delete;
+	CallExecutor& operator=(const CallExecutor&) = delete;
+
+	template<typename... PARAMS>
+	bool NativeCall(asIScriptFunction& function, asIScriptContext& context, PARAMS&&... parameters)
+	{
+		bool success = false;
+
+		if(static_cast<DERIVED*>(this)->IsObjectInstanceValid())
+		{
+			if (VerifyParameterCount(context, function.GetParamCount(), sizeof...(parameters)))
+			{
+				auto result = context.Prepare(&function);
+
+				if (result >= 0)
+				{
+					result = static_cast<DERIVED*>(this)->MaybeSetObjectInstance(context);
+				}
+
+				if (result >= 0)
+				{
+					if (SetNativeParameters(function, context, 0, std::forward<PARAMS>(parameters)...))
+					{
+						result = context.Execute();
+					}
+					else
+					{
+						result = asERROR;
+					}
+				}
+
+				const auto unprepareResult = static_cast<DERIVED*>(this)->MaybeUnprepare(context);
+
+				success = result >= 0 && unprepareResult >= 0;
+			}
+		}
+		else
+		{
+			context.GetEngine()->WriteMessage("CallExecutor::NativeCall", -1, -1, asMSGTYPE_ERROR,
+				"Application error: Object instance is null");
+		}
+
+		//Release references to caller parameters
+		ReleaseNativeParameters(std::forward<PARAMS>(parameters)...);
+
+		return success;
+	}
+
+	template<typename T>
+	inline bool PackedCall(asIScriptFunction& function, asIScriptContext& context, const T& parameters)
+	{
+		bool success = false;
+
+		if (static_cast<DERIVED*>(this)->IsObjectInstanceValid())
+		{
+			if (VerifyParameterCount(context, function.GetParamCount(), parameters.size()))
+			{
+				auto result = context.Prepare(&function);
+
+				if (result >= 0)
+				{
+					result = static_cast<DERIVED*>(this)->MaybeSetObjectInstance(context);
+				}
+
+				if (result >= 0)
+				{
+					if (SetScriptParameters(function, parameters, context))
+					{
+						result = context.Execute();
+					}
+					else
+					{
+						result = asERROR;
+					}
+				}
+
+				const auto unprepareResult = static_cast<DERIVED*>(this)->MaybeUnprepare(context);
+
+				success = result >= 0 && unprepareResult >= 0;
+			}
+		}
+		else
+		{
+			context.GetEngine()->WriteMessage("CallExecutor::PackedCall", -1, -1, asMSGTYPE_ERROR,
+				"Application error: Object instance is null");
+		}
+
+		return success;
+	}
+
+protected:
+	bool IsObjectInstanceValid()
+	{
+		return true;
+	}
+
+	int MaybeSetObjectInstance(asIScriptContext&)
+	{
+		return asSUCCESS;
+	}
+
+	int MaybeUnprepare(asIScriptContext&)
+	{
+		return asSUCCESS;
+	}
+};
+
+template<typename DERIVED>
+class TGlobalFunctionCallExecutor : public CallExecutor<DERIVED>
+{
+	//Default implementations for everything
+};
+
+template<typename DERIVED>
+class TMemberFunctionCallExecutor : public CallExecutor<DERIVED>
+{
+public:
+	TMemberFunctionCallExecutor(void* instance)
+		: m_Instance(instance)
+	{
+	}
+
+protected:
+	friend class CallExecutor<DERIVED>;
+
+	bool IsObjectInstanceValid()
+	{
+		return m_Instance != nullptr;
+	}
+
+	int MaybeSetObjectInstance(asIScriptContext& context)
+	{
+		return context.SetObject(m_Instance);
+	}
+
+private:
+	void* const m_Instance;
+};
+
+/**
+*	@brief Executor for repeated global calls
+*/
+class GlobalFunctionCallExecutor : public TGlobalFunctionCallExecutor<GlobalFunctionCallExecutor>
+{
+};
+
+/**
+*	@brief Executor for repeated member calls
+*/
+class MemberFunctionCallExecutor : public TMemberFunctionCallExecutor<MemberFunctionCallExecutor>
+{
+};
+
+/**
+*	@brief Executor for a one off global call
+*/
+class SingleShotGlobalFunctionCallExecutor : public TGlobalFunctionCallExecutor<SingleShotGlobalFunctionCallExecutor>
+{
+protected:
+	friend class CallExecutor<SingleShotGlobalFunctionCallExecutor>;
+
+	int MaybeUnprepare(asIScriptContext& context)
+	{
+		return context.Unprepare();
+	}
+};
+
+/**
+*	@brief Executor for a one off member call
+*/
+class SingleShotMemberFunctionCallExecutor : public TMemberFunctionCallExecutor<SingleShotMemberFunctionCallExecutor>
+{
+protected:
+	int MaybeUnprepare(asIScriptContext& context)
+	{
+		return context.Unprepare();
+	}
+};
+
 /**
 *	@brief Base class for callable functions
 */
@@ -146,58 +336,13 @@ public:
 	template<typename... PARAMS>
 	bool NativeCall(PARAMS&&... parameters)
 	{
-		bool success = false;
-
-		if (VerifyParameterCount(m_Context, m_Function.GetParamCount(), sizeof...(parameters)))
-		{
-			auto result = m_Context.Prepare(&m_Function);
-
-			if (result >= 0)
-			{
-				if (SetNativeParameters(m_Function, m_Context, 0, std::forward<PARAMS>(parameters)...))
-				{
-					result = m_Context.Execute();
-				}
-				else
-				{
-					result = asERROR;
-				}
-			}
-
-			success = result >= 0;
-		}
-
-		//Release references to caller parameters
-		ReleaseNativeParameters(std::forward<PARAMS>(parameters)...);
-
-		return success;
+		return GlobalFunctionCallExecutor{}.NativeCall(m_Function, m_Context, std::forward<PARAMS>(parameters)...);
 	}
 
 	template<typename T>
 	inline bool PackedCall(const T& parameters)
 	{
-		bool success = false;
-
-		if (VerifyParameterCount(m_Context, m_Function.GetParamCount(), parameters.size()))
-		{
-			auto result = m_Context.Prepare(&m_Function);
-
-			if (result >= 0)
-			{
-				if (SetScriptParameters(m_Function, parameters, m_Context))
-				{
-					result = m_Context.Execute();
-				}
-				else
-				{
-					result = asERROR;
-				}
-			}
-
-			success = result >= 0;
-		}
-
-		return success;
+		return GlobalFunctionCallExecutor{}.PackedCall(m_Function, m_Context, parameters);
 	}
 };
 
@@ -224,84 +369,13 @@ public:
 	template<typename... PARAMS>
 	bool NativeCall(void* instance, PARAMS&&... parameters)
 	{
-		bool success = false;
-
-		if (instance)
-		{
-			if (VerifyParameterCount(m_Context, m_Function.GetParamCount(), sizeof...(parameters)))
-			{
-				auto result = m_Context.Prepare(&m_Function);
-
-				if (result >= 0)
-				{
-					result = m_Context.SetObject(instance);
-				}
-
-				if (result >= 0)
-				{
-					if (SetNativeParameters(m_Function, m_Context, 0, std::forward<PARAMS>(parameters)...))
-					{
-						result = m_Context.Execute();
-					}
-					else
-					{
-						result = asERROR;
-					}
-				}
-
-				success = result >= 0;
-			}
-		}
-		else
-		{
-			m_Context.GetEngine()->WriteMessage("CallableMemberFunction::NativeCall", -1, -1, asMSGTYPE_ERROR,
-				"Application error: Object instance is null");
-		}
-
-		//Release references to caller parameters
-		ReleaseNativeParameters(std::forward<PARAMS>(parameters)...);
-
-		return success;
+		return MemberFunctionCallExecutor{instance}.NativeCall(m_Function, m_Context, std::forward<PARAMS>(parameters)...);
 	}
 
 	template<typename T>
 	inline bool PackedCall(void* instance, const T& parameters)
 	{
-		bool success = false;
-
-		if (instance)
-		{
-			if (VerifyParameterCount(m_Context, m_Function.GetParamCount(), parameters.size()))
-			{
-				auto result = m_Context.Prepare(&m_Function);
-
-				if (result >= 0)
-				{
-					result = m_Context.SetObject(instance);
-				}
-
-				if (result >= 0)
-				{
-					if (SetScriptParameters(m_Function, parameters, m_Context))
-					{
-						result = m_Context.Execute();
-					}
-					else
-					{
-						result = asERROR;
-					}
-				}
-
-				success = result >= 0;
-			}
-		}
-		else
-		{
-			m_Context.GetEngine()->WriteMessage("CallableMemberFunction::PackedCall", -1, -1, asMSGTYPE_ERROR,
-				"Application error: Object instance is null");
-		}
-
-		return success;
+		return MemberFunctionCallExecutor{instance}.PackedCall(m_Function, m_Context, parameters);
 	}
 };
 
@@ -359,34 +433,7 @@ private:
 template<typename... PARAMS>
 bool Call(asIScriptFunction& function, asIScriptContext& context, PARAMS&&... parameters)
 {
-	bool success = false;
-
-	if (VerifyParameterCount(context, function.GetParamCount(), sizeof...(parameters)))
-	{
-		auto result = context.Prepare(&function);
-
-		if (result >= 0)
-		{
-			if (SetNativeParameters(function, context, 0, std::forward<PARAMS>(parameters)...))
-			{
-				result = context.Execute();
-			}
-			else
-			{
-				result = asERROR;
-			}
-		}
-
-		//Always unprepare to clean up state
-		const auto unprepareResult = context.Unprepare();
-
-		success = result >= 0 && unprepareResult >= 0;
-	}
-
-	//Release references to caller parameters
-	ReleaseNativeParameters(std::forward<PARAMS>(parameters)...);
-
-	return success;
+	return SingleShotGlobalFunctionCallExecutor{}.NativeCall(function, context, std::forward<PARAMS>(parameters)...);
 }
 
 /**
@@ -396,30 +443,6 @@ bool Call(asIScriptFunction& function, asIScriptContext& context, PARAMS&&... pa
 template<typename T>
 inline bool Call(asIScriptFunction& function, const T& parameters, asIScriptContext& context)
 {
-	bool success = false;
-
-	if (VerifyParameterCount(context, function.GetParamCount(), parameters.size()))
-	{
-		auto result = context.Prepare(&function);
-
-		if (result >= 0)
-		{
-			if (SetScriptParameters(function, parameters, context))
-			{
-				result = context.Execute();
-			}
-			else
-			{
-				result = asERROR;
-			}
-		}
-
-		//Always unprepare to clean up state
-		const auto unprepareResult = context.Unprepare();
-
-		success = result >= 0 && unprepareResult >= 0;
-	}
-
-	return success;
+	return SingleShotGlobalFunctionCallExecutor{}.PackedCall(function, context, parameters);
 }
 }

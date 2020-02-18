@@ -302,26 +302,6 @@ public:
 	}
 };
 
-struct CallHelper final
-{
-public:
-	CallHelper(asIScriptFunction& function, asIScriptContext& context)
-		: function(function)
-		, context(context)
-	{
-	}
-
-	template<typename... PARAMS>
-	void Call(PARAMS&&... params)
-	{
-		asutils::NativeCall(function, context, std::forward<PARAMS>(params)...);
-	}
-
-private:
-	asIScriptFunction& function;
-	asIScriptContext& context;
-};
-
 int main( int, char*[] )
 {
 	{
@@ -483,8 +463,11 @@ int main( int, char*[] )
 				asutils::PackedCall(*pFunction, *pContext, parameterList);
 
 				//Wrapper version
-				CallHelper helper(*pFunction, *pContext);
-				helper.Call();
+				{
+					asutils::FunctionExecutor executor{*pContext};
+
+					executor.Global(*pFunction).NativeCall();
+				}
 			}
 
 			//Call a function that triggers a null pointer exception.

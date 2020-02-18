@@ -189,7 +189,7 @@ inline void* SetPointer(void*& destination, void* source, const asITypeInfo& typ
 
     destination = source;
 
-    if (destination && !transferOwnership)
+    if (destination)
     {
         if (typeInfo.GetFlags() & asOBJ_REF)
         {
@@ -199,7 +199,10 @@ inline void* SetPointer(void*& destination, void* source, const asITypeInfo& typ
                 destination = *reinterpret_cast<void**>(destination);
             }
 
-            engine.AddRefScriptObject(destination, &typeInfo);
+            if (!transferOwnership)
+            {
+                engine.AddRefScriptObject(destination, &typeInfo);
+            }
         }
         else
         {
@@ -457,10 +460,9 @@ private:
 
             m_Object = nullptr;
 
-            if (object)
+            //SetPointer can return null if exceptions are being caught and the object copy constructor throws
+            if (object && SetPointer(m_Object, object, *type, dereferenceIfHandle, transferOwnership))
             {
-                SetPointer(m_Object, object, *type, dereferenceIfHandle, transferOwnership);
-
                 m_Type = type;
             }
             else

@@ -5,6 +5,10 @@
 namespace asutils
 {
 /**
+*	@brief Type id bits that indicate that a type id refers to an object of some kind (handle or object reference)
+*/
+constexpr int OBJECT_TYPEID_BITS = asTYPEID_OBJHANDLE | asTYPEID_HANDLETOCONST | asTYPEID_MASK_OBJECT;
+/**
 *	@brief Returns whether the given type id is that of void
 *	Exists mostly for completeness
 */
@@ -24,9 +28,17 @@ inline bool IsPrimitive(const int typeId)
 /**
 *	@brief Returns whether a given type id is that of an enum type
 */
-inline bool IsEnum(const int typeId)
+inline bool IsEnum(int typeId)
 {
-	return typeId > asTYPEID_DOUBLE && (typeId & asTYPEID_MASK_OBJECT) == 0;
+	//Some kind of object
+	if ((typeId & OBJECT_TYPEID_BITS) != 0)
+	{
+		return false;
+	}
+
+	typeId &= asTYPEID_MASK_SEQNBR;
+
+	return typeId > asTYPEID_DOUBLE;
 }
 
 /**

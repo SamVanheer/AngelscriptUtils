@@ -74,4 +74,22 @@ inline bool GetExceptionInfo(asIScriptContext& context, LocationInfo& info)
 		return false;
 	}
 }
+
+/**
+*	@brief Gets a script module from a script context
+*	@param context Script context to retrieve the module from. Uses the function currently being executed
+*	@return The script module, or null if it couldn't be retrieved
+*/
+inline asIScriptModule* GetScriptModuleFromScriptContext(asIScriptContext& context)
+{
+	//TODO: this is wrong. function at 0 is what the caller wants
+	auto function = context.GetFunction(context.GetCallstackSize() - 1);
+
+	if (!function)
+	{
+		return nullptr;
+	}
+
+	return function->GetModule();
+}
 }

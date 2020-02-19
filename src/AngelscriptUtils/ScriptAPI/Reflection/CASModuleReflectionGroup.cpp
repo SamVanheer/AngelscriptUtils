@@ -26,8 +26,6 @@ asIScriptFunction* CASModuleReflectionGroup::FindGlobalFunction(const std::strin
 	}
 	else
 	{
-		function = scriptModule.GetFunctionByName(name.c_str());
-
 		const std::string currentNamespace = asutils::ExtractNamespaceFromName(name);
 		const std::string actualName = asutils::ExtractNameFromName(name);
 

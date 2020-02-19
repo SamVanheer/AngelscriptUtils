@@ -4,4 +4,6 @@ target_sources(AngelscriptUtils
 		CASEngineReflectionGroup.h
 		CASModuleReflectionGroup.h
 		ASReflection.h
+		ReflectionGroup.h
+		TypeProviders.h
 )

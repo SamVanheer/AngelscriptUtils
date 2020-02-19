@@ -3,4 +3,5 @@ target_sources(AngelscriptUtils
 		CASEngineReflectionGroup.cpp
 		CASModuleReflectionGroup.cpp
 		ASReflection.cpp
+		ReflectionGroup.cpp
 )

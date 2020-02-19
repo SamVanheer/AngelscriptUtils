@@ -88,6 +88,7 @@ asIScriptModule* GetScriptModuleFromScriptContext( asIScriptContext* pContext )
 {
 	assert( pContext );
 
+	//TODO: this is wrong. function at 0 is what the caller wants
 	auto pFunction = pContext->GetFunction( pContext->GetCallstackSize() - 1 );
 
 	if( !pFunction )

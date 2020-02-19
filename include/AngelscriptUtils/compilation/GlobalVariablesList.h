@@ -11,13 +11,32 @@
 
 namespace asutils
 {
+struct GlobalInitializerData final
+{
+	GlobalInitializerData(const std::string& typeName, const std::string& variableName, asIScriptModule& module, void* userData)
+		: TypeName(typeName)
+		, VariableName(variableName)
+		, Module(module)
+		, UserData(userData)
+	{
+	}
+
+	//Stored as a reference since it's only ever used on the stack
+	const std::string& TypeName;
+	const std::string& VariableName;
+
+	asIScriptModule& Module;
+
+	void* const UserData;
+};
+
 /**
 *	@brief Provides a means of tracking all global variables that are to be added to a script and initializing them after script compilation
 */
 class GlobalVariablesList final
 {
 public:
-	using Initializer = std::function<bool(const std::string & typeName, const std::string & variableName, asIScriptModule& module, void* userData)>;
+	using Initializer = std::function<bool(const GlobalInitializerData& data)>;
 
 private:
 	struct GlobalVariable
@@ -106,7 +125,7 @@ public:
 		for (const auto& pair : m_Globals)
 		{
 			const auto& variable = *pair.second;
-			allSucceeded = variable.Initializer(variable.TypeName, variable.VariableName, module, userData) && allSucceeded;
+			allSucceeded = variable.Initializer({variable.TypeName, variable.VariableName, module, userData}) && allSucceeded;
 		}
 
 		return allSucceeded;

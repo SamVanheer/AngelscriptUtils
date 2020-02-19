@@ -257,7 +257,7 @@ public:
 		//By using a handle this can be changed, but since there are no other instances, it can only be made null.
 		//TODO: figure out a better way.
 		m_GlobalVariables.Add("ScriptScheduler@", "Scheduler",
-			std::bind(&CASTestModuleBuilder::SetScheduler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+			std::bind(&CASTestModuleBuilder::SetScheduler, this, std::placeholders::_1));
 
 		const auto globalsSection = m_GlobalVariables.GetDeclarationsAsSection();
 
@@ -287,11 +287,11 @@ public:
 	}
 
 private:
-	bool SetScheduler(const std::string&, const std::string& variableName, asIScriptModule& module, void* userData)
+	bool SetScheduler(const asutils::GlobalInitializerData& data)
 	{
-		auto utilsModule = reinterpret_cast<CASModule*>(userData);
+		auto utilsModule = reinterpret_cast<CASModule*>(data.UserData);
 
-		return asutils::SetGlobalByName(module, variableName, &utilsModule->GetScheduler());
+		return asutils::SetGlobalByName(data.Module, data.VariableName, &utilsModule->GetScheduler());
 	}
 
 private:

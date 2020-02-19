@@ -1,14 +1,14 @@
 #pragma once
 
-#include "AngelscriptUtils/ScriptAPI/Reflection/IASReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/IReflectionGroup.h"
 
 namespace asutils
 {
-class CASEngineReflectionGroup : public IASReflectionGroup
+class EngineReflectionGroup : public IReflectionGroup
 {
 public:
-	CASEngineReflectionGroup() = default;
-	~CASEngineReflectionGroup() = default;
+	EngineReflectionGroup() = default;
+	~EngineReflectionGroup() = default;
 
 	asIScriptFunction* FindGlobalFunction(const std::string& name, bool searchByDecl = false) override;
 
@@ -31,7 +31,7 @@ private:
 	asIScriptEngine* m_pEngine = nullptr;
 
 private:
-	CASEngineReflectionGroup(const CASEngineReflectionGroup&) = delete;
-	CASEngineReflectionGroup& operator=(const CASEngineReflectionGroup&) = delete;
+	EngineReflectionGroup(const EngineReflectionGroup&) = delete;
+	EngineReflectionGroup& operator=(const EngineReflectionGroup&) = delete;
 };
 }

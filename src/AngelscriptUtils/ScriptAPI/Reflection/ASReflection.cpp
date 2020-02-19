@@ -1,6 +1,6 @@
-#include "AngelscriptUtils/ScriptAPI/Reflection/IASReflectionGroup.h"
-#include "AngelscriptUtils/ScriptAPI/Reflection/CASEngineReflectionGroup.h"
-#include "AngelscriptUtils/ScriptAPI/Reflection/CASModuleReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/EngineReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/IReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/ModuleReflectionGroup.h"
 
 #include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
 
@@ -8,8 +8,8 @@ namespace asutils
 {
 namespace Reflect
 {
-static CASEngineReflectionGroup Engine;
-static CASModuleReflectionGroup Module;
+static EngineReflectionGroup Engine;
+static ModuleReflectionGroup Module;
 }
 
 static void Function_AddRef(const asIScriptFunction* const instance)
@@ -234,27 +234,27 @@ static void RegisterScriptReflectionGroup(asIScriptEngine& engine)
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "Function@ FindGlobalFunction(const string& in name, bool searchByDecl = false)",
-		asMETHOD(IASReflectionGroup, FindGlobalFunction), asCALL_THISCALL);
+		asMETHOD(IReflectionGroup, FindGlobalFunction), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "uint GetGlobalFunctionCount() const",
-		asMETHOD(IASReflectionGroup, GetGlobalFunctionCount), asCALL_THISCALL);
+		asMETHOD(IReflectionGroup, GetGlobalFunctionCount), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "Function@ GetGlobalFunctionByIndex(uint index)",
-		asMETHOD(IASReflectionGroup, GetGlobalFunctionByIndex), asCALL_THISCALL);
+		asMETHOD(IReflectionGroup, GetGlobalFunctionByIndex), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "TypeInfo@ FindTypeInfo(const string& in name, bool searchByDecl = false)",
-		asMETHOD(IASReflectionGroup, FindTypeInfo), asCALL_THISCALL);
+		asMETHOD(IReflectionGroup, FindTypeInfo), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "uint GetObjectTypeCount() const",
-		asMETHOD(IASReflectionGroup, GetObjectTypeCount), asCALL_THISCALL);
+		asMETHOD(IReflectionGroup, GetObjectTypeCount), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "TypeInfo@ GetObjectTypeByIndex(uint index) const",
-		asMETHOD(IASReflectionGroup, GetObjectTypeByIndex), asCALL_THISCALL);
+		asMETHOD(IReflectionGroup, GetObjectTypeByIndex), asCALL_THISCALL);
 }
 
 void RegisterScriptReflection(asIScriptEngine& engine)

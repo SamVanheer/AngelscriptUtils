@@ -6,10 +6,10 @@
 
 namespace asutils
 {
-class IASReflectionGroup
+class IReflectionGroup
 {
 public:
-	virtual ~IASReflectionGroup() = 0;
+	virtual ~IReflectionGroup() = 0;
 
 	virtual asIScriptFunction* FindGlobalFunction(const std::string& name, bool searchByDecl = false) = 0;
 
@@ -24,7 +24,7 @@ public:
 	virtual asITypeInfo* GetObjectTypeByIndex(asUINT index) = 0;
 };
 
-inline IASReflectionGroup::~IASReflectionGroup()
+inline IReflectionGroup::~IReflectionGroup()
 {
 }
 }

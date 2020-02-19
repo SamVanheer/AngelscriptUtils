@@ -1,46 +1,46 @@
-#include "AngelscriptUtils/ScriptAPI/Reflection/CASEngineReflectionGroup.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/EngineReflectionGroup.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ReflectionGroup.h"
 
 #include "AngelscriptUtils/utility/TypeProviders.h"
 
 namespace asutils
 {
-asIScriptFunction* CASEngineReflectionGroup::FindGlobalFunction(const std::string& name, bool searchByDecl)
+asIScriptFunction* EngineReflectionGroup::FindGlobalFunction(const std::string& name, bool searchByDecl)
 {
 	EngineTypeProvider provider{*asGetActiveContext()->GetEngine()};
 
 	return ReflectionGroup::FindFunction(provider, name, searchByDecl);
 }
 
-asUINT CASEngineReflectionGroup::GetGlobalFunctionCount() const
+asUINT EngineReflectionGroup::GetGlobalFunctionCount() const
 {
 	EngineTypeProvider provider{*asGetActiveContext()->GetEngine()};
 
 	return ReflectionGroup::GetFunctionCount(provider);
 }
 
-asIScriptFunction* CASEngineReflectionGroup::GetGlobalFunctionByIndex(asUINT index)
+asIScriptFunction* EngineReflectionGroup::GetGlobalFunctionByIndex(asUINT index)
 {
 	EngineTypeProvider provider{*asGetActiveContext()->GetEngine()};
 
 	return ReflectionGroup::GetFunctionByIndex(provider, index);
 }
 
-asITypeInfo* CASEngineReflectionGroup::FindTypeInfo(const std::string& name, bool searchByDecl)
+asITypeInfo* EngineReflectionGroup::FindTypeInfo(const std::string& name, bool searchByDecl)
 {
 	EngineTypeProvider provider{*asGetActiveContext()->GetEngine()};
 
 	return ReflectionGroup::FindTypeInfo(provider, name, searchByDecl);
 }
 
-asUINT CASEngineReflectionGroup::GetObjectTypeCount() const
+asUINT EngineReflectionGroup::GetObjectTypeCount() const
 {
 	EngineTypeProvider provider{*asGetActiveContext()->GetEngine()};
 
 	return ReflectionGroup::GetObjectTypeCount(provider);
 }
 
-asITypeInfo* CASEngineReflectionGroup::GetObjectTypeByIndex(asUINT index)
+asITypeInfo* EngineReflectionGroup::GetObjectTypeByIndex(asUINT index)
 {
 	EngineTypeProvider provider{*asGetActiveContext()->GetEngine()};
 

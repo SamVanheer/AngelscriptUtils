@@ -1,11 +1,12 @@
 #pragma once
 
-#include "AngelscriptUtils/ScriptAPI/Reflection/IASReflectionGroup.h"
-
 namespace asutils
 {
 class ITypeProvider;
 
+/**
+*	@brief Provides the common logic for reflection groups
+*/
 class ReflectionGroup final
 {
 public:

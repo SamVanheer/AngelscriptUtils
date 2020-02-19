@@ -33,6 +33,10 @@ public:
 	virtual asITypeInfo* GetObjectTypeByIndex(asUINT index) const = 0;
 };
 
+inline ITypeProvider::~ITypeProvider()
+{
+}
+
 class EngineTypeProvider final : public ITypeProvider
 {
 public:

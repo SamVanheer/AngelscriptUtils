@@ -7,6 +7,8 @@
 
 namespace asutils
 {
+//TODO: rewrite these to use begin() and end() for iteration
+
 /**
 *	@brief Iterates over a list of functions
 */
@@ -44,17 +46,14 @@ struct MethodIterator final
 	const asITypeInfo& objectType;
 
 	/**
-	*	Constructor.
-	*	@param objectType Object type info.
+	*	Creates an iterator for the given object type's methods
 	*/
 	MethodIterator(const asITypeInfo& objectType)
 		: objectType(objectType)
 	{
-		//Must be an object
-		//TODO: asOBJ_VALUE should also count - Solokiller
-		if (!(objectType.GetFlags() & asOBJ_REF))
+		if (!(objectType.GetFlags() & (asOBJ_REF | asOBJ_VALUE)))
 		{
-			throw std::invalid_argument("Value types are not supported");
+			throw std::invalid_argument("MethodIterator type must be an object type");
 		}
 	}
 

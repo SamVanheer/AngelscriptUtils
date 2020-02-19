@@ -227,8 +227,6 @@ uint32_t Scheduler::TrySchedule(void* potentiallyAFunction, int typeId,
 		return INVALID_ID;
 	}
 
-	//TODO: modify parameters to match exactly the target function
-
 	return Schedule(*function, std::move(parameterList), m_CurrentTime + repeatInterval, repeatInterval, repeatCount);
 }
 

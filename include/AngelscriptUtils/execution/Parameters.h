@@ -256,8 +256,6 @@ inline bool SetObjectParameter(asIScriptContext& context, const asUINT index, co
 template<typename PARAM>
 bool SetNativeParameter(asIScriptFunction& function, asIScriptContext& context, const asUINT index, const BaseObjectType& type, PARAM&& parameter)
 {
-	//TODO: handle pointer-to and reference-to parameters
-
 	int typeId;
 	asDWORD flags;
 

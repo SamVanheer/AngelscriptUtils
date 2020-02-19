@@ -1,5 +1,9 @@
 #pragma once
 
+#include <string>
+
+#include <angelscript.h>
+
 namespace asutils
 {
 class ITypeProvider;

@@ -86,14 +86,6 @@ int NSTest()
 	return 0;
 }
 
-std::shared_ptr<spdlog::logger> CreateLogger()
-{
-	auto console = std::make_shared<spdlog::sinks::stdout_sink_mt>();
-	auto file = std::make_shared<spdlog::sinks::daily_file_sink_mt>("logs/L.log", 0, 0);
-
-	return std::make_shared<spdlog::logger>("ASUtils", spdlog::sinks_init_list{console, file});
-}
-
 class MyEvent : public asutils::EventArgs
 {
 public:
@@ -129,16 +121,6 @@ void RegisterMyEvent(asIScriptEngine& engine)
 
 	engine.RegisterObjectMethod(className, "bool get_ShouldHide() const property", asMETHOD(MyEvent, ShouldHide), asCALL_THISCALL);
 	engine.RegisterObjectMethod(className, "void set_ShouldHide(bool value) property", asMETHOD(MyEvent, SetShouldHide), asCALL_THISCALL);
-}
-
-void TestMessageCallback(const asSMessageInfo* message, void*)
-{
-	asutils::FormatEngineMessage(*message, std::cout);
-}
-
-void ShutdownAndReleaseEngine(asIScriptEngine* engine)
-{
-	engine->ShutDownAndRelease();
 }
 
 constexpr asPWORD MODULE_USER_DATA_ID = 10001;
@@ -261,7 +243,7 @@ class CASTestInitializer
 {
 public:
 	CASTestInitializer()
-		: m_Engine(nullptr, &ShutdownAndReleaseEngine)
+		: m_Engine(nullptr, &CASTestInitializer::ShutdownAndReleaseEngine)
 	{
 		m_Logger = CreateLogger();
 
@@ -270,8 +252,6 @@ public:
 
 	~CASTestInitializer()
 	{
-		m_EventSystem.reset();
-
 		spdlog::drop(m_Logger->name());
 	}
 
@@ -299,9 +279,11 @@ public:
 			return false;
 		}
 
-		m_Engine->SetMessageCallback(asFUNCTION(TestMessageCallback), nullptr, asCALL_CDECL);
+		m_Engine->SetMessageCallback(asFUNCTION(&CASTestInitializer::TestMessageCallback), nullptr, asCALL_CDECL);
 
 		m_Engine->SetContextCallbacks(&CASTestInitializer::CreateScriptContext, &CASTestInitializer::DestroyScriptContext, this);
+
+		m_Engine->SetModuleUserDataCleanupCallback(&CleanupModuleUserData, MODULE_USER_DATA_ID);
 
 		if (!RegisterAPI())
 		{
@@ -357,6 +339,24 @@ private:
 		return true;
 	}
 
+	static std::shared_ptr<spdlog::logger> CreateLogger()
+	{
+		auto console = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+		auto file = std::make_shared<spdlog::sinks::daily_file_sink_mt>("logs/L.log", 0, 0);
+
+		return std::make_shared<spdlog::logger>("ASUtils", spdlog::sinks_init_list{console, file});
+	}
+
+	static void ShutdownAndReleaseEngine(asIScriptEngine* engine)
+	{
+		engine->ShutDownAndRelease();
+	}
+
+	static void TestMessageCallback(const asSMessageInfo* message, void*)
+	{
+		asutils::FormatEngineMessage(*message, std::cout);
+	}
+
 	static asIScriptContext* CreateScriptContext(asIScriptEngine* pEngine, void* initializer)
 	{
 		auto context = pEngine->CreateContext();
@@ -381,7 +381,7 @@ private:
 private:
 	std::shared_ptr<spdlog::logger> m_Logger;
 
-	std::unique_ptr<asIScriptEngine, decltype(&ShutdownAndReleaseEngine)> m_Engine;
+	std::unique_ptr<asIScriptEngine, decltype(&CASTestInitializer::ShutdownAndReleaseEngine)> m_Engine;
 
 	asutils::EventRegistry m_EventRegistry;
 
@@ -399,8 +399,6 @@ int main( int, char*[] )
 	if(CASTestInitializer initializer; initializer.Initialize())
 	{
 		auto& engine = initializer.GetEngine();
-
-		engine.SetModuleUserDataCleanupCallback(&CleanupModuleUserData, MODULE_USER_DATA_ID);
 
 		asutils::Variant variant(10);
 
@@ -561,7 +559,7 @@ int main( int, char*[] )
 
 			{
 				//Test the scheduler.
-				//userData->Scheduler->Think(10, *pContext);
+				userData->Scheduler->Think(10, *pContext);
 			}
 
 			//Get the parameter types. Angelscript's type info support isn't complete yet, so not all types have an asITypeInfo instance yet.

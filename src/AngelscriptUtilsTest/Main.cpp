@@ -16,6 +16,8 @@
 
 #include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
 
+#include "AngelscriptUtils/compilation/GlobalVariablesList.h"
+
 #include "AngelscriptUtils/ScriptAPI/Scheduler.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ReflectionScriptAPI.h"
 
@@ -254,9 +256,14 @@ public:
 	{
 		//By using a handle this can be changed, but since there are no other instances, it can only be made null.
 		//TODO: figure out a better way.
+		m_GlobalVariables.Add("ScriptScheduler@", "Scheduler",
+			std::bind(&CASTestModuleBuilder::SetScheduler, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
+
+		const auto globalsSection = m_GlobalVariables.GetDeclarationsAsSection();
+
 		auto result = builder.AddSectionFromMemory( 
 			"__Globals", 
-			"ScriptScheduler@ Scheduler;" );
+			globalsSection.c_str());
 
 		if( result < 0 )
 			return false;
@@ -276,15 +283,21 @@ public:
 
 		auto& scriptModule = *pModule->GetModule();
 
-		//Set the scheduler instance.
-		if( !asutils::SetGlobalByName( scriptModule, "Scheduler", &pModule->GetScheduler() ) )
-			return false;
+		return m_GlobalVariables.InitializeAll(scriptModule, pModule);
+	}
 
-		return true;
+private:
+	bool SetScheduler(const std::string&, const std::string& variableName, asIScriptModule& module, void* userData)
+	{
+		auto utilsModule = reinterpret_cast<CASModule*>(userData);
+
+		return asutils::SetGlobalByName(module, variableName, &utilsModule->GetScheduler());
 	}
 
 private:
 	std::string m_szDecl;
+
+	asutils::GlobalVariablesList m_GlobalVariables;
 };
 
 int main( int, char*[] )

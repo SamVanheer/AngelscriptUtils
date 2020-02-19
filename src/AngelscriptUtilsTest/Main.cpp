@@ -89,7 +89,7 @@ int NSTest()
 std::shared_ptr<spdlog::logger> CreateLogger()
 {
 	auto console = std::make_shared<spdlog::sinks::stdout_sink_mt>();
-	auto file = std::make_shared<spdlog::sinks::daily_file_sink_mt>("logs/L", 0, 0);
+	auto file = std::make_shared<spdlog::sinks::daily_file_sink_mt>("logs/L.log", 0, 0);
 
 	return std::make_shared<spdlog::logger>("ASUtils", spdlog::sinks_init_list{console, file});
 }

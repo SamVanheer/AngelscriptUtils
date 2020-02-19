@@ -9,8 +9,6 @@
 
 #undef VOID
 
-#include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
-
 #include "AngelscriptUtils/compilation/GlobalVariablesList.h"
 
 #include "AngelscriptUtils/ScriptAPI/Scheduler.h"
@@ -25,6 +23,7 @@
 
 #include "add_on/scriptany/scriptany.h"
 #include "add_on/scriptarray/scriptarray.h"
+#include "add_on/scriptbuilder/scriptbuilder.h"
 #include "add_on/scriptdictionary/scriptdictionary.h"
 #include "add_on/scriptstdstring/scriptstdstring.h"
 

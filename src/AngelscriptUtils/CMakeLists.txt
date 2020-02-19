@@ -37,10 +37,6 @@ target_compile_options(AngelscriptUtils PRIVATE
      $<$<CXX_COMPILER_ID:MSVC>:
           /W4 /WX>)
 
-target_sources(AngelscriptUtils
-	PRIVATE
-		add_on/scriptbuilder/scriptbuilder.cpp)
-
 add_subdirectory(event)
 add_subdirectory(ScriptAPI)
 add_subdirectory(utility)

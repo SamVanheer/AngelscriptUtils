@@ -10,6 +10,8 @@ target_sources(AngelscriptUtilsTest PRIVATE
 	add_on/scriptany/scriptany.h
 	add_on/scriptarray/scriptarray.cpp
 	add_on/scriptarray/scriptarray.h
+	add_on/scriptbuilder/scriptbuilder.cpp
+	add_on/scriptbuilder/scriptbuilder.h
 	add_on/scriptdictionary/scriptdictionary.cpp
 	add_on/scriptdictionary/scriptdictionary.h
 	add_on/scriptstdstring/scriptstdstring.cpp

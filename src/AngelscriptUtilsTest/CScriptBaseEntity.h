@@ -1,5 +1,4 @@
-#ifndef TEST_CSCRIPTBASEENTITY_H
-#define TEST_CSCRIPTBASEENTITY_H
+#pragma once
 
 #if false
 #include "AngelscriptUtils/util/CASExtendAdapter.h"
@@ -15,27 +14,25 @@ public:
 	typedef CScriptBaseEntity ThisClass;
 
 public:
-	CScriptBaseEntity(const asutils::ObjectPointer& object )
-		: CASExtendAdapter( object )
+	CScriptBaseEntity(const asutils::ObjectPointer& object)
+		: CASExtendAdapter(object)
 	{
 	}
 
 	void Spawn() override
 	{
-		CALL_EXTEND_FUNC( Spawn, "()" );
+		CALL_EXTEND_FUNC(Spawn, "()");
 	}
 
 	//This is used to handle the reference type being a pointer.
-	int ScheduleOfTypePtr( const std::string* pszName )
+	int ScheduleOfTypePtr(const std::string* pszName)
 	{
-		return BaseClass::ScheduleOfType( *pszName );
+		return BaseClass::ScheduleOfType(*pszName);
 	}
 
-	int ScheduleOfType( const std::string& szName ) override
+	int ScheduleOfType(const std::string& szName) override
 	{
-		CALL_EXTEND_FUNC_RET_DIFFFUNC( int, ScheduleOfType, ThisClass::ScheduleOfTypePtr, "(const string& in)", &szName );
+		CALL_EXTEND_FUNC_RET_DIFFFUNC(int, ScheduleOfType, ThisClass::ScheduleOfTypePtr, "(const string& in)", &szName);
 	}
 };
 #endif
-
-#endif //TEST_CSCRIPTBASEENTITY_H

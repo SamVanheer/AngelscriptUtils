@@ -1,5 +1,4 @@
-#ifndef TEST_ASCBASEENTITY_H
-#define TEST_ASCBASEENTITY_H
+#pragma once
 
 #include <angelscript.h>
 
@@ -14,13 +13,13 @@
 *	Registers CBaseEntity for use in scripts.
 *	@param engine Script engine.
 */
-inline void RegisterScriptCBaseEntity( asIScriptEngine& engine )
+inline void RegisterScriptCBaseEntity(asIScriptEngine& engine)
 {
 	const char* const pszObjectName = AS_CBASEENTITY_CLASSNAME;
 
-	engine.RegisterObjectType( pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT );
+	engine.RegisterObjectType(pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT);
 
-	engine.RegisterObjectMethod( pszObjectName, "void Spawn()", asMETHOD( CBaseEntity, Spawn ), asCALL_THISCALL );
+	engine.RegisterObjectMethod(pszObjectName, "void Spawn()", asMETHOD(CBaseEntity, Spawn), asCALL_THISCALL);
 }
 
 /**
@@ -28,15 +27,15 @@ inline void RegisterScriptCBaseEntity( asIScriptEngine& engine )
 */
 
 template<typename BASECLASS>
-void BaseEntity_Spawn( BASECLASS* pThis )
+void BaseEntity_Spawn(BASECLASS* pThis)
 {
 	pThis->BASECLASS::Spawn();
 }
 
 template<typename BASECLASS>
-int BaseEntity_ScheduleOfType( BASECLASS* pThis, const std::string& szName )
+int BaseEntity_ScheduleOfType(BASECLASS* pThis, const std::string& szName)
 {
-	return pThis->BASECLASS::ScheduleOfType( szName );
+	return pThis->BASECLASS::ScheduleOfType(szName);
 }
 
 /**
@@ -46,23 +45,21 @@ int BaseEntity_ScheduleOfType( BASECLASS* pThis, const std::string& szName )
 *	@tparam BASECLASS Entity class type.
 */
 template<typename BASECLASS>
-void RegisterScriptBaseEntity( asIScriptEngine& engine, const char* const pszObjectName )
+void RegisterScriptBaseEntity(asIScriptEngine& engine, const char* const pszObjectName)
 {
-	engine.RegisterObjectType( pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT );
+	engine.RegisterObjectType(pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT);
 
-	engine.RegisterObjectMethod( pszObjectName, "void Spawn()", asFUNCTION( BaseEntity_Spawn<BASECLASS> ), asCALL_CDECL_OBJFIRST );
+	engine.RegisterObjectMethod(pszObjectName, "void Spawn()", asFUNCTION(BaseEntity_Spawn<BASECLASS>), asCALL_CDECL_OBJFIRST);
 
-	engine.RegisterObjectMethod( pszObjectName, "int ScheduleOfType(const string& in szName)", asFUNCTION( BaseEntity_ScheduleOfType<BASECLASS> ), asCALL_CDECL_OBJFIRST );
+	engine.RegisterObjectMethod(pszObjectName, "int ScheduleOfType(const string& in szName)", asFUNCTION(BaseEntity_ScheduleOfType<BASECLASS>), asCALL_CDECL_OBJFIRST);
 }
 
 /**
 *	Registers the base version of CBaseEntity.
 *	@param engine Script engine.
 */
-inline void RegisterScriptBaseEntity( asIScriptEngine& engine )
+inline void RegisterScriptBaseEntity(asIScriptEngine& engine)
 {
 	//The base name is just the regular name without the 'C'.
-	RegisterScriptBaseEntity<CBaseEntity>( engine, AS_CBASEENTITY_CLASSNAME + 1 );
+	RegisterScriptBaseEntity<CBaseEntity>(engine, AS_CBASEENTITY_CLASSNAME + 1);
 }
-
-#endif //TEST_ASCBASEENTITY_H

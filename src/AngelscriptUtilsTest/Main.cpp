@@ -48,35 +48,35 @@ enum ModuleAccessMask
 	/**
 	*	No access.
 	*/
-	NONE			= 0,
+	NONE = 0,
 
 	/**
 	*	Shared API.
 	*/
-	SHARED			= 1 << 0,
+	SHARED = 1 << 0,
 
 	/**
 	*	Map script specific.
 	*/
-	MAPSCRIPT_ONLY	= 1 << 1,
+	MAPSCRIPT_ONLY = 1 << 1,
 
-	MAPSCRIPT		= SHARED | MAPSCRIPT_ONLY,
+	MAPSCRIPT = SHARED | MAPSCRIPT_ONLY,
 
 	/**
 	*	Plugin script specific.
 	*/
-	PLUGIN_ONLY		= 1 << 2,
+	PLUGIN_ONLY = 1 << 2,
 
-	PLUGIN			= SHARED | PLUGIN_ONLY,
+	PLUGIN = SHARED | PLUGIN_ONLY,
 
 	/**
 	*	All scripts.
 	*/
-	ALL			= SHARED | MAPSCRIPT | PLUGIN
+	ALL = SHARED | MAPSCRIPT | PLUGIN
 };
 }
 
-void Print( const std::string& szString )
+void Print(const std::string& szString)
 {
 	std::cout << szString;
 }
@@ -153,12 +153,12 @@ void CleanupModuleUserData(asIScriptModule* module)
 class CASTestModuleBuilder
 {
 public:
-	CASTestModuleBuilder( const std::string& szDecl )
-		: m_szDecl( szDecl )
+	CASTestModuleBuilder(const std::string& szDecl)
+		: m_szDecl(szDecl)
 	{
 	}
 
-	bool AddScripts( CScriptBuilder& builder )
+	bool AddScripts(CScriptBuilder& builder)
 	{
 		//By using a handle this can be changed, but since there are no other instances, it can only be made null.
 		//TODO: figure out a better way.
@@ -167,16 +167,16 @@ public:
 
 		const auto globalsSection = m_GlobalVariables.GetDeclarationsAsSection();
 
-		auto result = builder.AddSectionFromMemory( 
-			"__Globals", 
+		auto result = builder.AddSectionFromMemory(
+			"__Globals",
 			globalsSection.c_str());
 
-		if( result < 0 )
+		if (result < 0)
 			return false;
 
-		if( !m_szDecl.empty() && builder.AddSectionFromMemory(
+		if (!m_szDecl.empty() && builder.AddSectionFromMemory(
 			"__CScriptBaseEntity",
-			m_szDecl.c_str() ) < 0 )
+			m_szDecl.c_str()) < 0)
 			return false;
 
 		return builder.AddSectionFromFile("resources/scripts/test.as") >= 0;
@@ -357,9 +357,9 @@ private:
 		asutils::FormatEngineMessage(*message, std::cout);
 	}
 
-	static asIScriptContext* CreateScriptContext(asIScriptEngine* pEngine, void* initializer)
+	static asIScriptContext* CreateScriptContext(asIScriptEngine* engine, void* initializer)
 	{
-		auto context = pEngine->CreateContext();
+		auto context = engine->CreateContext();
 
 		//TODO: add test to see if suspending will log an error.
 		auto wrapper = new asutils::LoggingScriptContext(*context, reinterpret_cast<CASTestInitializer*>(initializer)->m_Logger, true);
@@ -369,12 +369,12 @@ private:
 		return wrapper;
 	}
 
-	static void DestroyScriptContext(asIScriptEngine*, asIScriptContext* pContext, void*)
+	static void DestroyScriptContext(asIScriptEngine*, asIScriptContext* context, void*)
 	{
 		//Releases both the wrapper and context at once if this is a wrapped context
-		if (pContext)
+		if (context)
 		{
-			pContext->Release();
+			context->Release();
 		}
 	}
 
@@ -392,11 +392,11 @@ private:
 	CASTestInitializer& operator=(const CASTestInitializer&) = delete;
 };
 
-int main( int, char*[] )
+int main(int, char* [])
 {
 	std::cout << "Hello World!" << std::endl;
 
-	if(CASTestInitializer initializer; initializer.Initialize())
+	if (CASTestInitializer initializer; initializer.Initialize())
 	{
 		auto& engine = initializer.GetEngine();
 
@@ -415,42 +415,42 @@ int main( int, char*[] )
 		const std::string szDecl{};
 
 		//Make a map script.
-		CASTestModuleBuilder builder( szDecl );
+		CASTestModuleBuilder builder(szDecl);
 
-		auto pModule = builder.Build(engine, "MapScript", ModuleAccessMask::MAPSCRIPT);
+		auto mapModule = builder.Build(engine, "MapScript", ModuleAccessMask::MAPSCRIPT);
 
-		if( pModule )
+		if (mapModule)
 		{
-			auto& module = *pModule;
+			auto& module = *mapModule;
 
-			auto userData = reinterpret_cast<ModuleUserData*>(pModule->GetUserData(MODULE_USER_DATA_ID));
+			auto userData = reinterpret_cast<ModuleUserData*>(module.GetUserData(MODULE_USER_DATA_ID));
 
-			auto pContext = engine.RequestContext();
+			auto context = engine.RequestContext();
 
 			auto& eventSystem = initializer.GetEventSystem();
 
-			if (auto pFunction = module.GetFunctionByName("TemplatedCallTest"))
+			if (auto function = module.GetFunctionByName("TemplatedCallTest"))
 			{
 				auto parameters = asutils::CreateNativeParameterList(10, EnumType::Value, new MyEvent(), std::string{"Packed parameters"});
 
-				asutils::PackedCall(*pFunction, *pContext, parameters);
+				asutils::PackedCall(*function, *context, parameters);
 
 				int output = 10;
 				auto event = new MyEvent();
 				event->AddRef();
-				asutils::NativeCall(*pFunction, *pContext, output, EnumType::Value, event, std::string{"Test string"});
+				asutils::NativeCall(*function, *context, output, EnumType::Value, event, std::string{"Test string"});
 
 				std::cout << "C++ value of foo is " << output << std::endl;
 			}
 
 			//Call the main function.
-			if( auto pFunction = module.GetFunctionByName( "main" ) )
+			if (auto function = module.GetFunctionByName("main"))
 			{
 				std::string szString = "Hello World!\n";
 
 				//Note: main takes a const string& in. We can pass by pointer or by reference, either will work the same way
 				//Constructing the string in the parameter list itself also works
-				asutils::NativeCall( *pFunction, *pContext, &szString );
+				asutils::NativeCall(*function, *context, &szString);
 
 				MyEvent event;
 
@@ -460,12 +460,12 @@ int main( int, char*[] )
 			}
 
 			//Test the object pointer.
-			if( auto pFunction = module.GetFunctionByName( "GetLifetime" ) )
+			if (auto function = module.GetFunctionByName("GetLifetime"))
 			{
 				{
-					asutils::FunctionExecutor executor(*pContext);
+					asutils::FunctionExecutor executor(*context);
 
-					auto functionCaller = executor.Global(*pFunction);
+					auto functionCaller = executor.Global(*function);
 
 					if (functionCaller.NativeCall())
 					{
@@ -475,7 +475,7 @@ int main( int, char*[] )
 
 						if (result)
 						{
-							const int iTypeId = pFunction->GetReturnTypeId();
+							const int iTypeId = function->GetReturnTypeId();
 
 							ptr = result;
 						}
@@ -506,96 +506,97 @@ int main( int, char*[] )
 			}
 
 			//Call a function using the different function call helpers.
-			if( auto pFunction = module.GetFunctionByName( "NoArgs" ) )
+			if (auto function = module.GetFunctionByName("NoArgs"))
 			{
 				{
 					//Test the smart pointer.
 					asutils::ReferencePointer<asIScriptFunction> func;
 
-					asutils::ReferencePointer<asIScriptFunction> func2( pFunction );
+					asutils::ReferencePointer<asIScriptFunction> func2(function);
 
 					func = func2;
 
-					func = std::move( func2 );
+					func = std::move(func2);
 
-					asutils::ReferencePointer<asIScriptFunction> func3( func );
+					asutils::ReferencePointer<asIScriptFunction> func3(func);
 
-					asutils::ReferencePointer<asIScriptFunction> func4( std::move( func ) );
+					asutils::ReferencePointer<asIScriptFunction> func4(std::move(func));
 
-					func.Reset( pFunction );
+					func.Reset(function);
 
-					auto pPtr = func.Get();
+					auto ptr = func.Get();
 
-					std::cout << "Smart pointer points to: 0x" << std::hex << reinterpret_cast<intptr_t>( pPtr ) << std::dec << std::endl;
+					std::cout << "Smart pointer points to: 0x" << std::hex << reinterpret_cast<intptr_t>(ptr) << std::dec << std::endl;
 				}
 
 				//Regular variadic templates
-				asutils::NativeCall(*pFunction, *pContext);
+				asutils::NativeCall(*function, *context);
 
 				//Argument list
 				auto parameterList = asutils::CreateNativeParameterList();
-				asutils::PackedCall(*pFunction, *pContext, parameterList);
+				asutils::PackedCall(*function, *context, parameterList);
 
 				//Wrapper version
 				{
-					asutils::FunctionExecutor executor{*pContext};
+					asutils::FunctionExecutor executor{*context};
 
-					executor.Global(*pFunction).NativeCall();
+					executor.Global(*function).NativeCall();
 				}
 			}
 
 			//Call a function that triggers a null pointer exception.
-			if( auto pFunction = module.GetFunctionByName( "DoNullPointerException" ) )
+			if (auto function = module.GetFunctionByName("DoNullPointerException"))
 			{
 				std::cout << "Triggering null pointer exception" << std::endl;
-				asutils::NativeCall( *pFunction, *pContext );
+				asutils::NativeCall(*function, *context);
 			}
 
-			if( auto pFunction = module.GetFunctionByName( "DoNullPointerException2" ) )
+			if (auto function = module.GetFunctionByName("DoNullPointerException2"))
 			{
 				std::cout << "Triggering null pointer exception in object member function" << std::endl;
-				asutils::NativeCall(*pFunction, *pContext);
+				asutils::NativeCall(*function, *context);
 			}
 
 			{
 				//Test the scheduler.
-				userData->Scheduler->Think(10, *pContext);
+				userData->Scheduler->Think(10, *context);
 			}
 
 			//Get the parameter types. Angelscript's type info support isn't complete yet, so not all types have an asITypeInfo instance yet.
+			
 			/*
-			if( auto pFunc2 = module.GetFunctionByName( "Function" ) )
+			if(auto function2 = module.GetFunctionByName("Function"))
 			{
-				for( asUINT uiIndex = 0; uiIndex < pFunc2->GetParamCount(); ++uiIndex )
+				for(asUINT index = 0; index < function2->GetParamCount(); ++index)
 				{
-					int iTypeId;
-					const char* pszName;
-					pFunc2->GetParam( uiIndex, &iTypeId, nullptr, &pszName );
+					int typeId;
+					const char* name;
+					function2->GetParam(index, &typeId, nullptr, &name);
 
-					std::cout << "Parameter " << uiIndex << ": " << pszName << std::endl;
-				
-					if( auto pType = manager.GetEngine()->GetTypeInfoById( iTypeId ) )
+					std::cout << "Parameter " << index << ": " << name << std::endl;
+
+					if(auto type = engine.GetTypeInfoById(typeId))
 					{
-						std::cout << pType->GetNamespace() << "::" << pType->GetName() << std::endl;
+						std::cout << type->GetNamespace() << "::" << type->GetName() << std::endl;
 
-						asDWORD uiFlags = pType->GetFlags();
+						asDWORD flags = type->GetFlags();
 
-						if( uiFlags & asOBJ_VALUE )
+						if(flags & asOBJ_VALUE)
 							std::cout << "Value" << std::endl;
 
-						if( uiFlags & asOBJ_REF )
+						if(flags & asOBJ_REF)
 							std::cout << "Ref" << std::endl;
 
-						if( uiFlags & asOBJ_ENUM )
+						if(flags & asOBJ_ENUM)
 							std::cout << "Enum" << std::endl;
 
-						if( uiFlags & asOBJ_FUNCDEF )
+						if(flags & asOBJ_FUNCDEF)
 							std::cout << "Funcdef" << std::endl;
 
-						if( uiFlags & asOBJ_POD )
+						if(flags & asOBJ_POD)
 							std::cout << "POD" << std::endl;
 
-						if( uiFlags & asOBJ_TYPEDEF )
+						if(flags & asOBJ_TYPEDEF)
 							std::cout << "Typedef" << std::endl;
 					}
 					else //Only primitive types don't have type info right now.
@@ -606,36 +607,36 @@ int main( int, char*[] )
 
 			/*
 			//Try to create a C++ class that is extended in a script.
-			bool bCreatedExtend = false;
+			bool createdExtend = false;
 
 			//This data will need to be stored somewhere, bound to the baseclass.
-			if( auto pEntity = as::CreateExtensionClassInstance<CScriptBaseEntity>( *pEngine, module, "CEntity", "CBaseEntity", "BaseEntity" ) )
+			if(auto entity = as::CreateExtensionClassInstance<CScriptBaseEntity>(engine, module, "CEntity", "CBaseEntity", "BaseEntity"))
 			{
-				bCreatedExtend = true;
+				createdExtend = true;
 
-				CBaseEntity* pBaseEnt = pEntity;
+				CBaseEntity* baseEntity = entity;
 
-				pBaseEnt->Spawn();
+				baseEntity->Spawn();
 
-				int result = pBaseEnt->ScheduleOfType( "foo" );
+				int result = baseEntity->ScheduleOfType( "foo" );
 
 				//Silence compiler warnings (unused var).
 				result = result;
 
-				delete pEntity;
+				delete entity;
 			}
 
-			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
+			std::cout << "Created extend class: " << (createdExtend ? "yes" : "no") << std::endl;
 			*/
 
-			engine.ReturnContext(pContext);
+			engine.ReturnContext(context);
 
 			eventSystem.RemoveHandlersOfModule(module);
 
 			//Remove the module.
 			//The scheduler has to be reset before discarding since the engine checks for references before running the cleanup callback
 			userData->PreDiscardCleanup();
-			pModule->Discard();
+			mapModule->Discard();
 		}
 
 		//Initializer goes out of scope here and frees all resources automatically

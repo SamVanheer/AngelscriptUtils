@@ -1,5 +1,4 @@
-#ifndef TEST_CBASEENTITY_H
-#define TEST_CBASEENTITY_H
+#pragma once
 
 #include <string>
 
@@ -11,10 +10,8 @@ public:
 	{
 	}
 
-	virtual int ScheduleOfType( const std::string& /*szName*/ )
+	virtual int ScheduleOfType(const std::string& /*szName*/)
 	{
 		return 1;
 	}
 };
-
-#endif //TEST_CBASEENTITY_H

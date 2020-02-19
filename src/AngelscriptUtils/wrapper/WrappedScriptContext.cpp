@@ -46,7 +46,7 @@ int LoggingScriptContext::Execute()
 
 		case asEXECUTION_EXCEPTION:
 		{
-			const auto szExceptionFunction = FormatFunctionName(*m_Context.GetExceptionFunction());
+			const auto exceptionFunction = FormatFunctionName(*m_Context.GetExceptionFunction());
 
 			asutils::LocationInfo info;
 
@@ -54,7 +54,7 @@ int LoggingScriptContext::Execute()
 
 			m_Logger->warn(
 				"Exception occurred while executing function \"{}\"\nFunction \"{}\" at line {}, column {} in section \"{}\":\n{}",
-				szFunctionName, szExceptionFunction, info.line, info.column, info.section, m_Context.GetExceptionString()
+				szFunctionName, exceptionFunction, info.line, info.column, info.section, m_Context.GetExceptionString()
 			);
 
 			break;

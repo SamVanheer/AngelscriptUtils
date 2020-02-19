@@ -77,57 +77,30 @@ static int CASModuleManager_IncludeCallback( const char* pszFileName, const char
 	return reinterpret_cast<IASModuleBuilder*>( pUserParam )->IncludeScript( *pBuilder, pszFileName, pszFrom ) ? 0 : -1;
 }
 
-CASModule* CASModuleManager::BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder, IASModuleUserData* pUserData )
+CASModule* CASModuleManager::BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder)
 {
 	if( descriptor.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID || FindDescriptorByName( descriptor.GetName() ) != &descriptor )
 	{
-		if( pUserData )
-			pUserData->Release();
-
 		return nullptr;
 	}
 
-	return BuildModuleInternal( descriptor, pszModuleName, builder, pUserData );
+	return BuildModuleInternal( descriptor, pszModuleName, builder );
 }
 
-CASModule* CASModuleManager::BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder, IASModuleUserData* pUserData )
+CASModule* CASModuleManager::BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder )
 {
 	auto pDescriptor = FindDescriptorByName( pszName );
 
 	if( !pDescriptor )
 	{
-		if( pUserData )
-			pUserData->Release();
-
 		return nullptr;
 	}
 
-	return BuildModuleInternal( *pDescriptor, pszModuleName, builder, pUserData );
+	return BuildModuleInternal( *pDescriptor, pszModuleName, builder );
 }
 
-CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder, IASModuleUserData* pUserData )
+CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder )
 {
-	struct CleanupUserDataOnExit final
-	{
-		IASModuleUserData* pUserData;
-
-		CleanupUserDataOnExit( IASModuleUserData* pUserData )
-			: pUserData( pUserData )
-		{
-		}
-
-		~CleanupUserDataOnExit()
-		{
-			if( pUserData )
-				pUserData->Release();
-		}
-
-		void Release()
-		{
-			pUserData = nullptr;
-		}
-	} cleanupUserData( pUserData );
-
 	assert( pszModuleName );
 
 	if( !pszModuleName )
@@ -195,8 +168,7 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 
 	if( bSuccess )
 	{
-		pModule = new CASModule( scriptBuilder.GetModule(), descriptor, pUserData );
-		cleanupUserData.Release();
+		pModule = new CASModule( scriptBuilder.GetModule(), descriptor );
 		cleanupModule.Release();
 	}
 

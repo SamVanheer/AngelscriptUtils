@@ -6,11 +6,10 @@
 
 #include "AngelscriptUtils/CASModule.h"
 
-CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, IASModuleUserData* pUserData )
+CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor )
 	: m_pModule( pModule )
 	, m_pDescriptor( &descriptor )
 	, m_Scheduler(std::make_unique<asutils::Scheduler>())
-	, m_pUserData( pUserData )
 {
 	assert( pModule );
 
@@ -19,8 +18,6 @@ CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descr
 
 CASModule::~CASModule()
 {
-	SetUserData( nullptr );
-
 	//Discard should've been called first.
 	assert( !m_pModule );
 }

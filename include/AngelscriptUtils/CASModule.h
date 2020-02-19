@@ -24,24 +24,6 @@ class Scheduler;
 */
 
 /**
-*	Interface that user data assigned to modules must implement.
-*/
-class IASModuleUserData
-{
-public:
-	virtual ~IASModuleUserData();
-
-	/**
-	*	Called by the module when user data is being released. The module no longer references this user data after this call.
-	*/
-	virtual void Release() const = 0;
-};
-
-inline IASModuleUserData::~IASModuleUserData()
-{
-}
-
-/**
 *	Angelscript module. Wraps asIScriptModule and provides the descriptor.
 *	Is reference counted, unlike the script module.
 */
@@ -52,9 +34,8 @@ public:
 	*	Constructor.
 	*	@param pModule Script module.
 	*	@param descriptor Descriptor for this module.
-	*	@param pUserData Optional. User data to associate with this module.
 	*/
-	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor, IASModuleUserData* pUserData = nullptr );
+	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor );
 
 	/**
 	*	Destructor.
@@ -88,30 +69,12 @@ public:
 	*/
 	asutils::Scheduler& GetScheduler() { return *m_Scheduler; }
 
-	/**
-	*	@return User data associated with this module.
-	*/
-	IASModuleUserData* GetUserData() { return m_pUserData; }
-
-	/**
-	*	Sets the user data associated with this module.
-	*/
-	void SetUserData( IASModuleUserData* pUserData )
-	{
-		if( m_pUserData )
-			m_pUserData->Release();
-
-		m_pUserData = pUserData;
-	}
-
 private:
 	asIScriptModule* m_pModule;
 
 	const CASModuleDescriptor* m_pDescriptor;
 
 	std::unique_ptr<asutils::Scheduler> m_Scheduler;
-
-	IASModuleUserData* m_pUserData = nullptr;
 
 private:
 	CASModule( const CASModule& ) = delete;

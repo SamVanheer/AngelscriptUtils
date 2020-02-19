@@ -13,7 +13,6 @@
 
 class CASModule;
 class IASModuleBuilder;
-class IASModuleUserData;
 
 /**
 *	@addtogroup ASModule
@@ -65,20 +64,18 @@ public:
 	*	@param descriptor Descriptor to use.
 	*	@param pszModuleName Name of the module. Must be unique.
 	*	@param builder Builder to use.
-	*	@param pUserData Optional. User data to associate with the module. Will be released if the module failed to build.
 	*	@return On successful build, the module. Otherwise, null.
 	*/
-	CASModule* BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder, IASModuleUserData* pUserData = nullptr );
+	CASModule* BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder );
 
 	/**
 	*	Builds a module using the given descriptor.
 	*	@param pszName Name of the descriptor to use.
 	*	@param pszModuleName Name of the module. Must be unique.
 	*	@param builder Builder to use.
-	*	@param pUserData Optional. User data to associate with the module. Will be released if the module failed to build.
 	*	@return On successful build, the module. Otherwise, null.
 	*/
-	CASModule* BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder, IASModuleUserData* pUserData = nullptr );
+	CASModule* BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder );
 
 private:
 	/**
@@ -86,10 +83,9 @@ private:
 	*	@param descriptor Descriptor to use.
 	*	@param pszModuleName Name of the module. Must be unique.
 	*	@param builder Builder to use.
-	*	@param pUserData Optional. User data to associate with the module. Will be released if the module failed to build.
 	*	@return On successful build, the module. Otherwise, null.
 	*/
-	CASModule* BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder, IASModuleUserData* pUserData = nullptr );
+	CASModule* BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder );
 
 public:
 	/**

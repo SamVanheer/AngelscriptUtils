@@ -287,25 +287,6 @@ private:
 	std::string m_szDecl;
 };
 
-class CASModuleUserData : public IASModuleUserData
-{
-public:
-	CASModuleUserData()
-	{
-		std::cout << "Creating user data" << std::endl;
-	}
-
-	~CASModuleUserData()
-	{
-		std::cout << "Destroying user data" << std::endl;
-	}
-
-	void Release() const override
-	{
-		delete this;
-	}
-};
-
 int main( int, char*[] )
 {
 	g_Logger = CreateLogger();
@@ -347,7 +328,7 @@ int main( int, char*[] )
 		//Make a map script.
 		CASTestModuleBuilder builder( szDecl );
 
-		auto pModule = manager.GetModuleManager().BuildModule( "MapScript", "MapModule", builder, new CASModuleUserData() );
+		auto pModule = manager.GetModuleManager().BuildModule( "MapScript", "MapModule", builder );
 
 		if( pModule )
 		{

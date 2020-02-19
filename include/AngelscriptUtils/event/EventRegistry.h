@@ -7,7 +7,6 @@
 
 #include <angelscript.h>
 
-#include "AngelscriptUtils/std_make_unique.h"
 #include "AngelscriptUtils/event/Event.h"
 #include "AngelscriptUtils/event/EventArgs.h"
 

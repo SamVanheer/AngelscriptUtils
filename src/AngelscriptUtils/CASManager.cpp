@@ -1,5 +1,6 @@
 #include <cassert>
 #include <iostream>
+#include <memory>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_sinks.h>
@@ -11,8 +12,6 @@
 #include "AngelscriptUtils/IASInitializer.h"
 
 #include "AngelscriptUtils/CASManager.h"
-
-#include "AngelscriptUtils/std_make_unique.h"
 
 CASManager* CASManager::m_pActiveManager = nullptr;
 

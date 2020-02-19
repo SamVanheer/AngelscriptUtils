@@ -7,7 +7,6 @@ target_sources(AngelscriptUtils
 		CASModuleManager.h
 		IASInitializer.h
 		IASModuleBuilder.h
-		std_make_unique.h
 		add_on/scriptbuilder/scriptbuilder.h)
 
 add_subdirectory(event)

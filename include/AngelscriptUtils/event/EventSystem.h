@@ -6,7 +6,6 @@
 #include <typeinfo>
 #include <unordered_map>
 
-#include "AngelscriptUtils/std_make_unique.h"
 #include "AngelscriptUtils/event/Event.h"
 #include "AngelscriptUtils/event/EventRegistry.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"

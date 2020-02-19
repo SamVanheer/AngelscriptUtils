@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <memory>
 
 #include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
 
@@ -8,8 +9,6 @@
 #include "AngelscriptUtils/IASModuleBuilder.h"
 
 #include "AngelscriptUtils/CASModuleManager.h"
-
-#include "AngelscriptUtils/std_make_unique.h"
 
 CASModuleManager::CASModuleManager( asIScriptEngine& engine )
 	: m_Engine( engine )

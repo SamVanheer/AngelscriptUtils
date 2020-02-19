@@ -20,16 +20,11 @@
 #include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
 
 #include "AngelscriptUtils/util/CASBaseClass.h"
-#include "AngelscriptUtils/util/ASExtendAdapter.h"
-#include "AngelscriptUtils/util/ASLogging.h"
-#include "AngelscriptUtils/util/CASExtendAdapter.h"
 
 #include "AngelscriptUtils/utility/Objects.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
 #include "AngelscriptUtils/utility/Variant.h"
 
-#include "AngelscriptUtils/wrapper/ASCallable.h"
-#include "AngelscriptUtils/wrapper/CASContext.h"
 #include "AngelscriptUtils/wrapper/WrappedScriptContext.h"
 
 #include "add_on/scriptany/scriptany.h"
@@ -99,12 +94,23 @@ int NSTest()
 	return 0;
 }
 
+std::shared_ptr<spdlog::logger> CreateLogger()
+{
+	auto console = std::make_shared<spdlog::sinks::stdout_sink_mt>();
+	auto file = std::make_shared<spdlog::sinks::daily_file_sink_mt>("logs/L", 0, 0);
+
+	return std::make_shared<spdlog::logger>("ASUtils", spdlog::sinks_init_list{console, file});
+}
+
+//TODO: refactor to remove global
+static std::shared_ptr<spdlog::logger> g_Logger;
+
 asIScriptContext* CreateScriptContext( asIScriptEngine* pEngine, void* )
 {
 	auto context = pEngine->CreateContext();
 
 	//TODO: add test to see if suspending will log an error.
-	auto wrapper = new asutils::LoggingScriptContext(*context, as::log, true);
+	auto wrapper = new asutils::LoggingScriptContext(*context, g_Logger, true);
 
 	context->Release();
 
@@ -257,7 +263,7 @@ public:
 		if( result < 0 )
 			return false;
 
-		if( builder.AddSectionFromMemory(
+		if( !m_szDecl.empty() && builder.AddSectionFromMemory(
 			"__CScriptBaseEntity",
 			m_szDecl.c_str() ) < 0 )
 			return false;
@@ -304,14 +310,7 @@ public:
 
 int main( int, char*[] )
 {
-	{
-		auto console = std::make_shared<spdlog::sinks::stdout_sink_mt>();
-		auto file = std::make_shared<spdlog::sinks::daily_file_sink_mt>( "logs/L", 0, 0 );
-
-		auto logger = std::make_shared<spdlog::logger>( "ASUtils", spdlog::sinks_init_list{ console, file } );
-
-		as::log = logger;
-	}
+	g_Logger = CreateLogger();
 
 	std::cout << "Hello World!" << std::endl;
 
@@ -332,9 +331,12 @@ int main( int, char*[] )
 		registry.Register<MyEvent>(*pEngine->GetTypeInfoByName("MyEvent"));
 
 		//Create the declaration used for script entity base classes.
+		/*
 		const auto szDecl = as::CreateExtendBaseclassDeclaration( "CScriptBaseEntity", "IScriptEntity", "CBaseEntity", "BaseEntity" );
 
 		std::cout << szDecl << std::endl;
+		*/
+		const std::string szDecl{};
 
 		//Create some module types.
 
@@ -528,6 +530,7 @@ int main( int, char*[] )
 			}
 			*/
 
+			/*
 			//Try to create a C++ class that is extended in a script.
 			bool bCreatedExtend = false;
 
@@ -549,6 +552,7 @@ int main( int, char*[] )
 			}
 
 			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
+			*/
 
 			pEngine->ReturnContext(pContext);
 
@@ -562,9 +566,9 @@ int main( int, char*[] )
 	//Shut down the Angelscript engine, frees all resources.
 	manager.Shutdown();
 
-	spdlog::drop( as::log->name() );
+	spdlog::drop(g_Logger->name());
 
-	as::log.reset();
+	g_Logger.reset();
 
 	//Wait for input.
 	getchar();

@@ -1,9 +1,4 @@
 target_sources(AngelscriptUtils
 	PRIVATE
-		ASExtendAdapter.h
-		ASLogging.h
-		ContextUtils.h
 		CASBaseClass.h
-		CASExtendAdapter.h
-		IASExtendAdapter.h
 )

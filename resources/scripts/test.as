@@ -1,4 +1,4 @@
-
+/*
 class CEntity : CScriptBaseEntity
 {
 	void Spawn()
@@ -11,6 +11,7 @@ class CEntity : CScriptBaseEntity
 		return BaseClass.ScheduleOfType( szName ) + 2;
 	}
 }
+*/
 
 enum E
 {

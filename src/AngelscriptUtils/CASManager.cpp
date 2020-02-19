@@ -8,8 +8,6 @@
 
 #include "AngelscriptUtils/ASUtilsConfig.h"
 
-#include "AngelscriptUtils/util/ASLogging.h"
-
 #include "AngelscriptUtils/IASInitializer.h"
 
 #include "AngelscriptUtils/CASManager.h"
@@ -75,11 +73,6 @@ private:
 
 bool CASManager::Initialize( IASInitializer& initializer )
 {
-	if( !as::log )
-	{
-		as::log = spdlog::create<spdlog::sinks::stdout_sink_mt>( "ASUtils" );
-	}
-
 	if( m_pScriptEngine )
 	{
 		return true;

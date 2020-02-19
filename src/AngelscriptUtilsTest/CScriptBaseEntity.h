@@ -1,6 +1,7 @@
 #ifndef TEST_CSCRIPTBASEENTITY_H
 #define TEST_CSCRIPTBASEENTITY_H
 
+#if false
 #include "AngelscriptUtils/util/CASExtendAdapter.h"
 #include "CBaseEntity.h"
 
@@ -35,5 +36,6 @@ public:
 		CALL_EXTEND_FUNC_RET_DIFFFUNC( int, ScheduleOfType, ThisClass::ScheduleOfTypePtr, "(const string& in)", &szName );
 	}
 };
+#endif
 
 #endif //TEST_CSCRIPTBASEENTITY_H

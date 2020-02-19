@@ -3,7 +3,6 @@
 
 #include "AngelscriptUtils/utility/TypeInfo.h"
 #include "AngelscriptUtils/utility/TypeStringUtils.h"
-#include "AngelscriptUtils/wrapper/CASArguments.h"
 
 namespace asutils
 {
@@ -271,72 +270,6 @@ std::string ExtractNamespaceFromDecl(const std::string& declaration, const bool 
 	}
 
 	return declaration.substr(start, namespaceEnd - start);
-}
-
-bool CreateFunctionSignature(
-	asIScriptEngine& engine,
-	std::stringstream& function, const std::string& returnType, const std::string& functionName,
-	const CASArguments& args,
-	const asUINT startIndex, asIScriptGeneric& arguments)
-{
-	if (returnType.empty() || functionName.empty())
-	{
-		throw std::invalid_argument("Return type and function name must be valid");
-	}
-
-	function << returnType << ' ' << functionName << '(';
-
-	const size_t parameterCount = args.GetArgumentCount();
-
-	//Needs to match.
-	if (parameterCount != (arguments.GetArgCount() - startIndex))
-	{
-		return false;
-	}
-
-	for (size_t index = 0; index < parameterCount; ++index)
-	{
-		const auto parameter = args.GetArgument(index);
-
-		const int typeId = arguments.GetArgTypeId(index + startIndex);
-
-		const auto typeDeclaration = engine.GetTypeDeclaration(typeId, true);
-
-		if (index > 0)
-		{
-			//Get ready for the next argument to be appended.
-			function << ", ";
-		}
-
-		function << typeDeclaration;
-
-		switch (parameter->GetArgumentType())
-		{
-		default:
-		case ArgType::NONE:
-		case ArgType::VOID:
-		{
-			//This should never occur, unless the argument parser fails without returning false
-			throw std::invalid_argument("Invalid input argument");
-		}
-
-		case ArgType::PRIMITIVE:
-		case ArgType::ENUM:			break;
-		case ArgType::VALUE:		function << "& in"; break; //Value types are always passed by reference.
-		case ArgType::REF:
-		{
-			//Always pass as handle
-			if (typeDeclaration[strlen(typeDeclaration) - 1] != '@')
-				function << '@';
-
-			break;
-		}
-		}
-	}
-
-	function << ')';
-
-	return true;
 }
 
 std::string FormatObjectTypeName(const std::string& scriptNamespace, const std::string& scriptName)

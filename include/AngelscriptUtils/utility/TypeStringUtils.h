@@ -4,8 +4,6 @@
 
 #include <angelscript.h>
 
-class CASArguments;
-
 namespace asutils
 {
 /**
@@ -89,20 +87,6 @@ inline std::string ExtractNameFromName(const std::string& name)
 *	@return If a namespace is contained in the declaration, returns a string containing that namespace. Otherwise, returns an empty string
 */
 std::string ExtractNamespaceFromDecl(const std::string& declaration, const bool isFunctionDeclaration = true);
-
-/**
-*	@brief Creates a function signature that can be called with the given arguments
-*	@param function Stream that will receive the signature
-*	@param args Argument list
-*	@param startIndex First argument in the generic call instance to check
-*	@param arguments Generic call instance whose arguments will be used for type information
-*	@return true on success, false otherwise
-*/
-bool CreateFunctionSignature(
-	asIScriptEngine& engine,
-	std::stringstream& function, const std::string& returnType, const std::string& functionName,
-	const CASArguments& args,
-	const asUINT startIndex, asIScriptGeneric& arguments);
 
 std::string FormatObjectTypeName(const std::string& scriptNamespace, const std::string& scriptName);
 }

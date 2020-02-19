@@ -1,5 +1,3 @@
-#include "AngelscriptUtils/util/CASBaseClass.h"
-
 #include "AngelscriptUtils/ScriptAPI/Reflection/IASReflectionGroup.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/CASEngineReflectionGroup.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/CASModuleReflectionGroup.h"

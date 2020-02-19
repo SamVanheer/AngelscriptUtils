@@ -6,8 +6,6 @@
 
 #include <spdlog/spdlog.h>
 
-#include "AngelscriptUtils/util/CASBaseClass.h"
-
 namespace asutils
 {
 /**

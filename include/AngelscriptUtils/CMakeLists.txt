@@ -10,9 +10,8 @@ target_sources(AngelscriptUtils
 		std_make_unique.h
 		add_on/scriptbuilder/scriptbuilder.h)
 
-add_subdirectory( event )
+add_subdirectory(event)
 add_subdirectory(execution)
-add_subdirectory( ScriptAPI )
-add_subdirectory( util )
+add_subdirectory(ScriptAPI)
 add_subdirectory(utility)
-add_subdirectory( wrapper )
+add_subdirectory(wrapper)

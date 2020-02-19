@@ -1,5 +1,6 @@
 target_sources(AngelscriptUtils
 	PRIVATE
+		BaseClasses.h
 		ContextUtils.h
 		Introspection.h
 		Objects.h

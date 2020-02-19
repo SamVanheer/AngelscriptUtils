@@ -1,13 +1,13 @@
 #pragma once
 
-#include "AngelscriptUtils/util/CASBaseClass.h"
+#include "AngelscriptUtils/utility/BaseClasses.h"
 
 namespace asutils
 {
 /**
 *	@brief Base class for event arguments
 */
-class EventArgs : public CASRefCountedBaseClass
+class EventArgs : public ReferenceCountedClass
 {
 protected:
 	EventArgs()

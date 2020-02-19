@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "AngelscriptUtils/util/CASBaseClass.h"
+#include "AngelscriptUtils/utility/BaseClasses.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
 
 #include "AngelscriptUtils/event/EventArgs.h"
@@ -17,7 +17,7 @@ struct EventMetaData;
 /**
 *	@brief Represents an event, stores handlers, handles dispatching
 */
-class Event : public CASRefCountedBaseClass
+class Event : public ReferenceCountedClass
 {
 protected:
 	Event(const EventMetaData& metaData, const ReferencePointer<asIScriptContext>& context);

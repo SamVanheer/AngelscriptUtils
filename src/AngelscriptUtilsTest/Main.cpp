@@ -19,8 +19,6 @@
 #include "AngelscriptUtils/ScriptAPI/Scheduler.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
 
-#include "AngelscriptUtils/util/CASBaseClass.h"
-
 #include "AngelscriptUtils/utility/Objects.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
 #include "AngelscriptUtils/utility/Variant.h"

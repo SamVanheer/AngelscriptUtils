@@ -3,7 +3,7 @@
 #include <string>
 
 #include "AngelscriptUtils/event/EventArgs.h"
-#include "AngelscriptUtils/util/CASBaseClass.h"
+#include "AngelscriptUtils/utility/BaseClasses.h"
 
 class asIScriptEngine;
 
@@ -53,7 +53,7 @@ inline void RegisterEventClass(asIScriptEngine& engine, const char* className)
 {
 	engine.RegisterObjectType(className, sizeof(T), asOBJ_REF);
 
-	as::RegisterRefCountedBaseClass<T>(&engine, className);
+	RegisterReferenceCountedClass<T>(engine, className);
 
 	//Also register a funcdef to make casting object methods easier
 	engine.RegisterFuncdef((FormatEventHandlerFuncdef(className)).c_str());

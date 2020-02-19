@@ -6,7 +6,7 @@
 
 #include "ASUtilsConfig.h"
 
-#include "util/CASBaseClass.h"
+#include "AngelscriptUtils/utility/BaseClasses.h"
 
 #include "CASModuleDescriptor.h"
 
@@ -45,7 +45,7 @@ inline IASModuleUserData::~IASModuleUserData()
 *	Angelscript module. Wraps asIScriptModule and provides the descriptor.
 *	Is reference counted, unlike the script module.
 */
-class CASModule final : public CASAtomicRefCountedBaseClass
+class CASModule final : public asutils::AtomicReferenceCountedClass
 {
 public:
 	/**

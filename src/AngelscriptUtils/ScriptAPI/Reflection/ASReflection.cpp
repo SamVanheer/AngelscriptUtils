@@ -271,9 +271,6 @@ void RegisterScriptReflection(asIScriptEngine& engine)
 	RegisterScriptReflectionTypeInfo(engine);
 	RegisterScriptReflectionGroup(engine);
 
-	Reflect::Engine.SetEngine(engine);
-
-	//TODO: don't register the instances, leave that up to the app dev
 	engine.RegisterGlobalProperty("IGroup Engine", &Reflect::Engine);
 	engine.RegisterGlobalProperty("IGroup Module", &Reflect::Module);
 

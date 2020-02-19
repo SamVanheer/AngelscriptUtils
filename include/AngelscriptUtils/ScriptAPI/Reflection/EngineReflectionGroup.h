@@ -22,14 +22,6 @@ public:
 
 	asITypeInfo* GetObjectTypeByIndex(asUINT index) override;
 
-	void SetEngine(asIScriptEngine& engine)
-	{
-		m_pEngine = &engine;
-	}
-
-private:
-	asIScriptEngine* m_pEngine = nullptr;
-
 private:
 	EngineReflectionGroup(const EngineReflectionGroup&) = delete;
 	EngineReflectionGroup& operator=(const EngineReflectionGroup&) = delete;

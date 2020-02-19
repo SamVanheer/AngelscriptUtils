@@ -1,8 +1,7 @@
 #include "AngelscriptUtils/ScriptAPI/Reflection/EngineReflectionGroup.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/IReflectionGroup.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ModuleReflectionGroup.h"
-
-#include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/ReflectionScriptAPI.h"
 
 namespace asutils
 {

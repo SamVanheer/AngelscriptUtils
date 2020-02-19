@@ -17,7 +17,7 @@
 #include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
 
 #include "AngelscriptUtils/ScriptAPI/Scheduler.h"
-#include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
+#include "AngelscriptUtils/ScriptAPI/Reflection/ReflectionScriptAPI.h"
 
 #include "AngelscriptUtils/utility/Objects.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"

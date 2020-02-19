@@ -104,54 +104,8 @@ void PrintReflection()
 	}
 }
 
-namespace Foo
+void RunReflectionTests()
 {
-int Bar()
-{
-	return 0;
-}
-
-class Baz
-{
-}
-}
-
-class HookEvent
-{
-	void Hook(MyEvent@ args)
-	{
-		Print( "HookEvent lookup works\n" );
-		
-		Event<MyEvent>(@g_EventSystem).Unsubscribe(@MyEventHandler(HookEvent().Hook));
-	}
-}
-
-class EventTest
-{
-	void EventCallback(MyEvent@ args)
-	{
-		Print("Event callback\n");
-		
-		args.ShouldHide = true;
-	}
-}
-
-EventTest g_EventTest;
-
-int main( const string& in szString )
-{
-	Print( "foo\nbar\n" );
-	Print( szString );
-	
-	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(g_EventTest.EventCallback));
-	
-	Event<MyEvent>(@g_EventSystem).Subscribe(@MainFunc);
-	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(Foo().Func));
-	
-	Scheduler.SetTimeout( @Func, 5, "what's going on" );
-	
-	//PrintReflection();
-	
 	//Find a function in a namespace (Module).
 	Reflect::Function@ pFunction = Reflect::Module.FindGlobalFunction( "Foo::Bar" );
 	
@@ -223,6 +177,57 @@ int main( const string& in szString )
 	@pType = Reflect::Engine.FindTypeInfo( "Foo2::Baz", true );
 	
 	Print( "(Engine) Didn't find type info by decl: " + ( ( pType is null ) ? "yes" : "no" ) + "\n" );
+}
+
+namespace Foo
+{
+int Bar()
+{
+	return 0;
+}
+
+class Baz
+{
+}
+}
+
+class HookEvent
+{
+	void Hook(MyEvent@ args)
+	{
+		Print( "HookEvent lookup works\n" );
+		
+		Event<MyEvent>(@g_EventSystem).Unsubscribe(@MyEventHandler(HookEvent().Hook));
+	}
+}
+
+class EventTest
+{
+	void EventCallback(MyEvent@ args)
+	{
+		Print("Event callback\n");
+		
+		args.ShouldHide = true;
+	}
+}
+
+EventTest g_EventTest;
+
+int main( const string& in szString )
+{
+	Print( "foo\nbar\n" );
+	Print( szString );
+	
+	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(g_EventTest.EventCallback));
+	
+	Event<MyEvent>(@g_EventSystem).Subscribe(@MainFunc);
+	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(Foo().Func));
+	
+	Scheduler.SetTimeout( @Func, 5, "what's going on" );
+	
+	//PrintReflection();
+	
+	RunReflectionTests();
 
 	return 1;
 }

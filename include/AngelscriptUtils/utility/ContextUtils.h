@@ -82,8 +82,7 @@ inline bool GetExceptionInfo(asIScriptContext& context, LocationInfo& info)
 */
 inline asIScriptModule* GetScriptModuleFromScriptContext(asIScriptContext& context)
 {
-	//TODO: this is wrong. function at 0 is what the caller wants
-	auto function = context.GetFunction(context.GetCallstackSize() - 1);
+	auto function = context.GetFunction(0);
 
 	if (!function)
 	{

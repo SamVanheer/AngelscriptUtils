@@ -94,28 +94,6 @@ std::shared_ptr<spdlog::logger> CreateLogger()
 	return std::make_shared<spdlog::logger>("ASUtils", spdlog::sinks_init_list{console, file});
 }
 
-//TODO: refactor to remove global
-static std::shared_ptr<spdlog::logger> g_Logger;
-
-asIScriptContext* CreateScriptContext( asIScriptEngine* pEngine, void* )
-{
-	auto context = pEngine->CreateContext();
-
-	//TODO: add test to see if suspending will log an error.
-	auto wrapper = new asutils::LoggingScriptContext(*context, g_Logger, true);
-
-	context->Release();
-
-	return wrapper;
-}
-
-void DestroyScriptContext( asIScriptEngine*, asIScriptContext* pContext, void* )
-{
-	//Releases both the wrapper and context at once if this is a wrapped context
-	if( pContext )
-		pContext->Release();
-}
-
 class MyEvent : public asutils::EventArgs
 {
 public:
@@ -162,113 +140,6 @@ void ShutdownAndReleaseEngine(asIScriptEngine* engine)
 {
 	engine->ShutDownAndRelease();
 }
-
-class CASTestInitializer
-{
-public:
-	CASTestInitializer()
-		: m_Engine(nullptr, &ShutdownAndReleaseEngine)
-	{
-	}
-
-	~CASTestInitializer()
-	{
-		m_EventSystem.reset();
-	}
-
-	asIScriptEngine& GetEngine()
-	{
-		return *m_Engine;
-	}
-
-	asutils::EventRegistry& GetEventRegistry()
-	{
-		return m_EventRegistry;
-	}
-
-	asutils::EventSystem& GetEventSystem()
-	{
-		return *m_EventSystem;
-	}
-
-	bool Initialize()
-	{
-		m_Engine.reset(asCreateScriptEngine(ANGELSCRIPT_VERSION));
-
-		if (!m_Engine)
-		{
-			return false;
-		}
-
-		m_Engine->SetMessageCallback(asFUNCTION(TestMessageCallback), nullptr, asCALL_CDECL);
-
-		m_Engine->SetContextCallbacks(&::CreateScriptContext, &::DestroyScriptContext);
-
-		if (!RegisterAPI())
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-private:
-	bool RegisterAPI()
-	{
-		auto& engine = *m_Engine;
-
-		RegisterStdString(&engine);
-		RegisterScriptArray(&engine, true);
-		RegisterScriptDictionary(&engine);
-		RegisterScriptAny(&engine);
-		asutils::RegisterSchedulerAPI(engine);
-		asutils::RegisterReflectionAPI(engine);
-
-		asutils::RegisterEventAPI(engine);
-
-		RegisterMyEvent(engine);
-
-		m_EventSystem = std::make_unique<asutils::EventSystem>(m_EventRegistry, asutils::ReferencePointer<asIScriptContext>(engine.RequestContext(), true));
-
-		engine.RegisterGlobalProperty("EventSystem g_EventSystem", m_EventSystem.get());
-
-		engine.RegisterTypedef("size_t", "uint32");
-
-		//Printing function.
-		engine.RegisterGlobalFunction("void Print(const string& in szString)", asFUNCTION(Print), asCALL_CDECL);
-
-		engine.SetDefaultNamespace("NS");
-
-		engine.RegisterGlobalFunction(
-			"int NSTest()",
-			asFUNCTION(NSTest),
-			asCALL_CDECL);
-
-		engine.SetDefaultNamespace("");
-
-		//Register the interface that all custom entities use. Allows you to take them as handles to functions.
-		engine.RegisterInterface("IScriptEntity");
-
-		//Register the entity class.
-		RegisterScriptCBaseEntity(engine);
-
-		//Register the entity base class. Used to call base class implementations.
-		RegisterScriptBaseEntity(engine);
-
-		return true;
-	}
-
-private:
-	std::unique_ptr<asIScriptEngine, decltype(&ShutdownAndReleaseEngine)> m_Engine;
-
-	asutils::EventRegistry m_EventRegistry;
-
-	std::unique_ptr<asutils::EventSystem> m_EventSystem;
-
-private:
-	CASTestInitializer(const CASTestInitializer&) = delete;
-	CASTestInitializer& operator=(const CASTestInitializer&) = delete;
-};
 
 constexpr asPWORD MODULE_USER_DATA_ID = 10001;
 
@@ -386,10 +257,143 @@ private:
 	asutils::GlobalVariablesList m_GlobalVariables;
 };
 
+class CASTestInitializer
+{
+public:
+	CASTestInitializer()
+		: m_Engine(nullptr, &ShutdownAndReleaseEngine)
+	{
+		m_Logger = CreateLogger();
+
+		spdlog::register_logger(m_Logger);
+	}
+
+	~CASTestInitializer()
+	{
+		m_EventSystem.reset();
+
+		spdlog::drop(m_Logger->name());
+	}
+
+	asIScriptEngine& GetEngine()
+	{
+		return *m_Engine;
+	}
+
+	asutils::EventRegistry& GetEventRegistry()
+	{
+		return m_EventRegistry;
+	}
+
+	asutils::EventSystem& GetEventSystem()
+	{
+		return *m_EventSystem;
+	}
+
+	bool Initialize()
+	{
+		m_Engine.reset(asCreateScriptEngine(ANGELSCRIPT_VERSION));
+
+		if (!m_Engine)
+		{
+			return false;
+		}
+
+		m_Engine->SetMessageCallback(asFUNCTION(TestMessageCallback), nullptr, asCALL_CDECL);
+
+		m_Engine->SetContextCallbacks(&CASTestInitializer::CreateScriptContext, &CASTestInitializer::DestroyScriptContext, this);
+
+		if (!RegisterAPI())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+private:
+	bool RegisterAPI()
+	{
+		auto& engine = *m_Engine;
+
+		RegisterStdString(&engine);
+		RegisterScriptArray(&engine, true);
+		RegisterScriptDictionary(&engine);
+		RegisterScriptAny(&engine);
+		asutils::RegisterSchedulerAPI(engine);
+		asutils::RegisterReflectionAPI(engine);
+
+		asutils::RegisterEventAPI(engine);
+
+		RegisterMyEvent(engine);
+
+		m_EventSystem = std::make_unique<asutils::EventSystem>(m_EventRegistry, asutils::ReferencePointer<asIScriptContext>(engine.RequestContext(), true));
+
+		engine.RegisterGlobalProperty("EventSystem g_EventSystem", m_EventSystem.get());
+
+		engine.RegisterTypedef("size_t", "uint32");
+
+		//Printing function.
+		engine.RegisterGlobalFunction("void Print(const string& in szString)", asFUNCTION(Print), asCALL_CDECL);
+
+		engine.SetDefaultNamespace("NS");
+
+		engine.RegisterGlobalFunction(
+			"int NSTest()",
+			asFUNCTION(NSTest),
+			asCALL_CDECL);
+
+		engine.SetDefaultNamespace("");
+
+		//Register the interface that all custom entities use. Allows you to take them as handles to functions.
+		engine.RegisterInterface("IScriptEntity");
+
+		//Register the entity class.
+		RegisterScriptCBaseEntity(engine);
+
+		//Register the entity base class. Used to call base class implementations.
+		RegisterScriptBaseEntity(engine);
+
+		return true;
+	}
+
+	static asIScriptContext* CreateScriptContext(asIScriptEngine* pEngine, void* initializer)
+	{
+		auto context = pEngine->CreateContext();
+
+		//TODO: add test to see if suspending will log an error.
+		auto wrapper = new asutils::LoggingScriptContext(*context, reinterpret_cast<CASTestInitializer*>(initializer)->m_Logger, true);
+
+		context->Release();
+
+		return wrapper;
+	}
+
+	static void DestroyScriptContext(asIScriptEngine*, asIScriptContext* pContext, void*)
+	{
+		//Releases both the wrapper and context at once if this is a wrapped context
+		if (pContext)
+		{
+			pContext->Release();
+		}
+	}
+
+private:
+	std::shared_ptr<spdlog::logger> m_Logger;
+
+	std::unique_ptr<asIScriptEngine, decltype(&ShutdownAndReleaseEngine)> m_Engine;
+
+	asutils::EventRegistry m_EventRegistry;
+
+	std::unique_ptr<asutils::EventSystem> m_EventSystem;
+
+private:
+	CASTestInitializer(const CASTestInitializer&) = delete;
+	CASTestInitializer& operator=(const CASTestInitializer&) = delete;
+};
+
 int main( int, char*[] )
 {
-	g_Logger = CreateLogger();
-
 	std::cout << "Hello World!" << std::endl;
 
 	if(CASTestInitializer initializer; initializer.Initialize())
@@ -638,10 +642,6 @@ int main( int, char*[] )
 
 		//Initializer goes out of scope here and frees all resources automatically
 	}
-
-	spdlog::drop(g_Logger->name());
-
-	g_Logger.reset();
 
 	//Wait for input.
 	getchar();

@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_sinks.h>
@@ -7,9 +6,21 @@
 
 #include <angelscript.h>
 
-#undef VOID
+#include "add_on/scriptany/scriptany.h"
+#include "add_on/scriptarray/scriptarray.h"
+#include "add_on/scriptbuilder/scriptbuilder.h"
+#include "add_on/scriptdictionary/scriptdictionary.h"
+#include "add_on/scriptstdstring/scriptstdstring.h"
 
 #include "AngelscriptUtils/compilation/GlobalVariablesList.h"
+
+#include "AngelscriptUtils/event/EventArgs.h"
+#include "AngelscriptUtils/event/EventScriptAPI.h"
+#include "AngelscriptUtils/event/EventSystem.h"
+
+#include "AngelscriptUtils/execution/Metadata.h"
+#include "AngelscriptUtils/execution/Execution.h"
+#include "AngelscriptUtils/execution/Packing.h"
 
 #include "AngelscriptUtils/ScriptAPI/Scheduler.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ReflectionScriptAPI.h"
@@ -21,23 +32,9 @@
 
 #include "AngelscriptUtils/wrapper/WrappedScriptContext.h"
 
-#include "add_on/scriptany/scriptany.h"
-#include "add_on/scriptarray/scriptarray.h"
-#include "add_on/scriptbuilder/scriptbuilder.h"
-#include "add_on/scriptdictionary/scriptdictionary.h"
-#include "add_on/scriptstdstring/scriptstdstring.h"
-
 #include "CBaseEntity.h"
 #include "CScriptBaseEntity.h"
 #include "ASCBaseEntity.h"
-
-#include "AngelscriptUtils/event/EventArgs.h"
-#include "AngelscriptUtils/event/EventScriptAPI.h"
-#include "AngelscriptUtils/event/EventSystem.h"
-
-#include "AngelscriptUtils/execution/Metadata.h"
-#include "AngelscriptUtils/execution/Execution.h"
-#include "AngelscriptUtils/execution/Packing.h"
 
 DEFINE_OBJECT_TYPE_SIMPLE(std::string, string, asOBJ_VALUE | asGetTypeTraits<std::string>())
 

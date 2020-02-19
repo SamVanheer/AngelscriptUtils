@@ -1,9 +1,9 @@
 #include "AngelscriptUtils/CASModule.h"
 
-#include "AngelscriptUtils/utility/TypeStringUtils.h"
-
 #include "AngelscriptUtils/ScriptAPI/Reflection/ReflectionGroup.h"
-#include "AngelscriptUtils/ScriptAPI/Reflection/TypeProviders.h"
+
+#include "AngelscriptUtils/utility/TypeProviders.h"
+#include "AngelscriptUtils/utility/TypeStringUtils.h"
 
 namespace asutils
 {

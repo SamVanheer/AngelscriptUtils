@@ -1,6 +1,7 @@
 #include "AngelscriptUtils/ScriptAPI/Reflection/CASEngineReflectionGroup.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ReflectionGroup.h"
-#include "AngelscriptUtils/ScriptAPI/Reflection/TypeProviders.h"
+
+#include "AngelscriptUtils/utility/TypeProviders.h"
 
 namespace asutils
 {

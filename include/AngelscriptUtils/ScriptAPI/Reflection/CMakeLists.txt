@@ -5,5 +5,4 @@ target_sources(AngelscriptUtils
 		CASModuleReflectionGroup.h
 		ASReflection.h
 		ReflectionGroup.h
-		TypeProviders.h
 )

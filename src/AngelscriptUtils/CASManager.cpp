@@ -7,8 +7,6 @@
 
 #include <angelscript.h>
 
-#include "AngelscriptUtils/ASUtilsConfig.h"
-
 #include "AngelscriptUtils/IASInitializer.h"
 
 #include "AngelscriptUtils/CASManager.h"
@@ -88,8 +86,6 @@ bool CASManager::Initialize( IASInitializer& initializer )
 
 	initializer.OnInitBegin();
 
-	m_ModuleManager = std::make_unique<CASModuleManager>( *m_pScriptEngine );
-
 	asSFuncPtr msgCallback;
 	void* pObj;
 	asDWORD callConv;
@@ -124,13 +120,6 @@ void CASManager::Shutdown()
 	}
 
 	Activate();
-
-	if( m_ModuleManager )
-	{
-		//Clear all modules and destroy all descriptors.
-		m_ModuleManager->Clear();
-		m_ModuleManager.reset();
-	}
 
 	//Let it go.
 	m_pScriptEngine->ShutDownAndRelease();

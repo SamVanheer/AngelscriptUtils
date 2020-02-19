@@ -7,14 +7,7 @@ find_package(Threads REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(Angelscript CONFIG 2.34.0 REQUIRED)
 
-set(ASUTILS_CASMODULE_USER_DATA_ID "10001" CACHE STRING "Value for the CASModule user data ID")
-
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
-
-configure_file(
-	${INCLUDE_DIR}/AngelscriptUtils/ASUtilsConfig.h.in
-	${INCLUDE_DIR}/AngelscriptUtils/ASUtilsConfig.h
-	@ONLY)
 
 add_library(AngelscriptUtils STATIC)
 
@@ -47,8 +40,6 @@ target_compile_options(AngelscriptUtils PRIVATE
 target_sources(AngelscriptUtils
 	PRIVATE
 		CASManager.cpp
-		CASModule.cpp
-		CASModuleManager.cpp
 		add_on/scriptbuilder/scriptbuilder.cpp)
 
 add_subdirectory(event)

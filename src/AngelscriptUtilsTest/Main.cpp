@@ -10,9 +10,7 @@
 #undef VOID
 
 #include "AngelscriptUtils/CASManager.h"
-#include "AngelscriptUtils/CASModule.h"
 #include "AngelscriptUtils/IASInitializer.h"
-#include "AngelscriptUtils/IASModuleBuilder.h"
 
 #include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
 
@@ -241,10 +239,34 @@ private:
 	CASTestInitializer& operator=( const CASTestInitializer& ) = delete;
 };
 
+constexpr asPWORD MODULE_USER_DATA_ID = 10001;
+
+struct ModuleUserData final
+{
+	ModuleUserData()
+		: Scheduler(std::make_unique<asutils::Scheduler>())
+	{
+	}
+
+	void PreDiscardCleanup()
+	{
+		Scheduler.reset();
+	}
+
+	std::unique_ptr<asutils::Scheduler> Scheduler;
+};
+
+void CleanupModuleUserData(asIScriptModule* module)
+{
+	auto data = reinterpret_cast<ModuleUserData*>(module->GetUserData(MODULE_USER_DATA_ID));
+
+	delete data;
+}
+
 /**
-*	Builder for the test script.
+*	@brief Builder for the test script
 */
-class CASTestModuleBuilder : public IASModuleBuilder
+class CASTestModuleBuilder
 {
 public:
 	CASTestModuleBuilder( const std::string& szDecl )
@@ -252,7 +274,7 @@ public:
 	{
 	}
 
-	bool AddScripts( CScriptBuilder& builder ) override
+	bool AddScripts( CScriptBuilder& builder )
 	{
 		//By using a handle this can be changed, but since there are no other instances, it can only be made null.
 		//TODO: figure out a better way.
@@ -273,25 +295,58 @@ public:
 			m_szDecl.c_str() ) < 0 )
 			return false;
 
-		return builder.AddSectionFromFile( "resources/scripts/test.as" ) >= 0;
+		return builder.AddSectionFromFile("resources/scripts/test.as") >= 0;
 	}
 
-	bool PostBuild( CScriptBuilder&, const bool bSuccess, CASModule* pModule ) override
+	bool PostBuild(asIScriptModule& module)
 	{
-		if( !bSuccess )
-			return false;
+		auto userData = new ModuleUserData();
+		module.SetUserData(userData, MODULE_USER_DATA_ID);
 
-		auto& scriptModule = *pModule->GetModule();
+		return m_GlobalVariables.InitializeAll(module, userData);
+	}
 
-		return m_GlobalVariables.InitializeAll(scriptModule, pModule);
+	asIScriptModule* Build(asIScriptEngine& engine, const char* name, const asDWORD accessMask)
+	{
+		CScriptBuilder builder;
+
+		if (builder.StartNewModule(&engine, name) < 0)
+		{
+			return nullptr;
+		}
+
+		auto module = builder.GetModule();
+
+		std::unique_ptr<asIScriptModule, decltype(&CASTestModuleBuilder::DiscardModule)> deleter(module, &CASTestModuleBuilder::DiscardModule);
+
+		module->SetAccessMask(accessMask);
+
+		if (!AddScripts(builder))
+		{
+			return nullptr;
+		}
+
+		const auto success = builder.BuildModule() >= 0;
+
+		if (!PostBuild(*module))
+		{
+			return nullptr;
+		}
+
+		return deleter.release();
 	}
 
 private:
+	static void DiscardModule(asIScriptModule* module)
+	{
+		module->Discard();
+	}
+
 	bool SetScheduler(const asutils::GlobalInitializerData& data)
 	{
-		auto utilsModule = reinterpret_cast<CASModule*>(data.UserData);
+		auto userData = reinterpret_cast<ModuleUserData*>(data.UserData);
 
-		return asutils::SetGlobalByName(data.Module, data.VariableName, &utilsModule->GetScheduler());
+		return asutils::SetGlobalByName(data.Module, data.VariableName, userData->Scheduler.get());
 	}
 
 private:
@@ -316,6 +371,8 @@ int main( int, char*[] )
 	{
 		auto pEngine = manager.GetEngine();
 
+		pEngine->SetModuleUserDataCleanupCallback(&CleanupModuleUserData, MODULE_USER_DATA_ID);
+
 		asutils::Variant variant(10);
 
 		variant.Reset(10);
@@ -333,15 +390,19 @@ int main( int, char*[] )
 		//Make a map script.
 		CASTestModuleBuilder builder( szDecl );
 
-		auto pModule = manager.GetModuleManager().BuildModule( "MapScript", ModuleAccessMask::MAPSCRIPT, builder );
+		auto pModule = builder.Build(*pEngine, "MapScript", ModuleAccessMask::MAPSCRIPT);
 
 		if( pModule )
 		{
+			auto& module = *pModule;
+
+			auto userData = reinterpret_cast<ModuleUserData*>(pModule->GetUserData(MODULE_USER_DATA_ID));
+
 			auto pContext = pEngine->RequestContext();
 
 			auto& eventSystem = initializer.GetEventSystem();
 
-			if (auto pFunction = pModule->GetModule()->GetFunctionByName("TemplatedCallTest"))
+			if (auto pFunction = module.GetFunctionByName("TemplatedCallTest"))
 			{
 				auto parameters = asutils::CreateNativeParameterList(10, EnumType::Value, new MyEvent(), std::string{"Packed parameters"});
 
@@ -356,7 +417,7 @@ int main( int, char*[] )
 			}
 
 			//Call the main function.
-			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "main" ) )
+			if( auto pFunction = module.GetFunctionByName( "main" ) )
 			{
 				std::string szString = "Hello World!\n";
 
@@ -372,7 +433,7 @@ int main( int, char*[] )
 			}
 
 			//Test the object pointer.
-			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "GetLifetime" ) )
+			if( auto pFunction = module.GetFunctionByName( "GetLifetime" ) )
 			{
 				{
 					asutils::FunctionExecutor executor(*pContext);
@@ -418,7 +479,7 @@ int main( int, char*[] )
 			}
 
 			//Call a function using the different function call helpers.
-			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "NoArgs" ) )
+			if( auto pFunction = module.GetFunctionByName( "NoArgs" ) )
 			{
 				{
 					//Test the smart pointer.
@@ -457,24 +518,26 @@ int main( int, char*[] )
 			}
 
 			//Call a function that triggers a null pointer exception.
-			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "DoNullPointerException" ) )
+			if( auto pFunction = module.GetFunctionByName( "DoNullPointerException" ) )
 			{
 				std::cout << "Triggering null pointer exception" << std::endl;
 				asutils::NativeCall( *pFunction, *pContext );
 			}
 
-			if( auto pFunction = pModule->GetModule()->GetFunctionByName( "DoNullPointerException2" ) )
+			if( auto pFunction = module.GetFunctionByName( "DoNullPointerException2" ) )
 			{
 				std::cout << "Triggering null pointer exception in object member function" << std::endl;
 				asutils::NativeCall(*pFunction, *pContext);
 			}
 
-			//Test the scheduler.
-			pModule->GetScheduler().Think(10, *pContext);
+			{
+				//Test the scheduler.
+				//userData->Scheduler->Think(10, *pContext);
+			}
 
 			//Get the parameter types. Angelscript's type info support isn't complete yet, so not all types have an asITypeInfo instance yet.
 			/*
-			if( auto pFunc2 = pModule->GetModule()->GetFunctionByName( "Function" ) )
+			if( auto pFunc2 = module.GetFunctionByName( "Function" ) )
 			{
 				for( asUINT uiIndex = 0; uiIndex < pFunc2->GetParamCount(); ++uiIndex )
 				{
@@ -519,7 +582,7 @@ int main( int, char*[] )
 			bool bCreatedExtend = false;
 
 			//This data will need to be stored somewhere, bound to the baseclass.
-			if( auto pEntity = as::CreateExtensionClassInstance<CScriptBaseEntity>( *pEngine, *pModule->GetModule(), "CEntity", "CBaseEntity", "BaseEntity" ) )
+			if( auto pEntity = as::CreateExtensionClassInstance<CScriptBaseEntity>( *pEngine, module, "CEntity", "CBaseEntity", "BaseEntity" ) )
 			{
 				bCreatedExtend = true;
 
@@ -540,10 +603,12 @@ int main( int, char*[] )
 
 			pEngine->ReturnContext(pContext);
 
-			eventSystem.RemoveHandlersOfModule(*pModule->GetModule());
+			eventSystem.RemoveHandlersOfModule(module);
 
 			//Remove the module.
-			manager.GetModuleManager().RemoveModule( pModule );
+			//The scheduler has to be reset before discarding since the engine checks for references before running the cleanup callback
+			userData->PreDiscardCleanup();
+			pModule->Discard();
 		}
 	}
 

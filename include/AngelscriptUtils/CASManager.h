@@ -1,10 +1,6 @@
 #ifndef ANGELSCRIPT_CASMANAGER_H
 #define ANGELSCRIPT_CASMANAGER_H
 
-#include <memory>
-
-#include "CASModuleManager.h"
-
 class asIScriptEngine;
 struct asSMessageInfo;
 
@@ -62,11 +58,6 @@ public:
 	asIScriptEngine* GetEngine() { return m_pScriptEngine; }
 
 	/**
-	*	@return The module manager.
-	*/
-	CASModuleManager& GetModuleManager() { return *m_ModuleManager; }
-
-	/**
 	*	Initializes the manager.
 	*	On success, makes this the active manager.
 	*	@param initializer Initializer to use.
@@ -90,8 +81,6 @@ private:
 	static CASManager* m_pActiveManager;
 
 	asIScriptEngine* m_pScriptEngine = nullptr;
-
-	std::unique_ptr<CASModuleManager> m_ModuleManager;
 
 private:
 	CASManager( const CASManager& ) = delete;

@@ -1,11 +1,7 @@
 target_sources(AngelscriptUtils
 	PRIVATE
-		ASUtilsConfig.h
 		CASManager.h
-		CASModule.h
-		CASModuleManager.h
 		IASInitializer.h
-		IASModuleBuilder.h
 		add_on/scriptbuilder/scriptbuilder.h)
 
 add_subdirectory(compilation)

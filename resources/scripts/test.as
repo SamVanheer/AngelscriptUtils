@@ -99,7 +99,7 @@ void PrintReflection()
 		{
 			Reflect::Method@ pMethod = pType.GetMethodByIndex( uiIndex2 );
 			
-			Print( pMethod.GetDeclaration( bIncludeObjectName: false, bIncludeParamNames: true ) + "\n" );
+			Print( pMethod.GetDeclaration( includeObjectName: false, includeParamNames: true ) + "\n" );
 		}
 	}
 }

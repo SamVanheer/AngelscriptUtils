@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <typeinfo>
+#include <type_traits>
 #include <unordered_map>
 
 #include <angelscript.h>
@@ -70,7 +71,7 @@ public:
 	/**
 	*	@brief Registers a C++ class that derives from \see asutils::EventArgs and binds it to the given script type
 	*/
-	template<typename T, std::enable_if_t<std::is_base_of<EventArgs, T>::value, int> = 0>
+	template<typename T, std::enable_if_t<std::is_base_of_v<EventArgs, T>, int> = 0>
 	void Register(const asITypeInfo& type)
 	{
 		auto data = std::make_unique<EventMetaData>(type, [](const EventMetaData& metaData, asIScriptContext* context) -> ReferencePointer<Event>
@@ -87,7 +88,7 @@ public:
 	*	@brief Looks up event metadata by C++ type
 	*	Should not be used directly
 	*/
-	template<typename T, std::enable_if_t<std::is_base_of<EventArgs, T>::value, int> = 0>
+	template<typename T, std::enable_if_t<std::is_base_of_v<EventArgs, T>, int> = 0>
 	EventMetaData* Lookup()
 	{
 		auto it = m_CppTypeToData.find(typeid(T));

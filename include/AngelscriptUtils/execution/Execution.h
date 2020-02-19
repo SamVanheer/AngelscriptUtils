@@ -256,7 +256,7 @@ public:
 	/**
 	*	@brief Gets the return enum from the last call, if any
 	*/
-	template<typename T, std::enable_if_t<std::is_enum<T>::value, int> = 0>
+	template<typename T, std::enable_if_t<std::is_enum_v<T>, int> = 0>
 	std::optional<T> GetEnumReturnValue()
 	{
 		asDWORD flags;

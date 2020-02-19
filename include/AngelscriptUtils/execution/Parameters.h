@@ -72,14 +72,14 @@ case primitiveTypeId: return context.function(index, static_cast<destinationType
 	}
 }
 
-template<typename PARAM, typename std::enable_if_t<std::is_enum<PARAM>::value, int> = 0>
+template<typename PARAM, typename std::enable_if_t<std::is_enum_v<PARAM>, int> = 0>
 bool SetPrimitiveParameter(asIScriptContext& context, const asUINT index, const BaseObjectType& type, PARAM& parameter, const int typeId, const asDWORD flags)
 {
 	//Overload for enums passed in to primitive types
-	return SetPrimitiveParameter(context, index, type, reinterpret_cast<std::underlying_type<PARAM>::type&>(parameter), typeId, flags);
+	return SetPrimitiveParameter(context, index, type, reinterpret_cast<std::underlying_type_t<PARAM>&>(parameter), typeId, flags);
 }
 
-template<typename PARAM, typename std::enable_if_t<!IsPrimitiveType<PARAM>::value && !std::is_enum<PARAM>::value, int> = 0>
+template<typename PARAM, typename std::enable_if_t<!IsPrimitiveType<PARAM>::value && !std::is_enum_v<PARAM>, int> = 0>
 bool SetPrimitiveParameter(asIScriptContext& context, const asUINT, const BaseObjectType&, PARAM&, const int, const asDWORD)
 {
 	//Should never be reached; only required for completeness
@@ -97,7 +97,7 @@ bool SetPrimitiveParameter(asIScriptContext& context, const asUINT, const BaseOb
 *	Any other types will result in an error
 *	Ïf the type has to be converted reference parameters will not be supported
 */
-template<typename PARAM, std::enable_if_t<std::is_enum<PARAM>::value && Is32BitEnum<PARAM>::value, int> = 0>
+template<typename PARAM, std::enable_if_t<std::is_enum_v<PARAM> && Is32BitEnum<PARAM>::value, int> = 0>
 bool SetEnumParameter(asIScriptFunction& function, asIScriptContext& context,
 	const asUINT index, const BaseObjectType& type, PARAM&& parameter, const asDWORD flags)
 {
@@ -112,7 +112,7 @@ bool SetEnumParameter(asIScriptFunction& function, asIScriptContext& context,
 	}
 }
 
-template<typename PARAM, std::enable_if_t<std::is_enum<PARAM>::value && !Is32BitEnum<PARAM>::value, int> = 0>
+template<typename PARAM, std::enable_if_t<std::is_enum_v<PARAM> && !Is32BitEnum<PARAM>::value, int> = 0>
 bool SetEnumParameter(asIScriptFunction& function, asIScriptContext& context,
 	const asUINT index, const BaseObjectType& type, PARAM&& parameter, const asDWORD flags)
 {
@@ -130,7 +130,7 @@ bool SetEnumParameter(asIScriptFunction& function, asIScriptContext& context,
 	return context.SetArgDWord(index, enumValue) >= 0;
 }
 
-template<typename PARAM, std::enable_if_t<std::is_integral<PARAM>::value && std::is_same<int, PARAM>::value, int> = 0>
+template<typename PARAM, std::enable_if_t<std::is_integral_v<PARAM> && std::is_same_v<int, PARAM>, int> = 0>
 bool SetEnumParameter(asIScriptFunction& function, asIScriptContext& context,
 	const asUINT index, const BaseObjectType& type, PARAM&& parameter, const asDWORD flags)
 {
@@ -145,7 +145,7 @@ bool SetEnumParameter(asIScriptFunction& function, asIScriptContext& context,
 	}
 }
 
-template<typename PARAM, std::enable_if_t<std::is_integral<PARAM>::value && !std::is_same<int, PARAM>::value, int> = 0>
+template<typename PARAM, std::enable_if_t<std::is_integral_v<PARAM> && !std::is_same_v<int, PARAM>, int> = 0>
 bool SetEnumParameter(asIScriptFunction& function, asIScriptContext& context,
 	const asUINT index, const BaseObjectType& type, PARAM&& parameter, const asDWORD flags)
 {
@@ -162,7 +162,7 @@ bool SetEnumParameter(asIScriptFunction& function, asIScriptContext& context,
 	return context.SetArgDWord(index, enumValue) >= 0;
 }
 
-template<typename PARAM, std::enable_if_t<!std::is_enum<PARAM>::value && !std::is_integral<PARAM>::value, int> = 0>
+template<typename PARAM, std::enable_if_t<!std::is_enum_v<PARAM> && !std::is_integral_v<PARAM>, int> = 0>
 bool SetEnumParameter(asIScriptFunction&, asIScriptContext& context,
 	const asUINT, const BaseObjectType&, PARAM&&, const asDWORD)
 {
@@ -189,7 +189,7 @@ inline bool SetObjectParameter(asIScriptContext& context, const asUINT index, co
 
 	//For safety purposes reference types must be passed as a pointer to avoid pointing to a reference on the stack
 	if ((destinationFlags & asOBJ_REF) &&
-		!std::is_pointer<std::remove_reference_t<PARAM>>::value)
+		!std::is_pointer_v<std::remove_reference_t<PARAM>>)
 	{
 		engine.WriteMessage("asutils::SetNativeParameter", -1, -1, asMSGTYPE_ERROR,
 			"Cannot pass reference counted reference by value");
@@ -297,7 +297,7 @@ bool SetNativeParameter(asIScriptFunction& function, asIScriptContext& context, 
 template<typename PARAM>
 bool SetNativeParameter(asIScriptFunction& function, asIScriptContext& context, const asUINT index, PARAM&& param)
 {
-	const ObjectType<std::remove_reference<PARAM>::type> type;
+	const ObjectType<std::remove_reference_t<PARAM>> type;
 
 	return SetNativeParameter(function, context, index, type, param);
 }

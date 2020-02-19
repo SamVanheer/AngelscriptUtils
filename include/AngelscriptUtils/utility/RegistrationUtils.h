@@ -97,7 +97,7 @@ bool RegisterCasts(asIScriptEngine& engine, const std::string& baseType, const s
 *	@brief @see RegisterCasts
 *	Registers casts automatically based on whether the base type has AddRef and Release methods
 */
-template<typename BASE_TYPE, typename SUB_TYPE, typename std::enable_if<HasAddRefAndRelease<BASE_TYPE>::value, int>::type = 0>
+template<typename BASE_TYPE, typename SUB_TYPE, typename std::enable_if_t<HasAddRefAndRelease<BASE_TYPE>::value, int> = 0>
 bool RegisterCasts_Auto(asIScriptEngine& engine, const std::string& baseType, const std::string& subType)
 {
 	return RegisterCasts<BASE_TYPE, SUB_TYPE>(engine, baseType, subType, Cast_UpCast_Ref, Cast_DownCast_Ref);
@@ -107,7 +107,7 @@ bool RegisterCasts_Auto(asIScriptEngine& engine, const std::string& baseType, co
 *	@brief @see RegisterCasts
 *	Registers casts automatically based on whether the base type has AddRef and Release methods
 */
-template<typename BASE_TYPE, typename SUB_TYPE, typename std::enable_if<!HasAddRefAndRelease<BASE_TYPE>::value, int>::type = 0>
+template<typename BASE_TYPE, typename SUB_TYPE, typename std::enable_if_t<!HasAddRefAndRelease<BASE_TYPE>::value, int> = 0>
 bool RegisterCasts_Auto(asIScriptEngine& engine, const std::string& baseType, const std::string& subType)
 {
 	return RegisterCasts<BASE_TYPE, SUB_TYPE>(engine, baseType, subType, Cast_UpCast, Cast_DownCast);

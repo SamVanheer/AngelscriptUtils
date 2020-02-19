@@ -124,7 +124,7 @@ struct OptionalReferenceAdapter
 };
 
 template<typename T>
-struct OptionalReferenceAdapter<T, typename std::enable_if<HasAddRefAndRelease<T>::value>::type>
+struct OptionalReferenceAdapter<T, typename std::enable_if_t<HasAddRefAndRelease<T>::value>>
 {
     OptionalReferenceAdapter() = delete;
 

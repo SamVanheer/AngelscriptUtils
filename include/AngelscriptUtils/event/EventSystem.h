@@ -27,7 +27,7 @@ public:
 	/**
 	*	@brief Gets an event by C++ type
 	*/
-	template<typename T, std::enable_if_t<std::is_base_of<EventArgs, T>::value, int> = 0>
+	template<typename T, std::enable_if_t<std::is_base_of_v<EventArgs, T>, int> = 0>
 	TypedEvent<T>& GetEvent()
 	{
 		auto metaData = m_Registry.Lookup<T>();

@@ -30,14 +30,14 @@ void RegisterEventAPI(asIScriptEngine& engine);
 
 std::string FormatEventHandlerFuncdef(const char* className);
 
-template<typename T, std::enable_if_t<std::is_base_of<PreemptableEventArgs, T>::value, int> = 0>
+template<typename T, std::enable_if_t<std::is_base_of_v<PreemptableEventArgs, T>, int> = 0>
 inline void RegisterPreemptableEventClass(asIScriptEngine& engine, const char* className)
 {
 	engine.RegisterObjectMethod(className, "bool get_Handled() const property", asMETHOD(T, IsHandled), asCALL_THISCALL);
 	engine.RegisterObjectMethod(className, "void set_Handled(bool value) property", asMETHOD(T, SetHandled), asCALL_THISCALL);
 }
 
-template<typename T, std::enable_if_t<!std::is_base_of<PreemptableEventArgs, T>::value, int> = 0>
+template<typename T, std::enable_if_t<!std::is_base_of_v<PreemptableEventArgs, T>, int> = 0>
 inline void RegisterPreemptableEventClass(asIScriptEngine&, const char*)
 {
 	//Nothing
@@ -48,7 +48,7 @@ inline void RegisterPreemptableEventClass(asIScriptEngine&, const char*)
 *	@tparam C++ type of the event
 *	@param className Script type of the event
 */
-template<typename T, std::enable_if_t<std::is_base_of<EventArgs, T>::value, int> = 0>
+template<typename T, std::enable_if_t<std::is_base_of_v<EventArgs, T>, int> = 0>
 inline void RegisterEventClass(asIScriptEngine& engine, const char* className)
 {
 	engine.RegisterObjectType(className, sizeof(T), asOBJ_REF);

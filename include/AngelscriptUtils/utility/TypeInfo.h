@@ -16,7 +16,7 @@ constexpr int OBJECT_TYPEID_BITS = asTYPEID_OBJHANDLE | asTYPEID_HANDLETOCONST |
 *	@brief If T is a primitive type, provides a member const value equal true. For any other type, value is false
 */
 template<typename T>
-struct IsPrimitiveType : std::bool_constant<std::is_same<bool, T>::value || std::is_arithmetic<T>::value>
+struct IsPrimitiveType : std::bool_constant<std::is_same_v<bool, T> || std::is_arithmetic_v<T>>
 {
 };
 
@@ -65,7 +65,7 @@ public:
 /**
 *	@brief Tests if T is an enumeration with a 32 bit signed integer underlying type
 */
-template<typename T, bool = std::is_enum<T>::value>
+template<typename T, bool = std::is_enum_v<T>>
 class Is32BitEnum
 {
 public:
@@ -76,7 +76,7 @@ template<typename T>
 class Is32BitEnum<T, true>
 {
 public:
-	static const bool value = std::is_same<int, std::underlying_type_t<T>>::value;
+	static const bool value = std::is_same_v<int, std::underlying_type_t<T>>;
 };
 
 /**
@@ -146,13 +146,13 @@ bool HasDefaultConstructor(const asITypeInfo& type);
 *	@brief If type T is an enum, converts value to a 32 bit integer for use as an enum parameter
 *	Otherwise returns 0
 */
-template<typename T, std::enable_if_t<std::is_enum<T>::value, int> = 0>
+template<typename T, std::enable_if_t<std::is_enum_v<T>, int> = 0>
 asDWORD ConvertEnumToInt(const T value)
 {
 	return static_cast<asDWORD>(value);
 }
 
-template<typename T, std::enable_if_t<!std::is_enum<T>::value, int> = 0>
+template<typename T, std::enable_if_t<!std::is_enum_v<T>, int> = 0>
 asDWORD ConvertEnumToInt(const T value)
 {
 	return 0;
@@ -162,13 +162,13 @@ asDWORD ConvertEnumToInt(const T value)
 *	@brief If type T is not a pointer type, returns a pointer to value
 *	Otherwise returns value
 */
-template<typename T, std::enable_if_t<std::is_pointer<T>::value, int> = 0>
+template<typename T, std::enable_if_t<std::is_pointer_v<T>, int> = 0>
 typename std::remove_pointer_t<T>* ConvertObjectToPointer(T& object)
 {
 	return object;
 }
 
-template<typename T, std::enable_if_t<!std::is_pointer<T>::value, int> = 0>
+template<typename T, std::enable_if_t<!std::is_pointer_v<T>, int> = 0>
 typename std::remove_pointer_t<T>* ConvertObjectToPointer(T& object)
 {
 	return &object;
@@ -178,19 +178,19 @@ typename std::remove_pointer_t<T>* ConvertObjectToPointer(T& object)
 *	@brief If type T is a pointer type, returns a reference to value
 *	Otherwise returns value
 */
-template<typename T, std::enable_if_t<std::is_pointer<T>::value, int> = 0>
+template<typename T, std::enable_if_t<std::is_pointer_v<T>, int> = 0>
 typename std::remove_pointer_t<T>& ConvertObjectToReference(T object)
 {
 	return *object;
 }
 
-template<typename T, std::enable_if_t<!std::is_pointer<T>::value && std::is_reference<T>::value, int> = 0>
+template<typename T, std::enable_if_t<!std::is_pointer_v<T> && std::is_reference_v<T>, int> = 0>
 typename T ConvertObjectToReference(T object)
 {
 	return object;
 }
 
-template<typename T, std::enable_if_t<!std::is_pointer<T>::value && !std::is_reference<T>::value, int> = 0>
+template<typename T, std::enable_if_t<!std::is_pointer_v<T> && !std::is_reference_v<T>, int> = 0>
 typename T& ConvertObjectToReference(T& object)
 {
 	return object;
@@ -235,13 +235,13 @@ case typeId: return static_cast<T>(context.function())
 #undef PRIMITIVE_CASE
 }
 
-template<typename T, std::enable_if_t<std::is_pointer<T>::value, int> = 0>
+template<typename T, std::enable_if_t<std::is_pointer_v<T>, int> = 0>
 T ReturnNullPointerOrNothing()
 {
 	return nullptr;
 }
 
-template<typename T, std::enable_if_t<!std::is_pointer<T>::value, int> = 0>
+template<typename T, std::enable_if_t<!std::is_pointer_v<T>, int> = 0>
 T ReturnNullPointerOrNothing()
 {
 	return {};

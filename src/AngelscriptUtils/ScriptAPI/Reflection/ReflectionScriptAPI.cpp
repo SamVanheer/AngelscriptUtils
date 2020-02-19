@@ -256,7 +256,7 @@ static void RegisterScriptReflectionGroup(asIScriptEngine& engine)
 		asMETHOD(IReflectionGroup, GetObjectTypeByIndex), asCALL_THISCALL);
 }
 
-void RegisterScriptReflection(asIScriptEngine& engine)
+void RegisterReflectionAPI(asIScriptEngine& engine)
 {
 	const std::string oldNamespace = engine.GetDefaultNamespace();
 

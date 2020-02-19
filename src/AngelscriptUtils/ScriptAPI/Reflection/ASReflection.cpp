@@ -4,266 +4,279 @@
 
 #include "AngelscriptUtils/ScriptAPI/Reflection/ASReflection.h"
 
-namespace as
+namespace asutils
 {
 namespace Reflect
 {
 static CASEngineReflectionGroup Engine;
 static CASModuleReflectionGroup Module;
 }
+
+static void Function_AddRef(const asIScriptFunction* const instance)
+{
+	instance->AddRef();
 }
 
-static void Function_AddRef( const asIScriptFunction* const pThis )
+static void Function_Release(const asIScriptFunction* const instance)
 {
-	pThis->AddRef();
+	instance->Release();
 }
 
-static void Function_Release( const asIScriptFunction* const pThis )
+static asITypeInfo* Function_GetObjectType(const asIScriptFunction* const instance)
 {
-	pThis->Release();
-}
-
-static asITypeInfo* Function_GetObjectType( const asIScriptFunction* const pThis )
-{
-	if( auto pType = pThis->GetObjectType() )
+	if (auto type = instance->GetObjectType())
 	{
-		pThis->AddRef();
-		return pType;
+		instance->AddRef();
+		return type;
 	}
 
 	return nullptr;
 }
 
-static std::string Function_GetObjectName( const asIScriptFunction* const pThis )
+static std::string Function_GetObjectName(const asIScriptFunction* const instance)
 {
-	if( auto pszName = pThis->GetObjectName() )
-		return pszName;
+	if (auto name = instance->GetObjectName())
+	{
+		return name;
+	}
 
 	return "";
 }
 
-static std::string Function_GetNamespace( const asIScriptFunction* const pThis )
+static std::string Function_GetNamespace(const asIScriptFunction* const instance)
 {
-	return pThis->GetNamespace();
+	if (auto functionNamespace = instance->GetNamespace())
+	{
+		return functionNamespace;
+	}
+
+	return "";
 }
 
-static std::string Function_GetName( const asIScriptFunction* const pThis )
+static std::string Function_GetName(const asIScriptFunction* const instance)
 {
-	return pThis->GetName();
+	return instance->GetName();
 }
 
-static std::string Function_GetDeclaration( const asIScriptFunction* const pThis, 
-											const bool bIncludeObjectName = true, const bool bIncludeNamespace = false, const bool bIncludeParamNames = false )
+static std::string Function_GetDeclaration(const asIScriptFunction* const instance,
+	const bool includeObjectName = true, const bool includeNamespace = false, const bool includeParamNames = false)
 {
-	return pThis->GetDeclaration( bIncludeObjectName, bIncludeNamespace, bIncludeParamNames );
+	return instance->GetDeclaration(includeObjectName, includeNamespace, includeParamNames);
 }
 
-static void RegisterScriptReflectionCallable( asIScriptEngine& engine, const char* const pszObjectName )
+static void RegisterScriptReflectionCallable(asIScriptEngine& engine, const char* const pszObjectName)
 {
-	engine.RegisterObjectType( pszObjectName, 0, asOBJ_REF );
+	engine.RegisterObjectType(pszObjectName, 0, asOBJ_REF);
 
 	engine.RegisterObjectBehaviour(
 		pszObjectName, asBEHAVE_ADDREF, "void AddRef()",
-		asFUNCTION( Function_AddRef ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(Function_AddRef), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectBehaviour(
 		pszObjectName, asBEHAVE_RELEASE, "void Release()",
-		asFUNCTION( Function_Release ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(Function_Release), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "TypeInfo@ GetObjectType() const",
-		asFUNCTION( Function_GetObjectType ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(Function_GetObjectType), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "string GetObjectName() const",
-		asFUNCTION( Function_GetObjectName ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(Function_GetObjectName), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "string GetNamespace() const",
-		asFUNCTION( Function_GetNamespace ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(Function_GetNamespace), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "string GetName() const",
-		asFUNCTION( Function_GetName ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(Function_GetName), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
-		pszObjectName,  "string GetDeclaration(const bool bIncludeObjectName = true, const bool bIncludeNamespace = false, const bool bIncludeParamNames = false) const",
-		asFUNCTION( Function_GetDeclaration ), asCALL_CDECL_OBJFIRST );
+		pszObjectName, "string GetDeclaration(const bool includeObjectName = true, const bool includeNamespace = false, const bool includeParamNames = false) const",
+		asFUNCTION(Function_GetDeclaration), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "bool IsReadOnly() const",
-		asMETHOD( asIScriptFunction, IsReadOnly ), asCALL_THISCALL );
+		asMETHOD(asIScriptFunction, IsReadOnly), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "bool IsPrivate() const",
-		asMETHOD( asIScriptFunction, IsPrivate ), asCALL_THISCALL );
+		asMETHOD(asIScriptFunction, IsPrivate), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "bool IsProtected() const",
-		asMETHOD( asIScriptFunction, IsProtected ), asCALL_THISCALL );
+		asMETHOD(asIScriptFunction, IsProtected), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "bool IsFinal() const",
-		asMETHOD( asIScriptFunction, IsFinal ), asCALL_THISCALL );
+		asMETHOD(asIScriptFunction, IsFinal), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "bool IsOverride() const",
-		asMETHOD( asIScriptFunction, IsOverride ), asCALL_THISCALL );
+		asMETHOD(asIScriptFunction, IsOverride), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "bool IsShared() const",
-		asMETHOD( asIScriptFunction, IsShared ), asCALL_THISCALL );
+		asMETHOD(asIScriptFunction, IsShared), asCALL_THISCALL);
 }
 
-static void RegisterScriptReflectionFunction( asIScriptEngine& engine )
+static void RegisterScriptReflectionFunction(asIScriptEngine& engine)
 {
-	RegisterScriptReflectionCallable( engine, "Function" );
+	RegisterScriptReflectionCallable(engine, "Function");
 }
 
-static void RegisterScriptReflectionMethod( asIScriptEngine& engine )
+static void RegisterScriptReflectionMethod(asIScriptEngine& engine)
 {
-	RegisterScriptReflectionCallable( engine, "Method" );
+	RegisterScriptReflectionCallable(engine, "Method");
 }
 
-static void TypeInfo_AddRef( const asITypeInfo* const pThis )
+static void TypeInfo_AddRef(const asITypeInfo* const instance)
 {
-	pThis->AddRef();
+	instance->AddRef();
 }
 
-static void TypeInfo_Release( const asITypeInfo* const pThis )
+static void TypeInfo_Release(const asITypeInfo* const instance)
 {
-	pThis->Release();
+	instance->Release();
 }
 
-static std::string TypeInfo_GetNamespace( const asITypeInfo* const pThis )
+static std::string TypeInfo_GetNamespace(const asITypeInfo* const instance)
 {
-	return pThis->GetNamespace();
-}
-
-static std::string TypeInfo_GetName( const asITypeInfo* const pThis )
-{
-	return pThis->GetName();
-}
-
-static asIScriptFunction* TypeInfo_GetMethodByIndex( const asITypeInfo* const pThis, const asUINT uiIndex, const bool bGetVirtual )
-{
-	if( auto pFunc = pThis->GetMethodByIndex( uiIndex, bGetVirtual ) )
+	if (auto functionNamespace = instance->GetNamespace())
 	{
-		pFunc->AddRef();
-		return pFunc;
+		return functionNamespace;
+	}
+
+	return "";
+}
+
+static std::string TypeInfo_GetName(const asITypeInfo* const instance)
+{
+	return instance->GetName();
+}
+
+static asIScriptFunction* TypeInfo_GetMethodByIndex(const asITypeInfo* const instance, const asUINT index, const bool getVirtual)
+{
+	if (auto function = instance->GetMethodByIndex(index, getVirtual))
+	{
+		function->AddRef();
+		return function;
 	}
 
 	return nullptr;
 }
 
-static asIScriptFunction* TypeInfo_GetMethodByDecl( const asITypeInfo* const pThis, const std::string& szDecl, const bool bGetVirtual )
+static asIScriptFunction* TypeInfo_GetMethodByDecl(const asITypeInfo* const instance, const std::string& declaration, const bool getVirtual)
 {
-	if( auto pFunc = pThis->GetMethodByDecl( szDecl.c_str(), bGetVirtual ) )
+	if (auto function = instance->GetMethodByDecl(declaration.c_str(), getVirtual))
 	{
-		pFunc->AddRef();
-		return pFunc;
+		function->AddRef();
+		return function;
 	}
 
 	return nullptr;
 }
 
-static asIScriptFunction* TypeInfo_GetMethodByName( const asITypeInfo* const pThis, const std::string& szName, const bool bGetVirtual )
+static asIScriptFunction* TypeInfo_GetMethodByName(const asITypeInfo* const instance, const std::string& name, const bool getVirtual)
 {
-	if( auto pFunc = pThis->GetMethodByName( szName.c_str(), bGetVirtual ) )
+	if (auto function = instance->GetMethodByName(name.c_str(), getVirtual))
 	{
-		pFunc->AddRef();
-		return pFunc;
+		function->AddRef();
+		return function;
 	}
 
 	return nullptr;
 }
 
-static void RegisterScriptReflectionTypeInfo( asIScriptEngine& engine )
+static void RegisterScriptReflectionTypeInfo(asIScriptEngine& engine)
 {
 	const char* const pszObjectName = "TypeInfo";
 
 	engine.RegisterObjectBehaviour(
 		pszObjectName, asBEHAVE_ADDREF, "void AddRef()",
-		asFUNCTION( TypeInfo_AddRef ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(TypeInfo_AddRef), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectBehaviour(
 		pszObjectName, asBEHAVE_RELEASE, "void Release()",
-		asFUNCTION( TypeInfo_Release ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(TypeInfo_Release), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "string GetNamespace() const",
-		asFUNCTION( TypeInfo_GetNamespace ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(TypeInfo_GetNamespace), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "string GetName() const",
-		asFUNCTION( TypeInfo_GetName ), asCALL_CDECL_OBJFIRST );
+		asFUNCTION(TypeInfo_GetName), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "uint GetMethodCount() const",
-		asMETHOD( asITypeInfo, GetMethodCount ), asCALL_THISCALL );
+		asMETHOD(asITypeInfo, GetMethodCount), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "Method@ GetMethodByIndex(const uint uiIndex, const bool bGetVirtual = true) const",
-		asFUNCTION( TypeInfo_GetMethodByIndex ), asCALL_CDECL_OBJFIRST );
+		pszObjectName, "Method@ GetMethodByIndex(const uint index, const bool getVirtual = true) const",
+		asFUNCTION(TypeInfo_GetMethodByIndex), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "Method@ GetMethodByDecl(const string& in szDecl, const bool bGetVirtual = true) const",
-		asFUNCTION( TypeInfo_GetMethodByDecl ), asCALL_CDECL_OBJFIRST );
+		pszObjectName, "Method@ GetMethodByDecl(const string& in declaration, const bool getVirtual = true) const",
+		asFUNCTION(TypeInfo_GetMethodByDecl), asCALL_CDECL_OBJFIRST);
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "Method@ GetMethodByName(const string& in szName, const bool bGetVirtual = true) const",
-		asFUNCTION( TypeInfo_GetMethodByName ), asCALL_CDECL_OBJFIRST );
+		pszObjectName, "Method@ GetMethodByName(const string& in name, const bool getVirtual = true) const",
+		asFUNCTION(TypeInfo_GetMethodByName), asCALL_CDECL_OBJFIRST);
 }
 
-static void RegisterScriptReflectionGroup( asIScriptEngine& engine )
+static void RegisterScriptReflectionGroup(asIScriptEngine& engine)
 {
 	const char* const pszObjectName = "IGroup";
 
-	engine.RegisterObjectType( pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT );
+	engine.RegisterObjectType(pszObjectName, 0, asOBJ_REF | asOBJ_NOCOUNT);
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "Function@ FindGlobalFunction(const string& in szName, bool fSearchByDecl = false)",
-		asMETHOD( IASReflectionGroup, FindGlobalFunction ), asCALL_THISCALL );
+		pszObjectName, "Function@ FindGlobalFunction(const string& in name, bool searchByDecl = false)",
+		asMETHOD(IASReflectionGroup, FindGlobalFunction), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "uint GetGlobalFunctionCount() const",
-		asMETHOD( IASReflectionGroup, GetGlobalFunctionCount ), asCALL_THISCALL );
+		asMETHOD(IASReflectionGroup, GetGlobalFunctionCount), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "Function@ GetGlobalFunctionByIndex(uint uiIndex)",
-		asMETHOD( IASReflectionGroup, GetGlobalFunctionByIndex ), asCALL_THISCALL );
+		pszObjectName, "Function@ GetGlobalFunctionByIndex(uint index)",
+		asMETHOD(IASReflectionGroup, GetGlobalFunctionByIndex), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "TypeInfo@ FindTypeInfo(const string& in szName, bool fSearchByDecl = false)",
-		asMETHOD( IASReflectionGroup, FindTypeInfo ), asCALL_THISCALL );
+		pszObjectName, "TypeInfo@ FindTypeInfo(const string& in name, bool searchByDecl = false)",
+		asMETHOD(IASReflectionGroup, FindTypeInfo), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
 		pszObjectName, "uint GetObjectTypeCount() const",
-		asMETHOD( IASReflectionGroup, GetObjectTypeCount ), asCALL_THISCALL );
+		asMETHOD(IASReflectionGroup, GetObjectTypeCount), asCALL_THISCALL);
 
 	engine.RegisterObjectMethod(
-		pszObjectName, "TypeInfo@ GetObjectTypeByIndex(uint uiIndex) const",
-		asMETHOD( IASReflectionGroup, GetObjectTypeByIndex ), asCALL_THISCALL );
+		pszObjectName, "TypeInfo@ GetObjectTypeByIndex(uint index) const",
+		asMETHOD(IASReflectionGroup, GetObjectTypeByIndex), asCALL_THISCALL);
 }
 
-void RegisterScriptReflection( asIScriptEngine& engine )
+void RegisterScriptReflection(asIScriptEngine& engine)
 {
-	const std::string szOldNS = engine.GetDefaultNamespace();
+	const std::string oldNamespace = engine.GetDefaultNamespace();
 
-	engine.SetDefaultNamespace( "Reflect" );
+	engine.SetDefaultNamespace("Reflect");
 
 	//Forward declarations.
-	engine.RegisterObjectType( "TypeInfo", 0, asOBJ_REF );
+	engine.RegisterObjectType("TypeInfo", 0, asOBJ_REF);
 
-	RegisterScriptReflectionFunction( engine );
-	RegisterScriptReflectionMethod( engine );
-	RegisterScriptReflectionTypeInfo( engine );
-	RegisterScriptReflectionGroup( engine );
+	RegisterScriptReflectionFunction(engine);
+	RegisterScriptReflectionMethod(engine);
+	RegisterScriptReflectionTypeInfo(engine);
+	RegisterScriptReflectionGroup(engine);
 
-	as::Reflect::Engine.SetEngine( engine );
+	Reflect::Engine.SetEngine(engine);
 
-	engine.RegisterGlobalProperty( "IGroup Engine", &as::Reflect::Engine );
-	engine.RegisterGlobalProperty( "IGroup Module", &as::Reflect::Module );
+	//TODO: don't register the instances, leave that up to the app dev
+	engine.RegisterGlobalProperty("IGroup Engine", &Reflect::Engine);
+	engine.RegisterGlobalProperty("IGroup Module", &Reflect::Module);
 
-	engine.SetDefaultNamespace( szOldNS.c_str() );
+	engine.SetDefaultNamespace(oldNamespace.c_str());
+}
 }

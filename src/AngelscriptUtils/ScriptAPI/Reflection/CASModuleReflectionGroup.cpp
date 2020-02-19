@@ -4,123 +4,128 @@
 
 #include "AngelscriptUtils/ScriptAPI/Reflection/CASModuleReflectionGroup.h"
 
-asIScriptFunction* CASModuleReflectionGroup::FindGlobalFunction( const std::string& szName, bool bSearchByDecl )
+namespace asutils
 {
-	auto& scriptModule = *GetScriptModuleFromScriptContext( asGetActiveContext() );
+asIScriptFunction* CASModuleReflectionGroup::FindGlobalFunction(const std::string& name, bool searchByDecl)
+{
+	auto& scriptModule = *GetScriptModuleFromScriptContext(asGetActiveContext());
 
-	asIScriptFunction* pFunction = nullptr;
+	asIScriptFunction* function = nullptr;
 
-	if( bSearchByDecl )
+	if (searchByDecl)
 	{
-		const std::string szOldNS = scriptModule.GetDefaultNamespace();
+		const std::string oldNamespace = scriptModule.GetDefaultNamespace();
 
-		const std::string szNS = asutils::ExtractNamespaceFromDecl( szName );
+		const std::string currentNamespace = asutils::ExtractNamespaceFromDecl(name);
 
-		scriptModule.SetDefaultNamespace( szNS.c_str() );
+		scriptModule.SetDefaultNamespace(currentNamespace.c_str());
 
-		pFunction = scriptModule.GetFunctionByDecl( szName.c_str() );
+		function = scriptModule.GetFunctionByDecl(name.c_str());
 
-		scriptModule.SetDefaultNamespace( szOldNS.c_str() );
-
-		pFunction = scriptModule.GetFunctionByDecl( szName.c_str() );
+		scriptModule.SetDefaultNamespace(oldNamespace.c_str());
 	}
 	else
 	{
-		pFunction = scriptModule.GetFunctionByName( szName.c_str() );
+		function = scriptModule.GetFunctionByName(name.c_str());
 
-		const std::string szNS = asutils::ExtractNamespaceFromName( szName );
-		const std::string szActualName = asutils::ExtractNameFromName( szName );
+		const std::string currentNamespace = asutils::ExtractNamespaceFromName(name);
+		const std::string actualName = asutils::ExtractNameFromName(name);
 
-		const asUINT uiCount = scriptModule.GetFunctionCount();
+		const asUINT count = scriptModule.GetFunctionCount();
 
-		for( asUINT uiIndex = 0; uiIndex < uiCount; ++uiIndex )
+		for (asUINT index = 0; index < count; ++index)
 		{
-			auto pFunc = scriptModule.GetFunctionByIndex( uiIndex );
+			auto candidateFunction = scriptModule.GetFunctionByIndex(index);
 
-			if( szActualName == pFunc->GetName() && szNS == pFunc->GetNamespace() )
+			if (actualName == candidateFunction->GetName() && currentNamespace == candidateFunction->GetNamespace())
 			{
-				pFunction = pFunc;
+				function = candidateFunction;
 				break;
 			}
 		}
 	}
 
-	if( pFunction )
-		pFunction->AddRef();
+	if (function)
+	{
+		function->AddRef();
+	}
 
-	return pFunction;
+	return function;
 }
 
 asUINT CASModuleReflectionGroup::GetGlobalFunctionCount() const
 {
-	auto& scriptModule = *GetScriptModuleFromScriptContext( asGetActiveContext() );
+	auto& scriptModule = *GetScriptModuleFromScriptContext(asGetActiveContext());
 
 	return scriptModule.GetFunctionCount();
 }
 
-asIScriptFunction* CASModuleReflectionGroup::GetGlobalFunctionByIndex( asUINT uiIndex )
+asIScriptFunction* CASModuleReflectionGroup::GetGlobalFunctionByIndex(asUINT uiIndex)
 {
-	auto& scriptModule = *GetScriptModuleFromScriptContext( asGetActiveContext() );
+	auto& scriptModule = *GetScriptModuleFromScriptContext(asGetActiveContext());
 
-	if( auto pFunction = scriptModule.GetFunctionByIndex( uiIndex ) )
+	if (auto function = scriptModule.GetFunctionByIndex(uiIndex))
 	{
-		pFunction->AddRef();
-		return pFunction;
+		function->AddRef();
+		return function;
 	}
 
 	return nullptr;
 }
 
-asITypeInfo* CASModuleReflectionGroup::FindTypeInfo( const std::string& szName, bool bSearchByDecl )
+asITypeInfo* CASModuleReflectionGroup::FindTypeInfo(const std::string& name, bool searchByDecl)
 {
-	auto& scriptModule = *GetScriptModuleFromScriptContext( asGetActiveContext() );
+	auto& scriptModule = *GetScriptModuleFromScriptContext(asGetActiveContext());
 
-	const std::string szOldNS = scriptModule.GetDefaultNamespace();
+	const std::string oldNamespace = scriptModule.GetDefaultNamespace();
 
-	asITypeInfo* pType;
+	asITypeInfo* type;
 
-	if( bSearchByDecl )
+	if (searchByDecl)
 	{
-		const std::string szNS = asutils::ExtractNamespaceFromDecl( szName, false );
+		const std::string currentNamespace = asutils::ExtractNamespaceFromDecl(name, false);
 
-		scriptModule.SetDefaultNamespace( szNS.c_str() );
+		scriptModule.SetDefaultNamespace(currentNamespace.c_str());
 
-		pType = scriptModule.GetTypeInfoByDecl( szName.c_str() );
+		type = scriptModule.GetTypeInfoByDecl(name.c_str());
 	}
 	else
 	{
-		const std::string szNS = asutils::ExtractNamespaceFromName( szName );
-		const std::string szActualName = asutils::ExtractNameFromName( szName );
+		const std::string currentNamespace = asutils::ExtractNamespaceFromName(name);
+		const std::string actualName = asutils::ExtractNameFromName(name);
 
-		scriptModule.SetDefaultNamespace( szNS.c_str() );
+		scriptModule.SetDefaultNamespace(currentNamespace.c_str());
 
-		pType = scriptModule.GetTypeInfoByName( szActualName.c_str() );
+		type = scriptModule.GetTypeInfoByName(actualName.c_str());
 	}
 
-	scriptModule.SetDefaultNamespace( szOldNS.c_str() );
+	scriptModule.SetDefaultNamespace(oldNamespace.c_str());
 
-	if( pType )
-		pType->AddRef();
+	if (type)
+	{
+		type->AddRef();
+	}
 
-	return pType;
+	return type;
 }
 
 asUINT CASModuleReflectionGroup::GetObjectTypeCount() const
 {
-	auto& scriptModule = *GetScriptModuleFromScriptContext( asGetActiveContext() );
+	auto& scriptModule = *GetScriptModuleFromScriptContext(asGetActiveContext());
 
 	return scriptModule.GetObjectTypeCount();
 }
 
-asITypeInfo* CASModuleReflectionGroup::GetObjectTypeByIndex( asUINT uiIndex )
+asITypeInfo* CASModuleReflectionGroup::GetObjectTypeByIndex(asUINT uiIndex)
 {
-	auto& scriptModule = *GetScriptModuleFromScriptContext( asGetActiveContext() );
+	auto& scriptModule = *GetScriptModuleFromScriptContext(asGetActiveContext());
 
-	if( auto pType = scriptModule.GetObjectTypeByIndex( uiIndex ) )
+	if (auto type = scriptModule.GetObjectTypeByIndex(uiIndex))
 	{
-		pType->AddRef();
-		return pType;
+		type->AddRef();
+		return type;
 	}
 
 	return nullptr;
+}
 }

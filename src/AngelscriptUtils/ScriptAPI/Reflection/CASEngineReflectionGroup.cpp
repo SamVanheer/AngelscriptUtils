@@ -4,119 +4,126 @@
 
 #include "AngelscriptUtils/ScriptAPI/Reflection/CASEngineReflectionGroup.h"
 
-asIScriptFunction* CASEngineReflectionGroup::FindGlobalFunction( const std::string& szName, bool bSearchByDecl )
+namespace asutils
 {
-	assert( m_pEngine );
+asIScriptFunction* CASEngineReflectionGroup::FindGlobalFunction(const std::string& name, bool searchByDecl)
+{
+	assert(m_pEngine);
 
-	asIScriptFunction* pFunction = nullptr;
+	asIScriptFunction* function = nullptr;
 
-	if( bSearchByDecl )
+	if (searchByDecl)
 	{
-		const std::string szOldNS = m_pEngine->GetDefaultNamespace();
+		const std::string oldNamespace = m_pEngine->GetDefaultNamespace();
 
-		const std::string szNS = asutils::ExtractNamespaceFromDecl( szName );
+		const std::string currentNamespace = asutils::ExtractNamespaceFromDecl(name);
 
-		m_pEngine->SetDefaultNamespace( szNS.c_str() );
+		m_pEngine->SetDefaultNamespace(currentNamespace.c_str());
 
-		pFunction = m_pEngine->GetGlobalFunctionByDecl( szName.c_str() );
+		function = m_pEngine->GetGlobalFunctionByDecl(name.c_str());
 
-		m_pEngine->SetDefaultNamespace( szOldNS.c_str() );
+		m_pEngine->SetDefaultNamespace(oldNamespace.c_str());
 	}
 	else
 	{
-		const std::string szNS = asutils::ExtractNamespaceFromName( szName );
-		const std::string szActualName = asutils::ExtractNameFromName( szName );
+		const std::string currentNamespace = asutils::ExtractNamespaceFromName(name);
+		const std::string actualName = asutils::ExtractNameFromName(name);
 
-		const asUINT uiCount = m_pEngine->GetGlobalFunctionCount();
+		const asUINT count = m_pEngine->GetGlobalFunctionCount();
 
-		for( asUINT uiIndex = 0; uiIndex < uiCount; ++uiIndex )
+		for (asUINT index = 0; index < count; ++index)
 		{
-			auto pFunc = m_pEngine->GetGlobalFunctionByIndex( uiIndex );
+			auto candidateFunction = m_pEngine->GetGlobalFunctionByIndex(index);
 
-			if( szActualName == pFunc->GetName() && szNS == pFunc->GetNamespace() )
+			if (actualName == candidateFunction->GetName() && currentNamespace == candidateFunction->GetNamespace())
 			{
-				pFunction = pFunc;
+				function = candidateFunction;
 				break;
 			}
 		}
 	}
 
-	if( pFunction )
-		pFunction->AddRef();
+	if (function)
+	{
+		function->AddRef();
+	}
 
-	return pFunction;
+	return function;
 }
 
 asUINT CASEngineReflectionGroup::GetGlobalFunctionCount() const
 {
-	assert( m_pEngine );
+	assert(m_pEngine);
 
 	return m_pEngine->GetGlobalFunctionCount();
 }
 
-asIScriptFunction* CASEngineReflectionGroup::GetGlobalFunctionByIndex( asUINT uiIndex )
+asIScriptFunction* CASEngineReflectionGroup::GetGlobalFunctionByIndex(asUINT index)
 {
-	assert( m_pEngine );
+	assert(m_pEngine);
 
-	if( auto pFunction = m_pEngine->GetGlobalFunctionByIndex( uiIndex ) )
+	if (auto function = m_pEngine->GetGlobalFunctionByIndex(index))
 	{
-		pFunction->AddRef();
-		return pFunction;
+		function->AddRef();
+		return function;
 	}
 
 	return nullptr;
 }
 
-asITypeInfo* CASEngineReflectionGroup::FindTypeInfo( const std::string& szName, bool bSearchByDecl )
+asITypeInfo* CASEngineReflectionGroup::FindTypeInfo(const std::string& name, bool searchByDecl)
 {
-	assert( m_pEngine );
+	assert(m_pEngine);
 
-	const std::string szOldNS = m_pEngine->GetDefaultNamespace();
+	const std::string oldNamespace = m_pEngine->GetDefaultNamespace();
 
-	asITypeInfo* pType;
+	asITypeInfo* type;
 
-	if( bSearchByDecl )
+	if (searchByDecl)
 	{
-		const std::string szNS = asutils::ExtractNamespaceFromDecl( szName, false );
+		const std::string currentNamespace = asutils::ExtractNamespaceFromDecl(name, false);
 
-		m_pEngine->SetDefaultNamespace( szNS.c_str() );
+		m_pEngine->SetDefaultNamespace(currentNamespace.c_str());
 
-		pType = m_pEngine->GetTypeInfoByDecl( szName.c_str() );
+		type = m_pEngine->GetTypeInfoByDecl(name.c_str());
 	}
 	else
 	{
-		const std::string szNS = asutils::ExtractNamespaceFromName( szName );
-		const std::string szActualName = asutils::ExtractNameFromName( szName );
+		const std::string currentNamespace = asutils::ExtractNamespaceFromName(name);
+		const std::string actualName = asutils::ExtractNameFromName(name);
 
-		m_pEngine->SetDefaultNamespace( szNS.c_str() );
+		m_pEngine->SetDefaultNamespace(currentNamespace.c_str());
 
-		pType = m_pEngine->GetTypeInfoByName( szActualName.c_str() );
+		type = m_pEngine->GetTypeInfoByName(actualName.c_str());
 	}
 
-	m_pEngine->SetDefaultNamespace( szOldNS.c_str() );
+	m_pEngine->SetDefaultNamespace(oldNamespace.c_str());
 
-	if( pType )
-		pType->AddRef();
+	if (type)
+	{
+		type->AddRef();
+	}
 
-	return pType;
+	return type;
 }
 
 asUINT CASEngineReflectionGroup::GetObjectTypeCount() const
 {
-	assert( m_pEngine );
+	assert(m_pEngine);
 
 	return m_pEngine->GetObjectTypeCount();
 }
 
-asITypeInfo* CASEngineReflectionGroup::GetObjectTypeByIndex( asUINT uiIndex )
+asITypeInfo* CASEngineReflectionGroup::GetObjectTypeByIndex(asUINT index)
 {
-	assert( m_pEngine );
+	assert(m_pEngine);
 
-	if( auto pType = m_pEngine->GetObjectTypeByIndex( uiIndex ) )
+	if (auto type = m_pEngine->GetObjectTypeByIndex(index))
 	{
-		pType->AddRef();
-		return pType;
+		type->AddRef();
+		return type;
 	}
 
 	return nullptr;
+}
 }

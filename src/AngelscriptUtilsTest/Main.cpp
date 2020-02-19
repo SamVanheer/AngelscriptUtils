@@ -180,7 +180,7 @@ public:
 		RegisterScriptDictionary( manager.GetEngine() );
 		RegisterScriptAny( manager.GetEngine() );
 		asutils::RegisterSchedulerAPI( *manager.GetEngine() );
-		RegisterScriptReflection( *manager.GetEngine() );
+		asutils::RegisterScriptReflection( *manager.GetEngine() );
 
 		asutils::RegisterEventAPI(*manager.GetEngine());
 

@@ -1,8 +1,8 @@
-#ifndef ANGELSCRIPT_SCRIPTAPI_REFLECTION_ASREFLECTION_H
-#define ANGELSCRIPT_SCRIPTAPI_REFLECTION_ASREFLECTION_H
+#pragma once
 
 class asIScriptEngine;
 
-void RegisterScriptReflection( asIScriptEngine& engine );
-
-#endif //ANGELSCRIPT_SCRIPTAPI_REFLECTION_ASREFLECTION_H
+namespace asutils
+{
+void RegisterScriptReflection(asIScriptEngine& engine);
+}

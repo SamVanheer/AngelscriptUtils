@@ -1,30 +1,30 @@
-#ifndef ANGELSCRIPT_SCRIPTAPI_REFLECTION_IASREFLECTIONGROUP_H
-#define ANGELSCRIPT_SCRIPTAPI_REFLECTION_IASREFLECTIONGROUP_H
+#pragma once
 
 #include <string>
 
 #include <angelscript.h>
 
+namespace asutils
+{
 class IASReflectionGroup
 {
 public:
 	virtual ~IASReflectionGroup() = 0;
 
-	virtual asIScriptFunction* FindGlobalFunction( const std::string& szName, bool bSearchByDecl = false ) = 0;
+	virtual asIScriptFunction* FindGlobalFunction(const std::string& name, bool searchByDecl = false) = 0;
 
 	virtual asUINT GetGlobalFunctionCount() const = 0;
 
-	virtual asIScriptFunction* GetGlobalFunctionByIndex( asUINT uiIndex ) = 0;
+	virtual asIScriptFunction* GetGlobalFunctionByIndex(asUINT index) = 0;
 
-	virtual asITypeInfo* FindTypeInfo( const std::string& szName, bool bSearchByDecl = false ) = 0;
+	virtual asITypeInfo* FindTypeInfo(const std::string& name, bool searchByDecl = false) = 0;
 
 	virtual asUINT GetObjectTypeCount() const = 0;
 
-	virtual asITypeInfo* GetObjectTypeByIndex( asUINT uiIndex ) = 0;
+	virtual asITypeInfo* GetObjectTypeByIndex(asUINT index) = 0;
 };
 
 inline IASReflectionGroup::~IASReflectionGroup()
 {
 }
-
-#endif //ANGELSCRIPT_SCRIPTAPI_REFLECTION_IASREFLECTIONGROUP_H
+}

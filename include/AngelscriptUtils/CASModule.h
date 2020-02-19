@@ -8,8 +8,6 @@
 
 #include "AngelscriptUtils/utility/BaseClasses.h"
 
-#include "CASModuleDescriptor.h"
-
 class asIScriptModule;
 
 namespace asutils
@@ -33,9 +31,8 @@ public:
 	/**
 	*	Constructor.
 	*	@param pModule Script module.
-	*	@param descriptor Descriptor for this module.
 	*/
-	CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor );
+	CASModule( asIScriptModule* pModule );
 
 	/**
 	*	Destructor.
@@ -60,19 +57,12 @@ public:
 	const char* GetModuleName() const;
 
 	/**
-	*	@return The descriptor.
-	*/
-	const CASModuleDescriptor& GetDescriptor() const { return *m_pDescriptor; }
-
-	/**
 	*	@return The scheduler.
 	*/
 	asutils::Scheduler& GetScheduler() { return *m_Scheduler; }
 
 private:
 	asIScriptModule* m_pModule;
-
-	const CASModuleDescriptor* m_pDescriptor;
 
 	std::unique_ptr<asutils::Scheduler> m_Scheduler;
 
@@ -117,12 +107,6 @@ asIScriptModule* GetScriptModuleFromScriptContext( asIScriptContext* pContext );
 */
 inline bool ModuleLess( const CASModule* pLHS, const CASModule* pRHS )
 {
-	if(  pLHS->GetDescriptor() < pRHS->GetDescriptor() )
-		return true;
-
-	if( pRHS->GetDescriptor() < pLHS->GetDescriptor() )
-		return false;
-
 	//Use the memory address for sorting. They need only be sorted in a unique order.
 	return pLHS < pRHS;
 }

@@ -21,54 +21,6 @@ CASModuleManager::~CASModuleManager()
 	m_Engine.Release();
 }
 
-const CASModuleDescriptor* CASModuleManager::FindDescriptorByName( const char* const pszName ) const
-{
-	assert( pszName );
-
-	if( !pszName )
-		return nullptr;
-
-	auto it = m_Descriptors.find( pszName );
-
-	return it != m_Descriptors.end() ? it->second.get() : nullptr;
-}
-
-std::pair<const CASModuleDescriptor*, bool> CASModuleManager::AddDescriptor( const char* const pszName, const asDWORD accessMask, const as::ModulePriority_t priority )
-{
-	assert( pszName );
-
-	if( !pszName )
-		return std::make_pair( nullptr, false );
-
-	assert( *pszName );
-
-	if( !( *pszName ) )
-		return std::make_pair( nullptr, false );
-
-	assert( accessMask != 0 );
-
-	if( accessMask == 0 )
-		return std::make_pair( nullptr, false );
-
-	//Out of free IDs. TODO: if needed, add ID reclamation.
-	if( m_NextDescriptorID >= as::LAST_DESCRIPTOR_ID )
-		return std::make_pair( nullptr, false );
-
-	if( auto pDescriptor = FindDescriptorByName( pszName ) )
-		return std::make_pair( pDescriptor, false );
-
-	auto descriptor = std::make_unique<CASModuleDescriptor>( pszName, accessMask, priority, m_NextDescriptorID );
-
-	auto result = m_Descriptors.emplace( descriptor->GetName(), std::move( descriptor ) );
-
-	if( !result.second )
-		return std::make_pair( nullptr, false );
-
-	++m_NextDescriptorID;
-
-	return std::make_pair( result.first->second.get(), true );
-}
-
 /*
 *	Include callback for builders.
 */
@@ -77,29 +29,7 @@ static int CASModuleManager_IncludeCallback( const char* pszFileName, const char
 	return reinterpret_cast<IASModuleBuilder*>( pUserParam )->IncludeScript( *pBuilder, pszFileName, pszFrom ) ? 0 : -1;
 }
 
-CASModule* CASModuleManager::BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder)
-{
-	if( descriptor.GetDescriptorID() == as::INVALID_DESCRIPTOR_ID || FindDescriptorByName( descriptor.GetName() ) != &descriptor )
-	{
-		return nullptr;
-	}
-
-	return BuildModuleInternal( descriptor, pszModuleName, builder );
-}
-
-CASModule* CASModuleManager::BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder )
-{
-	auto pDescriptor = FindDescriptorByName( pszName );
-
-	if( !pDescriptor )
-	{
-		return nullptr;
-	}
-
-	return BuildModuleInternal( *pDescriptor, pszModuleName, builder );
-}
-
-CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder )
+CASModule* CASModuleManager::BuildModule(const char* const pszModuleName, const asDWORD accessMask, IASModuleBuilder& builder)
 {
 	assert( pszModuleName );
 
@@ -124,7 +54,7 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 
 	auto pScriptModule = scriptBuilder.GetModule();
 
-	pScriptModule->SetAccessMask( descriptor.GetAccessMask() );
+	pScriptModule->SetAccessMask(accessMask);
 
 	struct CleanupModuleOnExit final
 	{
@@ -168,7 +98,7 @@ CASModule* CASModuleManager::BuildModuleInternal( const CASModuleDescriptor& des
 
 	if( bSuccess )
 	{
-		pModule = new CASModule( scriptBuilder.GetModule(), descriptor );
+		pModule = new CASModule( scriptBuilder.GetModule() );
 		cleanupModule.Release();
 	}
 
@@ -292,8 +222,4 @@ void CASModuleManager::Clear()
 	}
 
 	m_Modules.clear();
-
-	m_Descriptors.clear();
-
-	m_NextDescriptorID = as::FIRST_DESCRIPTOR_ID;
 }

@@ -47,7 +47,6 @@ target_compile_options(AngelscriptUtils PRIVATE
 target_sources(AngelscriptUtils
 	PRIVATE
 		CASManager.cpp
-		CASModuleDescriptor.cpp
 		CASModule.cpp
 		CASModuleManager.cpp
 		add_on/scriptbuilder/scriptbuilder.cpp)

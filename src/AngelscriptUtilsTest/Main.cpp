@@ -330,18 +330,10 @@ int main( int, char*[] )
 		*/
 		const std::string szDecl{};
 
-		//Create some module types.
-
-		//Map scripts are per-map scripts that always have their hooks executed before any other module.
-		manager.GetModuleManager().AddDescriptor( "MapScript", ModuleAccessMask::MAPSCRIPT, as::ModulePriority::HIGHEST );
-
-		//Plugins are persistent scripts that can keep running after map changes.
-		manager.GetModuleManager().AddDescriptor( "Plugin", ModuleAccessMask::PLUGIN );
-
 		//Make a map script.
 		CASTestModuleBuilder builder( szDecl );
 
-		auto pModule = manager.GetModuleManager().BuildModule( "MapScript", "MapModule", builder );
+		auto pModule = manager.GetModuleManager().BuildModule( "MapScript", ModuleAccessMask::MAPSCRIPT, builder );
 
 		if( pModule )
 		{

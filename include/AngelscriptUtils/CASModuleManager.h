@@ -9,8 +9,6 @@
 
 #include <angelscript.h>
 
-#include "CASModuleDescriptor.h"
-
 class CASModule;
 class IASModuleBuilder;
 
@@ -43,49 +41,13 @@ public:
 	asIScriptEngine& GetEngine() { return m_Engine; }
 
 	/**
-	*	Finds a descriptor by name.
-	*	@param pszName Name of the descriptor. Case sensitive.
-	*	@return Descriptor, or null if it couldn't be found.
+	*	Builds a module
+	*	@param pszModuleName Name of the module. Must be unique
+	*	@param accessMask Module access mask
+	*	@param builder Builder to use
+	*	@return On successful build, the module. Otherwise, null
 	*/
-	const CASModuleDescriptor* FindDescriptorByName( const char* const pszName ) const;
-
-	/**
-	*	Adds a new descriptor.
-	*	@param pszName Name of the descriptor. Must be unique.
-	*	@param accessMask Access mask.
-	*	@param priority Priority.
-	*	@return Pair containing the descriptor and whether the descriptor was added in this call. If the descriptor already existed, first contains that descriptor and second is set to false.
-	*	@see CASModuleDescriptor
-	*/
-	std::pair<const CASModuleDescriptor*, bool> AddDescriptor( const char* const pszName, const asDWORD accessMask, const as::ModulePriority_t priority = as::ModulePriority::NORMAL );
-
-	/**
-	*	Builds a module using the given descriptor.
-	*	@param descriptor Descriptor to use.
-	*	@param pszModuleName Name of the module. Must be unique.
-	*	@param builder Builder to use.
-	*	@return On successful build, the module. Otherwise, null.
-	*/
-	CASModule* BuildModule( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder );
-
-	/**
-	*	Builds a module using the given descriptor.
-	*	@param pszName Name of the descriptor to use.
-	*	@param pszModuleName Name of the module. Must be unique.
-	*	@param builder Builder to use.
-	*	@return On successful build, the module. Otherwise, null.
-	*/
-	CASModule* BuildModule( const char* const pszName, const char* const pszModuleName, IASModuleBuilder& builder );
-
-private:
-	/**
-	*	Builds a module using the given descriptor.
-	*	@param descriptor Descriptor to use.
-	*	@param pszModuleName Name of the module. Must be unique.
-	*	@param builder Builder to use.
-	*	@return On successful build, the module. Otherwise, null.
-	*/
-	CASModule* BuildModuleInternal( const CASModuleDescriptor& descriptor, const char* const pszModuleName, IASModuleBuilder& builder );
+	CASModule* BuildModule( const char* const pszModuleName, const asDWORD accessMask, IASModuleBuilder& builder );
 
 public:
 	/**
@@ -145,10 +107,6 @@ public:
 
 private:
 	asIScriptEngine& m_Engine;
-
-	std::unordered_map<std::string, std::unique_ptr<CASModuleDescriptor>> m_Descriptors;
-
-	as::DescriptorID_t m_NextDescriptorID = as::FIRST_DESCRIPTOR_ID;
 
 	std::vector<CASModule*> m_Modules;
 

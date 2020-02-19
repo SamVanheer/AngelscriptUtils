@@ -6,9 +6,8 @@
 
 #include "AngelscriptUtils/CASModule.h"
 
-CASModule::CASModule( asIScriptModule* pModule, const CASModuleDescriptor& descriptor )
+CASModule::CASModule( asIScriptModule* pModule )
 	: m_pModule( pModule )
-	, m_pDescriptor( &descriptor )
 	, m_Scheduler(std::make_unique<asutils::Scheduler>())
 {
 	assert( pModule );

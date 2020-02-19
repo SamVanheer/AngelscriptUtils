@@ -2,7 +2,6 @@ target_sources(AngelscriptUtils
 	PRIVATE
 		ASUtilsConfig.h
 		CASManager.h
-		CASModuleDescriptor.h
 		CASModule.h
 		CASModuleManager.h
 		IASInitializer.h

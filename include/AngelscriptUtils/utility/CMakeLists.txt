@@ -3,6 +3,7 @@ target_sources(AngelscriptUtils
 		BaseClasses.h
 		ContextUtils.h
 		Introspection.h
+		MessageLogging.h
 		Objects.h
 		RegistrationUtils.h
 		SmartPointers.h

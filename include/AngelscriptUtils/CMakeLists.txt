@@ -1,7 +1,5 @@
 target_sources(AngelscriptUtils
 	PRIVATE
-		CASManager.h
-		IASInitializer.h
 		add_on/scriptbuilder/scriptbuilder.h)
 
 add_subdirectory(compilation)

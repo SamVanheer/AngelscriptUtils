@@ -9,9 +9,6 @@
 
 #undef VOID
 
-#include "AngelscriptUtils/CASManager.h"
-#include "AngelscriptUtils/IASInitializer.h"
-
 #include "AngelscriptUtils/add_on/scriptbuilder/scriptbuilder.h"
 
 #include "AngelscriptUtils/compilation/GlobalVariablesList.h"
@@ -19,6 +16,7 @@
 #include "AngelscriptUtils/ScriptAPI/Scheduler.h"
 #include "AngelscriptUtils/ScriptAPI/Reflection/ReflectionScriptAPI.h"
 
+#include "AngelscriptUtils/utility/MessageLogging.h"
 #include "AngelscriptUtils/utility/Objects.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
 #include "AngelscriptUtils/utility/Variant.h"
@@ -159,68 +157,37 @@ void RegisterMyEvent(asIScriptEngine& engine)
 	engine.RegisterObjectMethod(className, "void set_ShouldHide(bool value) property", asMETHOD(MyEvent, SetShouldHide), asCALL_THISCALL);
 }
 
-class CASTestInitializer : public IASInitializer
+void TestMessageCallback(const asSMessageInfo* message, void*)
+{
+	asutils::FormatEngineMessage(*message, std::cout);
+}
+
+void ShutdownAndReleaseEngine(asIScriptEngine* engine)
+{
+	engine->ShutDownAndRelease();
+}
+
+class CASTestInitializer
 {
 public:
-	CASTestInitializer( CASManager& manager, asutils::EventRegistry& eventRegistry)
-		: m_Manager( manager )
-		, m_EventRegistry(eventRegistry)
+	CASTestInitializer()
+		: m_Engine(nullptr, &ShutdownAndReleaseEngine)
 	{
 	}
 
-	void OnInitBegin()
+	~CASTestInitializer()
 	{
-		m_Manager.GetEngine()->SetContextCallbacks( &::CreateScriptContext, &::DestroyScriptContext );
+		m_EventSystem.reset();
 	}
 
-	bool RegisterCoreAPI( CASManager& manager ) override
+	asIScriptEngine& GetEngine()
 	{
-		RegisterStdString( manager.GetEngine() );
-		RegisterScriptArray( manager.GetEngine(), true );
-		RegisterScriptDictionary( manager.GetEngine() );
-		RegisterScriptAny( manager.GetEngine() );
-		asutils::RegisterSchedulerAPI( *manager.GetEngine() );
-		asutils::RegisterReflectionAPI( *manager.GetEngine() );
-
-		asutils::RegisterEventAPI(*manager.GetEngine());
-
-		RegisterMyEvent(*manager.GetEngine());
-
-		m_EventSystem = std::make_unique<asutils::EventSystem>(m_EventRegistry, asutils::ReferencePointer<asIScriptContext>(manager.GetEngine()->RequestContext(), true));
-
-		manager.GetEngine()->RegisterGlobalProperty("EventSystem g_EventSystem", m_EventSystem.get());
-
-		manager.GetEngine()->RegisterTypedef( "size_t", "uint32" );
-
-		return true;
+		return *m_Engine;
 	}
 
-	bool RegisterAPI( CASManager& manager ) override
+	asutils::EventRegistry& GetEventRegistry()
 	{
-		auto pEngine = manager.GetEngine();
-
-		//Printing function.
-		pEngine->RegisterGlobalFunction( "void Print(const string& in szString)", asFUNCTION( Print ), asCALL_CDECL );
-
-		pEngine->SetDefaultNamespace( "NS" );
-
-		pEngine->RegisterGlobalFunction( 
-			"int NSTest()", 
-			asFUNCTION( NSTest ),
-			asCALL_CDECL );
-
-		pEngine->SetDefaultNamespace( "" );
-
-		//Register the interface that all custom entities use. Allows you to take them as handles to functions.
-		pEngine->RegisterInterface( "IScriptEntity" );
-
-		//Register the entity class.
-		RegisterScriptCBaseEntity( *pEngine );
-
-		//Register the entity base class. Used to call base class implementations.
-		RegisterScriptBaseEntity( *pEngine );
-
-		return true;
+		return m_EventRegistry;
 	}
 
 	asutils::EventSystem& GetEventSystem()
@@ -228,15 +195,83 @@ public:
 		return *m_EventSystem;
 	}
 
+	bool Initialize()
+	{
+		m_Engine.reset(asCreateScriptEngine(ANGELSCRIPT_VERSION));
+
+		if (!m_Engine)
+		{
+			return false;
+		}
+
+		m_Engine->SetMessageCallback(asFUNCTION(TestMessageCallback), nullptr, asCALL_CDECL);
+
+		m_Engine->SetContextCallbacks(&::CreateScriptContext, &::DestroyScriptContext);
+
+		if (!RegisterAPI())
+		{
+			return false;
+		}
+
+		return true;
+	}
+
 private:
-	CASManager& m_Manager;
-	asutils::EventRegistry& m_EventRegistry;
+	bool RegisterAPI()
+	{
+		auto& engine = *m_Engine;
+
+		RegisterStdString(&engine);
+		RegisterScriptArray(&engine, true);
+		RegisterScriptDictionary(&engine);
+		RegisterScriptAny(&engine);
+		asutils::RegisterSchedulerAPI(engine);
+		asutils::RegisterReflectionAPI(engine);
+
+		asutils::RegisterEventAPI(engine);
+
+		RegisterMyEvent(engine);
+
+		m_EventSystem = std::make_unique<asutils::EventSystem>(m_EventRegistry, asutils::ReferencePointer<asIScriptContext>(engine.RequestContext(), true));
+
+		engine.RegisterGlobalProperty("EventSystem g_EventSystem", m_EventSystem.get());
+
+		engine.RegisterTypedef("size_t", "uint32");
+
+		//Printing function.
+		engine.RegisterGlobalFunction("void Print(const string& in szString)", asFUNCTION(Print), asCALL_CDECL);
+
+		engine.SetDefaultNamespace("NS");
+
+		engine.RegisterGlobalFunction(
+			"int NSTest()",
+			asFUNCTION(NSTest),
+			asCALL_CDECL);
+
+		engine.SetDefaultNamespace("");
+
+		//Register the interface that all custom entities use. Allows you to take them as handles to functions.
+		engine.RegisterInterface("IScriptEntity");
+
+		//Register the entity class.
+		RegisterScriptCBaseEntity(engine);
+
+		//Register the entity base class. Used to call base class implementations.
+		RegisterScriptBaseEntity(engine);
+
+		return true;
+	}
+
+private:
+	std::unique_ptr<asIScriptEngine, decltype(&ShutdownAndReleaseEngine)> m_Engine;
+
+	asutils::EventRegistry m_EventRegistry;
 
 	std::unique_ptr<asutils::EventSystem> m_EventSystem;
 
 private:
-	CASTestInitializer( const CASTestInitializer& ) = delete;
-	CASTestInitializer& operator=( const CASTestInitializer& ) = delete;
+	CASTestInitializer(const CASTestInitializer&) = delete;
+	CASTestInitializer& operator=(const CASTestInitializer&) = delete;
 };
 
 constexpr asPWORD MODULE_USER_DATA_ID = 10001;
@@ -361,23 +396,17 @@ int main( int, char*[] )
 
 	std::cout << "Hello World!" << std::endl;
 
-	CASManager manager;
-
-	asutils::EventRegistry registry;
-
-	CASTestInitializer initializer( manager, registry);
-
-	if( manager.Initialize( initializer ) )
+	if(CASTestInitializer initializer; initializer.Initialize())
 	{
-		auto pEngine = manager.GetEngine();
+		auto& engine = initializer.GetEngine();
 
-		pEngine->SetModuleUserDataCleanupCallback(&CleanupModuleUserData, MODULE_USER_DATA_ID);
+		engine.SetModuleUserDataCleanupCallback(&CleanupModuleUserData, MODULE_USER_DATA_ID);
 
 		asutils::Variant variant(10);
 
 		variant.Reset(10);
 
-		registry.Register<MyEvent>(*pEngine->GetTypeInfoByName("MyEvent"));
+		initializer.GetEventRegistry().Register<MyEvent>(*engine.GetTypeInfoByName("MyEvent"));
 
 		//Create the declaration used for script entity base classes.
 		/*
@@ -390,7 +419,7 @@ int main( int, char*[] )
 		//Make a map script.
 		CASTestModuleBuilder builder( szDecl );
 
-		auto pModule = builder.Build(*pEngine, "MapScript", ModuleAccessMask::MAPSCRIPT);
+		auto pModule = builder.Build(engine, "MapScript", ModuleAccessMask::MAPSCRIPT);
 
 		if( pModule )
 		{
@@ -398,7 +427,7 @@ int main( int, char*[] )
 
 			auto userData = reinterpret_cast<ModuleUserData*>(pModule->GetUserData(MODULE_USER_DATA_ID));
 
-			auto pContext = pEngine->RequestContext();
+			auto pContext = engine.RequestContext();
 
 			auto& eventSystem = initializer.GetEventSystem();
 
@@ -601,7 +630,7 @@ int main( int, char*[] )
 			std::cout << "Created extend class: " << ( bCreatedExtend ? "yes" : "no" ) << std::endl;
 			*/
 
-			pEngine->ReturnContext(pContext);
+			engine.ReturnContext(pContext);
 
 			eventSystem.RemoveHandlersOfModule(module);
 
@@ -610,10 +639,9 @@ int main( int, char*[] )
 			userData->PreDiscardCleanup();
 			pModule->Discard();
 		}
-	}
 
-	//Shut down the Angelscript engine, frees all resources.
-	manager.Shutdown();
+		//Initializer goes out of scope here and frees all resources automatically
+	}
 
 	spdlog::drop(g_Logger->name());
 

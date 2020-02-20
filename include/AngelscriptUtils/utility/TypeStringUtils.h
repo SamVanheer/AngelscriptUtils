@@ -94,4 +94,19 @@ std::string ExtractNamespaceFromDecl(const std::string& declaration, const bool 
 *	@param typeName Name of the object type
 */
 std::string FormatObjectTypeName(const char* typeNamespace, const std::string& typeName);
+
+/**
+*	@brief Helper function to get a non-null namespace name from a type
+*/
+inline const char* GetTypeNamespace(const asITypeInfo& typeInfo)
+{
+	auto typeNamespace = typeInfo.GetNamespace();
+
+	if (!typeNamespace)
+	{
+		typeNamespace = "";
+	}
+
+	return typeNamespace;
+}
 }

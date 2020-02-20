@@ -12,7 +12,7 @@
 
 namespace asutils
 {
-void Scheduler::ClearTimer(uint32_t id)
+void Scheduler::ClearTimer(TimerID id)
 {
 	if (m_CurrentFunctionID != INVALID_ID && m_CurrentFunctionID == id)
 	{
@@ -158,7 +158,7 @@ void Scheduler::TrySetInterval(asIScriptGeneric& parameters, const ScheduleType 
 	parameters.SetReturnDWord(timerID);
 }
 
-uint32_t Scheduler::TrySchedule(void* potentiallyAFunction, int typeId,
+Scheduler::TimerID Scheduler::TrySchedule(void* potentiallyAFunction, int typeId,
 	asIScriptGeneric& parameters, asUINT startIndex, float repeatInterval, int repeatCount)
 {
 	auto& engine = *parameters.GetEngine();
@@ -230,12 +230,12 @@ uint32_t Scheduler::TrySchedule(void* potentiallyAFunction, int typeId,
 	return Schedule(*function, std::move(parameterList), m_CurrentTime + repeatInterval, repeatInterval, repeatCount);
 }
 
-uint32_t Scheduler::Schedule(asIScriptFunction& function, ScriptParameters&& parameters, float executionTime, float repeatInterval, int repeatCount)
+Scheduler::TimerID Scheduler::Schedule(asIScriptFunction& function, ScriptParameters&& parameters, float executionTime, float repeatInterval, int repeatCount)
 {
 	const auto timerID = m_NextID++;
 
 	//Unlikely to happen but will occur on long running scripts
-	if (m_NextID == std::numeric_limits<uint32_t>::max())
+	if (m_NextID == std::numeric_limits<TimerID>::max())
 	{
 		m_NextID = 1;
 	}

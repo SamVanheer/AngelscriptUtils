@@ -31,12 +31,14 @@ private:
 		Repeating
 	};
 
+	using TimerID = uint32_t;
+
 	/**
 *	@brief Contains all of the information to make a scheduled call
 */
 	struct ScheduledFunction final
 	{
-		ScheduledFunction(uint32_t id,
+		ScheduledFunction(TimerID id,
 			ReferencePointer<asIScriptFunction>&& function, ScriptParameters&& parameters, float executionTime, float repeatInterval, int repeatCount)
 			: m_ID(id)
 			, m_Function(std::move(function))
@@ -50,7 +52,7 @@ private:
 		ScheduledFunction(const ScheduledFunction&) = delete;
 		ScheduledFunction& operator=(const ScheduledFunction&) = delete;
 
-		const uint32_t m_ID;
+		const TimerID m_ID;
 
 		const ReferencePointer<asIScriptFunction> m_Function;
 		const ScriptParameters m_Parameters;
@@ -75,7 +77,7 @@ public:
 		m_CurrentTime = value;
 	}
 
-	void ClearTimer(uint32_t id);
+	void ClearTimer(TimerID id);
 
 	void Think(const float currentTime, asIScriptContext& context);
 
@@ -109,24 +111,24 @@ private:
 	/**
 	*	@brief If the given object is a function, tries to schedule it with the given parameters
 	*/
-	uint32_t TrySchedule(void* potentiallyAFunction, int typeId,
+	TimerID TrySchedule(void* potentiallyAFunction, int typeId,
 		asIScriptGeneric& parameters, asUINT startIndex, float repeatInterval, int repeatCount);
 
 	/**
 	*	@brief Schedules a given function with the given parameters and time
 	*/
-	uint32_t Schedule(asIScriptFunction& function, ScriptParameters&& parameters, float executionTime, float repeatInterval, int repeatCount);
+	TimerID Schedule(asIScriptFunction& function, ScriptParameters&& parameters, float executionTime, float repeatInterval, int repeatCount);
 
 	static void WriteError(const char* message);
 
 private:
 	std::vector<std::unique_ptr<ScheduledFunction>> m_Functions;
 
-	uint32_t m_NextID = 1;
+	TimerID m_NextID = 1;
 
 	float m_CurrentTime = 0;
 
-	uint32_t m_CurrentFunctionID = INVALID_ID;
+	TimerID m_CurrentFunctionID = INVALID_ID;
 
 	//True if ClearTimer is called to remove the function being executed
 	bool m_RemoveCurrentFunction = false;

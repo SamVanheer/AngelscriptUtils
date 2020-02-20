@@ -1,6 +1,6 @@
 target_sources(AngelscriptUtils
 	PRIVATE
-		Event.cpp
+		EventDispatcher.cpp
+		EventLocator.cpp
 		EventScriptAPI.cpp
-		EventSystem.cpp
 )

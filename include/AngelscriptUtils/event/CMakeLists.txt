@@ -1,8 +1,7 @@
 target_sources(AngelscriptUtils
 	PRIVATE
-		Event.h
 		EventArgs.h
-		EventRegistry.h
+		EventDispatcher.h
+		EventLocator.h
 		EventScriptAPI.h
-		EventSystem.h
-)
+		EventSystem.h)

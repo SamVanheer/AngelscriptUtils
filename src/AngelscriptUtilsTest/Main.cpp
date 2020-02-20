@@ -115,9 +115,11 @@ DEFINE_ENUM_TYPE_SIMPLE(EnumType, EnumType)
 
 void RegisterMyEvent(asIScriptEngine& engine)
 {
-	const auto className = "MyEvent";
+	const asutils::ObjectType<MyEvent> type;
 
-	asutils::RegisterEventClass<MyEvent>(engine, className);
+	const auto className = type.GetName();
+
+	asutils::RegisterEventClass<MyEvent>(engine);
 
 	engine.RegisterObjectMethod(className, "bool get_ShouldHide() const property", asMETHOD(MyEvent, ShouldHide), asCALL_THISCALL);
 	engine.RegisterObjectMethod(className, "void set_ShouldHide(bool value) property", asMETHOD(MyEvent, SetShouldHide), asCALL_THISCALL);
@@ -260,11 +262,6 @@ public:
 		return *m_Engine;
 	}
 
-	asutils::EventRegistry& GetEventRegistry()
-	{
-		return m_EventRegistry;
-	}
-
 	asutils::EventSystem& GetEventSystem()
 	{
 		return *m_EventSystem;
@@ -305,11 +302,11 @@ private:
 		asutils::RegisterSchedulerAPI(engine);
 		asutils::RegisterReflectionAPI(engine);
 
-		asutils::RegisterEventAPI(engine);
+		asutils::RegisterEventAPI(engine, true);
 
 		RegisterMyEvent(engine);
 
-		m_EventSystem = std::make_unique<asutils::EventSystem>(m_EventRegistry, asutils::ReferencePointer<asIScriptContext>(engine.RequestContext(), true));
+		m_EventSystem = std::make_unique<asutils::EventSystem>(asutils::ReferencePointer<asIScriptContext>(engine.RequestContext(), true));
 
 		engine.RegisterGlobalProperty("EventSystem g_EventSystem", m_EventSystem.get());
 
@@ -383,8 +380,6 @@ private:
 
 	std::unique_ptr<asIScriptEngine, decltype(&CASTestInitializer::ShutdownAndReleaseEngine)> m_Engine;
 
-	asutils::EventRegistry m_EventRegistry;
-
 	std::unique_ptr<asutils::EventSystem> m_EventSystem;
 
 private:
@@ -404,7 +399,7 @@ int main(int, char* [])
 
 		variant.Reset(10);
 
-		initializer.GetEventRegistry().Register<MyEvent>(*engine.GetTypeInfoByName("MyEvent"));
+		initializer.GetEventSystem().Register<MyEvent>(*engine.GetTypeInfoByName("MyEvent"));
 
 		//Create the declaration used for script entity base classes.
 		/*

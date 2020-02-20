@@ -17,6 +17,9 @@ class EventLocator final
 public:
 	EventLocator(asITypeInfo* type, EventSystem* eventSystem);
 
+	EventLocator(const EventLocator&) = delete;
+	EventLocator& operator=(const EventLocator&) = delete;
+
 	bool IsSubscribed(void* object, int typeId) const;
 
 	bool IsSubscribed(asIScriptFunction& function) const;

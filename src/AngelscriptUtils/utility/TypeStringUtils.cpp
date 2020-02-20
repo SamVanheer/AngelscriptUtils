@@ -272,13 +272,13 @@ std::string ExtractNamespaceFromDecl(const std::string& declaration, const bool 
 	return declaration.substr(start, namespaceEnd - start);
 }
 
-std::string FormatObjectTypeName(const std::string& scriptNamespace, const std::string& scriptName)
+std::string FormatObjectTypeName(const char* typeNamespace, const std::string& typeName)
 {
-	if (scriptNamespace.empty())
+	if (!typeNamespace)
 	{
-		return scriptName;
+		return typeName;
 	}
 
-	return scriptNamespace + "::" + scriptName;
+	return typeNamespace + ("::" + typeName);
 }
 }

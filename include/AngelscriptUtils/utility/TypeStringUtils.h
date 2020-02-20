@@ -88,5 +88,10 @@ inline std::string ExtractNameFromName(const std::string& name)
 */
 std::string ExtractNamespaceFromDecl(const std::string& declaration, const bool isFunctionDeclaration = true);
 
-std::string FormatObjectTypeName(const std::string& scriptNamespace, const std::string& scriptName);
+/**
+*	@brief Formats an object type name
+*	@param typeNamespace Optional. Namespace of the type
+*	@param typeName Name of the object type
+*/
+std::string FormatObjectTypeName(const char* typeNamespace, const std::string& typeName);
 }

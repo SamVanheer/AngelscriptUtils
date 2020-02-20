@@ -11,9 +11,11 @@ list( APPEND CMAKE_MODULE_PATH
 
 include(PDBUtils)
 
-option(UseDynamicMSVCRuntime "Use dynamic MSVC runtime" ON)
+if (MSVC)
+	option(UseDynamicMSVCRuntime "Use dynamic MSVC runtime" ON)
+endif()
 
-if(UseDynamicMSVCRuntime)
+if(NOT MSVC OR UseDynamicMSVCRuntime)
 	set(MSVC_RUNTIME_SUFFIX "DLL")
 endif()
 

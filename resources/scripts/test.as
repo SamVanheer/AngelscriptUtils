@@ -208,6 +208,12 @@ class EventTest
 		Print("Event callback\n");
 		
 		args.ShouldHide = true;
+		
+		//Test adding an removing an event handler during event execution
+		EventTest obj;
+		
+		Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(obj.EventCallback));
+		Event<MyEvent>(@g_EventSystem).Unsubscribe(@MyEventHandler(obj.EventCallback));
 	}
 }
 

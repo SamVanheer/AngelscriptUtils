@@ -20,7 +20,11 @@ bool IsEventHandled(const T&)
 template<typename T>
 void DispatchEvent(IEventHandlers& eventHandlers, asIScriptContext& context, T& arguments)
 {
-	for (asUINT index = 0; index < eventHandlers.GetCount(); ++index)
+	eventHandlers.SetExecuting(true);
+
+	const auto count = eventHandlers.GetCount();
+
+	for (asUINT index = 0; index < count; ++index)
 	{
 		auto result = context.Prepare(eventHandlers.GetFunction(index));
 
@@ -48,6 +52,8 @@ void DispatchEvent(IEventHandlers& eventHandlers, asIScriptContext& context, T& 
 	}
 
 	context.Unprepare();
+
+	eventHandlers.SetExecuting(false);
 }
 
 void BaseEventDispatcher::Dispatch(EventArgs& arguments)

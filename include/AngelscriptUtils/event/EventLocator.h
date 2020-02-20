@@ -31,8 +31,6 @@ public:
 private:
 	asIScriptFunction* GetFunctionFromVariable(void* object, int typeId) const;
 
-	bool ValidateFunctionFormat(asIScriptFunction& function) const;
-
 private:
 	const ReferencePointer<const asIScriptEngine> m_Engine;
 	EventMetaData* m_EventData;

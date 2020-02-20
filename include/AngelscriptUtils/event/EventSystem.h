@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+#include <iterator>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
@@ -27,14 +29,19 @@ public:
 
 	/**
 	*	@brief Returns the current number of event handlers
-	*	You must call this every iteration because handlers can be added and removed during execution
 	*/
 	virtual asUINT GetCount() const = 0;
 
 	virtual asIScriptFunction* GetFunction(asUINT index) const = 0;
-};
 
-using EventHandlers = std::vector<ReferencePointer<asIScriptFunction>>;
+	virtual bool IsExecuting() const = 0;
+
+	/**
+	*	@brief Sets whether the event handlers are being executed at this time
+	*	During execution event handler addition and removal is delayed to ensure execution occurs properly
+	*/
+	virtual void SetExecuting(bool state) = 0;
+};
 
 struct EventMetaData final : public IEventHandlers
 {
@@ -45,22 +52,54 @@ struct EventMetaData final : public IEventHandlers
 
 	const ReferencePointer<const asITypeInfo> EventType;
 
-	EventHandlers EventHandlers;
+	asUINT GetCount() const override final;
 
-	asUINT GetCount() const override final
+	asIScriptFunction* GetFunction(asUINT index) const override final;
+
+	bool IsExecuting() const override final { return Executing; }
+
+	void SetExecuting(bool state) override final;
+
+	bool IsSubscribed(asIScriptFunction& function) const;
+
+	void Subscribe(asIScriptFunction& function);
+
+	void Unsubscribe(asIScriptFunction& function);
+
+	void RemoveHandlersOfModule(asIScriptModule& module);
+
+	void RemoveAllHandlers()
 	{
-		return EventHandlers.size();
+		EventHandlers.clear();
 	}
 
-	asIScriptFunction* GetFunction(asUINT index) const override final
+private:
+	bool ValidateFunctionFormat(asIScriptFunction& function) const;
+
+	const std::vector<ReferencePointer<asIScriptFunction>>& GetImmutableList() const
 	{
-		if (index < EventHandlers.size())
+		return ModifiedDuringExecution ? ExecutingCopy : EventHandlers;
+	}
+
+	void MakeCopyIfNeeded()
+	{
+		if (Executing && !ModifiedDuringExecution)
 		{
-			return EventHandlers[index].Get();
+			ExecutingCopy = EventHandlers;
+			ModifiedDuringExecution = true;
 		}
-
-		return nullptr;
 	}
+
+private:
+	std::vector<ReferencePointer<asIScriptFunction>> EventHandlers;
+	
+	//This is a kind of copy-on-write container in that any modification during execution will make a copy of the list into this,
+	//which is then used for the remainder of execution
+	std::vector<ReferencePointer<asIScriptFunction>> ExecutingCopy;
+
+	bool Executing = false;
+
+	bool ModifiedDuringExecution = false;
 };
 
 /**
@@ -161,19 +200,7 @@ public:
 	{
 		for (const auto& pair : m_Events)
 		{
-			auto& eventHandlers = pair.second->EventHandlers;
-
-			eventHandlers.erase(std::remove_if(eventHandlers.begin(), eventHandlers.end(), [&](const auto& function)
-				{
-					if (function->GetFuncType() == asFUNC_DELEGATE)
-					{
-						return function->GetDelegateFunction()->GetModule() == &module;
-					}
-					else
-					{
-						return function->GetModule() == &module;
-					}
-				}), eventHandlers.end());
+			pair.second->RemoveHandlersOfModule(module);
 		}
 	}
 
@@ -181,7 +208,7 @@ public:
 	{
 		for (const auto& pair : m_Events)
 		{
-			pair.second->EventHandlers.clear();
+			pair.second->RemoveAllHandlers();
 		}
 	}
 

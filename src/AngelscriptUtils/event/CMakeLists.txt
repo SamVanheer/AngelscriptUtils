@@ -3,4 +3,5 @@ target_sources(AngelscriptUtils
 		EventDispatcher.cpp
 		EventLocator.cpp
 		EventScriptAPI.cpp
+		EventSystem.cpp
 )

@@ -104,7 +104,7 @@ private:
 	bool m_ShouldHide = false;
 };
 
-DEFINE_OBJECT_TYPE_SIMPLE(MyEvent, MyEvent, asOBJ_REF | asGetTypeTraits<MyEvent>())
+DEFINE_OBJECT_TYPE_SIMPLE(MyEvent, MyEvent, asOBJ_REF)
 
 enum class EnumType
 {

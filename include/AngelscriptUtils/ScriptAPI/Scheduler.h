@@ -128,10 +128,11 @@ private:
 
 	float m_CurrentTime = 0;
 
-	TimerID m_CurrentFunctionID = INVALID_ID;
+	bool m_ExecutingFunctions = false;
 
-	//True if ClearTimer is called to remove the function being executed
-	bool m_RemoveCurrentFunction = false;
+	std::vector<std::unique_ptr<ScheduledFunction>> m_FunctionsToAdd;
+
+	std::vector<TimerID> m_FunctionsToRemove;
 };
 
 /**

@@ -1,3 +1,5 @@
+#include <algorithm>
+#include <iterator>
 #include <limits>
 #include <string>
 
@@ -14,10 +16,10 @@ namespace asutils
 {
 void Scheduler::ClearTimer(TimerID id)
 {
-	if (m_CurrentFunctionID != INVALID_ID && m_CurrentFunctionID == id)
+	if (m_ExecutingFunctions)
 	{
-		//Delay until function has finished executing so it stays alive long enough
-		m_RemoveCurrentFunction = true;
+		//Delay until functios have finished executing
+		m_FunctionsToRemove.emplace_back(id);
 		return;
 	}
 
@@ -35,6 +37,8 @@ void Scheduler::ClearTimer(TimerID id)
 
 void Scheduler::Think(const float currentTime, asIScriptContext& context)
 {
+	m_ExecutingFunctions = true;
+
 	for (auto it = m_Functions.begin(); it != m_Functions.end();)
 	{
 		auto& function = **it;
@@ -49,25 +53,48 @@ void Scheduler::Think(const float currentTime, asIScriptContext& context)
 			++it;
 		}
 	}
+
+	m_ExecutingFunctions = false;
+
+	//Add new functions
+	if (!m_FunctionsToAdd.empty())
+	{
+		if (m_Functions.empty())
+		{
+			m_Functions = std::move(m_FunctionsToAdd);
+		}
+		else
+		{
+			m_Functions.reserve(m_Functions.size() + m_FunctionsToAdd.size());
+			std::move(m_FunctionsToAdd.begin(), m_FunctionsToAdd.end(), std::back_inserter(m_Functions));
+			m_FunctionsToAdd.clear();
+		}
+	}
+
+	//Remove functions flagged for removal
+	//This can include functions that were added from m_FunctionsToAdd, so perform this operation after adding those
+	if (!m_FunctionsToRemove.empty())
+	{
+		for (auto id : m_FunctionsToRemove)
+		{
+			ClearTimer(id);
+		}
+
+		m_FunctionsToRemove.clear();
+	}
 }
 
 bool Scheduler::ExecuteFunction(ScheduledFunction& function, asIScriptContext& context)
 {
-	m_CurrentFunctionID = function.m_ID;
-
 	//Call will log any errors if the context has logging enabled
 	PackedCall(*function.m_Function, context, function.m_Parameters);
-
-	m_CurrentFunctionID = INVALID_ID;
 
 	if (function.m_RepeatCount != REPEAT_INFINITE_TIMES)
 	{
 		--function.m_RepeatCount;
 	}
 
-	const auto shouldRemove = m_RemoveCurrentFunction || (function.m_RepeatCount == 0);
-
-	m_RemoveCurrentFunction = false;
+	const auto shouldRemove = function.m_RepeatCount == 0;
 
 	if (!shouldRemove)
 	{
@@ -243,7 +270,14 @@ Scheduler::TimerID Scheduler::Schedule(asIScriptFunction& function, ScriptParame
 	auto scheduled = std::make_unique<ScheduledFunction>(timerID,
 		ReferencePointer<asIScriptFunction>(&function), std::move(parameters), executionTime, repeatInterval, repeatCount);
 
-	m_Functions.emplace_back(std::move(scheduled));
+	if (m_ExecutingFunctions)
+	{
+		m_FunctionsToAdd.emplace_back(std::move(scheduled));
+	}
+	else
+	{
+		m_Functions.emplace_back(std::move(scheduled));
+	}
 
 	return timerID;
 }

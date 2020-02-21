@@ -36,11 +36,6 @@ endif()
 
 set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries")
 
-#Copy all resources to the destination directory
-message(STATUS "Copying resources...")
-file(COPY ${CMAKE_SOURCE_DIR}/resources DESTINATION ${OUTPUT_DIR})
-message(STATUS "Done")
-
 #include the subdirectory containing our libs
 add_subdirectory(src)
 

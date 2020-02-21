@@ -1,5 +1,3 @@
-#include <cassert>
-
 #include "AngelscriptUtils/utility/ContextUtils.h"
 #include "AngelscriptUtils/utility/TypeStringUtils.h"
 #include "AngelscriptUtils/wrapper/WrappedScriptContext.h"
@@ -12,7 +10,7 @@ int LoggingScriptContext::Execute()
 
 	if (result != asEXECUTION_FINISHED)
 	{
-		const auto szFunctionName = FormatFunctionName(*m_Context.GetFunction());
+		const auto functionName = FormatFunctionName(*m_Context.GetFunction());
 
 		switch (result)
 		{
@@ -21,7 +19,7 @@ int LoggingScriptContext::Execute()
 			//Suspended execution is an error if the user wants it to be.
 			if (m_SuspendIsError)
 			{
-				m_Logger->error("Script execution unexpectedly suspended while executing function \"{}\"", szFunctionName);
+				m_Logger->error("Script execution unexpectedly suspended while executing function \"{}\"", functionName);
 
 				LogCurrentFunction("Suspended");
 			}
@@ -31,13 +29,13 @@ int LoggingScriptContext::Execute()
 
 		case asCONTEXT_NOT_PREPARED:
 		{
-			m_Logger->error("Context not prepared to execute function \"{}\"", szFunctionName);
+			m_Logger->error("Context not prepared to execute function \"{}\"", functionName);
 			break;
 		}
 
 		case asEXECUTION_ABORTED:
 		{
-			m_Logger->error("Script execution aborted while executing function \"{}\"", szFunctionName);
+			m_Logger->error("Script execution aborted while executing function \"{}\"", functionName);
 
 			LogCurrentFunction("Aborted");
 
@@ -54,7 +52,7 @@ int LoggingScriptContext::Execute()
 
 			m_Logger->warn(
 				"Exception occurred while executing function \"{}\"\nFunction \"{}\" at line {}, column {} in section \"{}\":\n{}",
-				szFunctionName, exceptionFunction, info.line, info.column, info.section, m_Context.GetExceptionString()
+				functionName, exceptionFunction, info.line, info.column, info.section, m_Context.GetExceptionString()
 			);
 
 			break;
@@ -67,7 +65,7 @@ int LoggingScriptContext::Execute()
 		case asEXECUTION_ACTIVE:
 		case asEXECUTION_ERROR:
 		{
-			m_Logger->error("Unexpected context state \"{}\" encountered while executing function \"{}\"", result, szFunctionName);
+			m_Logger->error("Unexpected context state \"{}\" encountered while executing function \"{}\"", result, functionName);
 			break;
 		}
 
@@ -75,7 +73,7 @@ int LoggingScriptContext::Execute()
 		default:
 		case asERROR:
 		{
-			m_Logger->error("Unknown error \"{}\" occurred while executing function \"{}\"\n", result, szFunctionName);
+			m_Logger->error("Unknown error \"{}\" occurred while executing function \"{}\"\n", result, functionName);
 			break;
 		}
 		}
@@ -84,11 +82,8 @@ int LoggingScriptContext::Execute()
 	return result;
 }
 
-void LoggingScriptContext::LogCurrentFunction(const char* const action)
+void LoggingScriptContext::LogCurrentFunction(const std::string_view action)
 {
-	assert(action);
-	assert(*action);
-
 	asutils::LocationInfo info;
 
 	asutils::GetCallerInfo(m_Context, info);

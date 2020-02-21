@@ -411,6 +411,8 @@ public:
 	FunctionExecutor(const FunctionExecutor&) = delete;
 	FunctionExecutor& operator=(const FunctionExecutor&) = delete;
 
+	asIScriptContext& GetContext() { return m_Context; }
+
 	CallableGlobalFunction Global(asIScriptFunction& function)
 	{
 		if (function.GetObjectType())

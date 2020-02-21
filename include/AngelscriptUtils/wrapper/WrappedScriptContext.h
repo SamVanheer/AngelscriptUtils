@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 
 #include <angelscript.h>
 
@@ -152,7 +153,7 @@ public:
 	int Execute() override;
 
 private:
-	void LogCurrentFunction(const char* const action);
+	void LogCurrentFunction(const std::string_view action);
 
 private:
 	const std::shared_ptr<spdlog::logger> m_Logger;

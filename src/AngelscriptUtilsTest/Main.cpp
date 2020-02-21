@@ -81,6 +81,13 @@ void Print(const std::string& szString)
 	std::cout << szString;
 }
 
+void SuspendTest()
+{
+	auto context = asGetActiveContext();
+
+	context->Suspend();
+}
+
 int NSTest()
 {
 	return 0;
@@ -314,6 +321,8 @@ private:
 
 		//Printing function.
 		engine.RegisterGlobalFunction("void Print(const string& in szString)", asFUNCTION(Print), asCALL_CDECL);
+
+		engine.RegisterGlobalFunction("void SuspendTest()", asFUNCTION(SuspendTest), asCALL_CDECL);
 
 		engine.SetDefaultNamespace("NS");
 
@@ -550,6 +559,19 @@ int main(int, char* [])
 			{
 				std::cout << "Triggering null pointer exception in object member function" << std::endl;
 				asutils::NativeCall(*function, *context);
+			}
+
+			if (auto function = module.GetFunctionByName("TestSuspendCall"))
+			{
+				std::cout << "Calling TestSuspendCall" << std::endl;
+
+				asutils::FunctionExecutor executor{*context};
+
+				executor.Global(*function).NativeCall();
+
+				const auto resumeResult = executor.GetContext().Execute();
+
+				std::cout << "Resumed execution: " << ((resumeResult >= 0) ? "success" : "failure") << std::endl;
 			}
 
 			{

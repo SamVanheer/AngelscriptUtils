@@ -275,3 +275,12 @@ void TemplatedCallTest(int& out foo, int enumValue, MyEvent@ event, const string
 	
 	Print("Value of foo is: " + formatInt(foo) + ", Text is: " + text + "\n");
 }
+
+void TestSuspendCall()
+{
+	Print("Calling SuspendTest()...\n");
+	
+	SuspendTest();
+	
+	Print("Resumed execution\n");
+}

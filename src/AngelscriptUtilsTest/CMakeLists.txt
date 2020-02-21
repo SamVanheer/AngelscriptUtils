@@ -45,20 +45,10 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/.." FILES ${SOURCE_FILES})
 
 # Indicate which libraries to include during the link process.
 target_link_libraries(AngelscriptUtilsTest
-	AngelscriptUtils)
+	PRIVATE
+		AngelscriptUtils)
 	
 configure_file(
 	"${CMAKE_CURRENT_SOURCE_DIR}/resources/scripts/test.as"
 	"${CMAKE_CURRENT_BINARY_DIR}/resources/scripts/test.as"
 	COPYONLY)
-
-#CMake places libraries in /Debug or /Release on Windows, so explicitly set the paths for both.
-#On Linux, it uses LIBRARY_OUTPUT_DIRECTORY
-set_target_properties(AngelscriptUtilsTest PROPERTIES
-	RUNTIME_OUTPUT_DIRECTORY "${OUTPUT_DIR}"
-	RUNTIME_OUTPUT_DIRECTORY_DEBUG "${OUTPUT_DIR}"
-	RUNTIME_OUTPUT_DIRECTORY_RELEASE "${OUTPUT_DIR}"
-	RUNTIME_OUTPUT_MINSIZEREL "${OUTPUT_DIR}"
-	RUNTIME_OUTPUT_RELWITHDEBINFO "${OUTPUT_DIR}")
-
-install(TARGETS AngelscriptUtilsTest DESTINATION bin)

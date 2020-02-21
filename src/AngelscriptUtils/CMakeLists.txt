@@ -23,8 +23,9 @@ target_include_directories(AngelscriptUtils PUBLIC
 	"$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
 target_link_libraries(AngelscriptUtils
-	Angelscript::angelscript
-	spdlog::spdlog)
+	PUBLIC
+		Angelscript::angelscript
+		spdlog::spdlog)
 
 target_compile_options(AngelscriptUtils PRIVATE
 	#All warnings.
@@ -84,7 +85,7 @@ configure_file(cmake/AngelscriptUtilsConfig.cmake
 	"${CMAKE_CURRENT_BINARY_DIR}/AngelscriptUtils/AngelscriptUtilsConfig.cmake"
 	COPYONLY)
 
-set( ConfigPackageLocation lib/cmake/AngelscriptUtils)
+set(ConfigPackageLocation lib/cmake/AngelscriptUtils)
 
 install(EXPORT AngelscriptUtilsTargets
 	FILE AngelscriptUtilsTargets.cmake

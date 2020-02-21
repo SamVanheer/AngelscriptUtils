@@ -1,12 +1,7 @@
-#############################################################
-#                                                           #
-#   AngelscriptUtils CMake build file                       #
-#                                                           #
-#############################################################
 cmake_minimum_required(VERSION 3.16)
 
 # Source additional modules from the "cmake" directory
-list( APPEND CMAKE_MODULE_PATH
+list(APPEND CMAKE_MODULE_PATH
 	"${CMAKE_CURRENT_LIST_DIR}/cmake")
 
 include(PDBUtils)
@@ -30,11 +25,9 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 #Debug builds should have a distinct name.
-if(NOT CMAKE_DEBUG_POSTFIX)
+if (NOT CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX d)
 endif()
-
-set(OUTPUT_DIR "${CMAKE_SOURCE_DIR}/test" CACHE PATH "Output directory for binaries")
 
 #include the subdirectory containing our libs
 add_subdirectory(src)

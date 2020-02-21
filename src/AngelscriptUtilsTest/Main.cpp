@@ -152,10 +152,10 @@ void CleanupModuleUserData(asIScriptModule* module)
 /**
 *	@brief Builder for the test script
 */
-class CASTestModuleBuilder
+class TestModuleBuilder
 {
 public:
-	CASTestModuleBuilder(const std::string& szDecl)
+	TestModuleBuilder(const std::string& szDecl)
 		: m_szDecl(szDecl)
 	{
 	}
@@ -165,7 +165,7 @@ public:
 		//By using a handle this can be changed, but since there are no other instances, it can only be made null.
 		//TODO: figure out a better way.
 		m_GlobalVariables.Add("ScriptScheduler@", "Scheduler",
-			std::bind(&CASTestModuleBuilder::SetScheduler, this, std::placeholders::_1));
+			std::bind(&TestModuleBuilder::SetScheduler, this, std::placeholders::_1));
 
 		const auto globalsSection = m_GlobalVariables.GetDeclarationsAsSection();
 
@@ -203,7 +203,7 @@ public:
 
 		auto module = builder.GetModule();
 
-		std::unique_ptr<asIScriptModule, decltype(&CASTestModuleBuilder::DiscardModule)> deleter(module, &CASTestModuleBuilder::DiscardModule);
+		std::unique_ptr<asIScriptModule, decltype(&TestModuleBuilder::DiscardModule)> deleter(module, &TestModuleBuilder::DiscardModule);
 
 		module->SetAccessMask(accessMask);
 
@@ -241,18 +241,18 @@ private:
 	asutils::GlobalVariablesList m_GlobalVariables;
 };
 
-class CASTestInitializer
+class TestInitializer
 {
 public:
-	CASTestInitializer()
-		: m_Engine(nullptr, &CASTestInitializer::ShutdownAndReleaseEngine)
+	TestInitializer()
+		: m_Engine(nullptr, &TestInitializer::ShutdownAndReleaseEngine)
 	{
 		m_Logger = CreateLogger();
 
 		spdlog::register_logger(m_Logger);
 	}
 
-	~CASTestInitializer()
+	~TestInitializer()
 	{
 		spdlog::drop(m_Logger->name());
 	}
@@ -276,9 +276,9 @@ public:
 			return false;
 		}
 
-		m_Engine->SetMessageCallback(asFUNCTION(&CASTestInitializer::TestMessageCallback), nullptr, asCALL_CDECL);
+		m_Engine->SetMessageCallback(asFUNCTION(&TestInitializer::TestMessageCallback), nullptr, asCALL_CDECL);
 
-		m_Engine->SetContextCallbacks(&CASTestInitializer::CreateScriptContext, &CASTestInitializer::DestroyScriptContext, this);
+		m_Engine->SetContextCallbacks(&TestInitializer::CreateScriptContext, &TestInitializer::DestroyScriptContext, this);
 
 		m_Engine->SetModuleUserDataCleanupCallback(&CleanupModuleUserData, MODULE_USER_DATA_ID);
 
@@ -359,7 +359,7 @@ private:
 		auto context = engine->CreateContext();
 
 		//TODO: add test to see if suspending will log an error.
-		auto wrapper = new asutils::LoggingScriptContext(*context, reinterpret_cast<CASTestInitializer*>(initializer)->m_Logger, true);
+		auto wrapper = new asutils::LoggingScriptContext(*context, reinterpret_cast<TestInitializer*>(initializer)->m_Logger, true);
 
 		context->Release();
 
@@ -378,20 +378,20 @@ private:
 private:
 	std::shared_ptr<spdlog::logger> m_Logger;
 
-	std::unique_ptr<asIScriptEngine, decltype(&CASTestInitializer::ShutdownAndReleaseEngine)> m_Engine;
+	std::unique_ptr<asIScriptEngine, decltype(&TestInitializer::ShutdownAndReleaseEngine)> m_Engine;
 
 	std::unique_ptr<asutils::EventSystem> m_EventSystem;
 
 private:
-	CASTestInitializer(const CASTestInitializer&) = delete;
-	CASTestInitializer& operator=(const CASTestInitializer&) = delete;
+	TestInitializer(const TestInitializer&) = delete;
+	TestInitializer& operator=(const TestInitializer&) = delete;
 };
 
 int main(int, char* [])
 {
 	std::cout << "Hello World!" << std::endl;
 
-	if (CASTestInitializer initializer; initializer.Initialize())
+	if (TestInitializer initializer; initializer.Initialize())
 	{
 		auto& engine = initializer.GetEngine();
 
@@ -410,7 +410,7 @@ int main(int, char* [])
 		const std::string szDecl{};
 
 		//Make a map script.
-		CASTestModuleBuilder builder(szDecl);
+		TestModuleBuilder builder(szDecl);
 
 		auto mapModule = builder.Build(engine, "MapScript", ModuleAccessMask::MAPSCRIPT);
 

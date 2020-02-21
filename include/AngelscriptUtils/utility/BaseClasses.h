@@ -162,12 +162,12 @@ private:
 /**
 *	@brief Base class for garbage collected classes
 */
-typedef GarbageCollectedClass<ReferenceCountedClass> CASGCRefCountedBaseClass;
+typedef GarbageCollectedClass<ReferenceCountedClass> GarbageCollectedReferenceCountedClass;
 
 /**
 *	@brief Base class for thread-safe garbage collected classes
 */
-typedef GarbageCollectedClass<AtomicReferenceCountedClass> CASGCAtomicRefCountedBaseClass;
+typedef GarbageCollectedClass<AtomicReferenceCountedClass> GarbageCollectedAtomicReferenceCountedClass;
 
 /**
 *	@brief Registers a ref counted class's ref counting behaviors

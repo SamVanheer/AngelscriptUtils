@@ -1,4 +1,4 @@
-add_executable(AngelscriptUtilsTest ${PREP_SRCS})
+add_executable(AngelscriptUtilsTest)
 
 target_sources(AngelscriptUtilsTest PRIVATE
 	ASCBaseEntity.h

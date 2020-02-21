@@ -17,11 +17,6 @@ target_sources(AngelscriptUtilsTest PRIVATE
 	add_on/scriptstdstring/scriptstdstring.cpp
 	add_on/scriptstdstring/scriptstdstring_utils.cpp
 	add_on/scriptstdstring/scriptstdstring.h)
-	
-set_target_properties(AngelscriptUtilsTest
-	PROPERTIES
-		CXX_STANDARD 17
-		CXX_STANDARD_REQUIRED ON)
 
 set_target_properties(AngelscriptUtilsTest PROPERTIES MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>${MSVC_RUNTIME_SUFFIX}")
 

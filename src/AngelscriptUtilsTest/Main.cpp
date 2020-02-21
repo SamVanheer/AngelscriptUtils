@@ -655,6 +655,10 @@ int main(int, char* [])
 			userData->PreDiscardCleanup();
 			mapModule->Discard();
 		}
+		else
+		{
+			std::cout << "Could not load test script" << std::endl;
+		}
 
 		//Initializer goes out of scope here and frees all resources automatically
 	}

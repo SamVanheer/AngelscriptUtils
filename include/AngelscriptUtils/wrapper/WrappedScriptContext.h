@@ -115,14 +115,22 @@ public:
 	}
 
 	int                GetVarCount(asUINT stackLevel = 0) override { return m_Context.GetVarCount(stackLevel); }
-	const char* GetVarName(asUINT varIndex, asUINT stackLevel = 0) override { return m_Context.GetVarName(varIndex, stackLevel); }
+
+	int                GetVar(asUINT varIndex, asUINT stackLevel, const char** name, int* typeId = 0, asETypeModifiers* typeModifiers = 0, bool* isVarOnHeap = 0, int* stackOffset = 0) override
+	{
+		return m_Context.GetVar(varIndex, stackLevel, name, typeId, typeModifiers, isVarOnHeap, stackOffset);
+	}
+
 	const char* GetVarDeclaration(asUINT varIndex, asUINT stackLevel = 0, bool includeNamespace = false) override
 	{
 		return m_Context.GetVarDeclaration(varIndex, stackLevel, includeNamespace);
 	}
 
-	int                GetVarTypeId(asUINT varIndex, asUINT stackLevel = 0) override { return m_Context.GetVarTypeId(varIndex, stackLevel); }
-	void* GetAddressOfVar(asUINT varIndex, asUINT stackLevel = 0) override { return m_Context.GetAddressOfVar(varIndex, stackLevel); }
+	void* GetAddressOfVar(asUINT varIndex, asUINT stackLevel = 0, bool dontDereference = false, bool returnAddressOfUnitializedObjects = false) override
+	{
+		return m_Context.GetAddressOfVar(varIndex, stackLevel, dontDereference, returnAddressOfUnitializedObjects);
+	}
+
 	bool               IsVarInScope(asUINT varIndex, asUINT stackLevel = 0) override { return m_Context.IsVarInScope(varIndex, stackLevel); }
 	int                GetThisTypeId(asUINT stackLevel = 0) override { return m_Context.GetThisTypeId(stackLevel); }
 	void* GetThisPointer(asUINT stackLevel = 0) override { return m_Context.GetThisPointer(stackLevel); }
@@ -131,6 +139,34 @@ public:
 	// User data
 	virtual void* SetUserData(void* data, asPWORD type = 0) override { return m_Context.SetUserData(data, type);  }
 	virtual void* GetUserData(asPWORD type = 0) const override { return m_Context.GetUserData(type); }
+
+	// Serialization
+	int StartDeserialization() override { return m_Context.StartDeserialization(); }
+	int FinishDeserialization() override { return m_Context.FinishDeserialization(); }
+	int PushFunction(asIScriptFunction* func, void* object) override { return m_Context.PushFunction(func, object); }
+
+	int GetStateRegisters(asUINT stackLevel, asIScriptFunction** callingSystemFunction, asIScriptFunction** initialFunction, asDWORD* origStackPointer, asDWORD* argumentsSize, asQWORD* valueRegister, void** objectRegister, asITypeInfo** objectTypeRegister) override
+	{
+		return m_Context.GetStateRegisters(stackLevel, callingSystemFunction, initialFunction, origStackPointer, argumentsSize, valueRegister, objectRegister, objectTypeRegister);
+	}
+	
+	int GetCallStateRegisters(asUINT stackLevel, asDWORD* stackFramePointer, asIScriptFunction** currentFunction, asDWORD* programPointer, asDWORD* stackPointer, asDWORD* stackIndex) override
+	{
+		return m_Context.GetCallStateRegisters(stackLevel, stackFramePointer, currentFunction, programPointer, stackPointer, stackIndex);
+	}
+	
+	int SetStateRegisters(asUINT stackLevel, asIScriptFunction* callingSystemFunction, asIScriptFunction* initialFunction, asDWORD origStackPointer, asDWORD argumentsSize, asQWORD valueRegister, void* objectRegister, asITypeInfo* objectTypeRegister) override
+	{
+		return m_Context.SetStateRegisters(stackLevel, callingSystemFunction, initialFunction, origStackPointer, argumentsSize, valueRegister, objectRegister, objectTypeRegister);
+	}
+	
+	int SetCallStateRegisters(asUINT stackLevel, asDWORD stackFramePointer, asIScriptFunction* currentFunction, asDWORD programPointer, asDWORD stackPointer, asDWORD stackIndex) override
+	{
+		return m_Context.SetCallStateRegisters(stackLevel, stackFramePointer, currentFunction, programPointer, stackPointer, stackIndex);
+	}
+
+	int GetArgsOnStackCount(asUINT stackLevel) override { return m_Context.GetArgsOnStackCount(stackLevel); }
+	int GetArgOnStack(asUINT stackLevel, asUINT arg, int* typeId, asUINT* flags, void** address) override { return m_Context.GetArgOnStack(stackLevel, arg, typeId, flags, address); }
 
 protected:
 	asIScriptContext& m_Context;

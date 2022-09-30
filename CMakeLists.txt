@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
+set(CMAKE_TOOLCHAIN_FILE ${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake)
+
 # Source additional modules from the "cmake" directory
 list(APPEND CMAKE_MODULE_PATH
 	"${CMAKE_CURRENT_LIST_DIR}/cmake")

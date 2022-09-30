@@ -5,7 +5,7 @@ set(PROJECT_VERSION ${ANGELSCRIPTUTILS_VERSION_MAJOR}.${ANGELSCRIPTUTILS_VERSION
 
 find_package(Threads REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
-find_package(Angelscript CONFIG 2.34.0 REQUIRED)
+find_package(Angelscript CONFIG 2.36.0 REQUIRED)
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 

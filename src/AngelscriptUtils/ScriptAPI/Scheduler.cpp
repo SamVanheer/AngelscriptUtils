@@ -1,40 +1,11 @@
 #include <algorithm>
 #include <iterator>
-#include <limits>
-#include <string>
-
-#include "AngelscriptUtils/execution/Execution.h"
 
 #include "AngelscriptUtils/ScriptAPI/Scheduler.h"
-
 #include "AngelscriptUtils/utility/ContextUtils.h"
-#include "AngelscriptUtils/utility/Objects.h"
-#include "AngelscriptUtils/utility/RegistrationUtils.h"
-#include "AngelscriptUtils/utility/TypeInfo.h"
 
 namespace asutils
 {
-void Scheduler::ClearTimer(TimerID id)
-{
-	if (m_ExecutingFunctions)
-	{
-		//Delay until functios have finished executing
-		m_FunctionsToRemove.emplace_back(id);
-		return;
-	}
-
-	auto end = m_Functions.end();
-
-	for (auto it = m_Functions.begin(); it != end; ++it)
-	{
-		if ((*it)->m_ID == id)
-		{
-			m_Functions.erase(it);
-			break;
-		}
-	}
-}
-
 void Scheduler::Think(const float currentTime, asIScriptContext& context)
 {
 	m_ExecutingFunctions = true;
@@ -73,21 +44,111 @@ void Scheduler::Think(const float currentTime, asIScriptContext& context)
 
 	//Remove functions flagged for removal
 	//This can include functions that were added from m_FunctionsToAdd, so perform this operation after adding those
-	if (!m_FunctionsToRemove.empty())
+	for (auto& function : m_FunctionsToRemove)
 	{
-		for (auto id : m_FunctionsToRemove)
+		ClearCallbackCore(function.Get());
+	}
+
+	m_FunctionsToRemove.clear();
+}
+
+void Scheduler::AdjustExecutionTimes(float adjustAmount)
+{
+	for (auto& function : m_Functions)
+	{
+		function->m_ExecutionTime += adjustAmount;
+	}
+}
+
+void Scheduler::RemoveFunctionsOfModule(asIScriptModule& module)
+{
+	m_Functions.erase(std::remove_if(m_Functions.begin(), m_Functions.end(), [&](const auto& candidate)
+		{ return candidate->m_Function->GetModule() == &module; }), m_Functions.end());
+}
+
+asIScriptFunction* Scheduler::Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount)
+{
+	if (!callback)
+	{
+		WriteError("Null callback passed");
+		return nullptr;
+	}
+
+	ReferencePointer function{callback, true};
+
+	{
+		auto context = asGetActiveContext();
+
+		auto caller = context->GetFunction();
+
+		auto actualFunction = function.Get();
+
+		if (auto delegate = actualFunction->GetDelegateFunction(); delegate)
 		{
-			ClearTimer(id);
+			actualFunction = delegate;
 		}
 
-		m_FunctionsToRemove.clear();
+		if (caller->GetModule() != actualFunction->GetModule())
+		{
+			WriteError("The given function must be part of the same script as the function that is scheduling the timer");
+			return nullptr;
+		}
+	}
+
+	if (repeatCount == 0 || repeatCount < REPEAT_INFINITE_TIMES)
+	{
+		WriteError("Repeat count must be larger than zero or REPEAT_INFINITE_TIMES");
+		return nullptr;
+	}
+
+	// Allow 0 to execute a function every frame
+	if (repeatInterval < 0)
+	{
+		WriteError("Repeat interval must be a positive value");
+		return nullptr;
+	}
+
+	auto& list = m_ExecutingFunctions ? m_FunctionsToAdd : m_Functions;
+
+	list.push_back(std::make_unique<ScheduledFunction>(
+		ReferencePointer<asIScriptFunction>(function), m_CurrentTime + repeatInterval, repeatInterval, repeatCount));
+
+	// Caller gets a strong reference.
+	return function.Release();
+}
+
+void Scheduler::ClearCallback(asIScriptFunction* callback)
+{
+	ReferencePointer<asIScriptFunction> cleanup{callback, true};
+
+	if (m_ExecutingFunctions)
+	{
+		//Delay until functions have finished executing
+		m_FunctionsToRemove.emplace_back(std::move(cleanup));
+		return;
+	}
+
+	ClearCallbackCore(callback);
+}
+
+void Scheduler::ClearCallbackCore(asIScriptFunction* callback)
+{
+	if (auto it = std::find_if(m_Functions.begin(), m_Functions.end(), [&](const auto& candidate)
+		{ return candidate->m_Function.Get() == callback; }); it != m_Functions.end())
+	{
+		m_Functions.erase(it);
 	}
 }
 
 bool Scheduler::ExecuteFunction(ScheduledFunction& function, asIScriptContext& context)
 {
 	//Call will log any errors if the context has logging enabled
-	PackedCall(*function.m_Function, context, function.m_Parameters);
+	auto result = context.Prepare(function.m_Function.Get());
+
+	if (result >= 0)
+	{
+		result = context.Execute();
+	}
 
 	if (function.m_RepeatCount != REPEAT_INFINITE_TIMES)
 	{
@@ -106,210 +167,31 @@ bool Scheduler::ExecuteFunction(ScheduledFunction& function, asIScriptContext& c
 	return shouldRemove;
 }
 
-void Scheduler::AdjustExecutionTimes(float adjustAmount)
-{
-	for (auto& function : m_Functions)
-	{
-		function->m_ExecutionTime += adjustAmount;
-	}
-}
-
-void Scheduler::RemoveFunctionsOfModule(asIScriptModule& module)
-{
-	for (auto it = m_Functions.begin(); it != m_Functions.end();)
-	{
-		if ((*it)->m_Function->GetModule() == &module)
-		{
-			it = m_Functions.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
-}
-
-void Scheduler::SetTimeout(asIScriptGeneric* parameters)
-{
-	auto& scheduler = *reinterpret_cast<Scheduler*>(parameters->GetObject());
-
-	scheduler.TrySetInterval(*parameters, ScheduleType::Timeout);
-}
-
-void Scheduler::SetInterval(asIScriptGeneric* parameters)
-{
-	auto& scheduler = *reinterpret_cast<Scheduler*>(parameters->GetObject());
-
-	scheduler.TrySetInterval(*parameters, ScheduleType::Interval);
-}
-
-void Scheduler::SetRepeating(asIScriptGeneric* parameters)
-{
-	auto& scheduler = *reinterpret_cast<Scheduler*>(parameters->GetObject());
-
-	scheduler.TrySetInterval(*parameters, ScheduleType::Repeating);
-}
-
-void Scheduler::TrySetInterval(asIScriptGeneric& parameters, const ScheduleType scheduleType)
-{
-	const auto potentiallyAFunction = parameters.GetArgAddress(0);
-	const auto typeId = parameters.GetArgTypeId(0);
-
-	const auto repeatInterval = parameters.GetArgFloat(1);
-
-	int repeatCount;
-
-	switch (scheduleType)
-	{
-	case ScheduleType::Timeout:
-		//Repeat once if timeout
-		repeatCount = 1;
-		break;
-
-	case ScheduleType::Interval:
-		repeatCount = static_cast<int>(parameters.GetArgDWord(2));
-		break;
-
-		//Default case should never be hit but the compiler doesn't agree
-	default:
-	case ScheduleType::Repeating:
-		//Repeat until caller clears timer
-		repeatCount = REPEAT_INFINITE_TIMES;
-		break;
-	}
-
-	const asUINT startIndex = scheduleType == ScheduleType::Interval ? 3 : 2;
-
-	const auto timerID = TrySchedule(potentiallyAFunction, typeId, parameters, startIndex, repeatInterval, repeatCount);
-
-	parameters.SetReturnDWord(timerID);
-}
-
-Scheduler::TimerID Scheduler::TrySchedule(void* potentiallyAFunction, int typeId,
-	asIScriptGeneric& parameters, asUINT startIndex, float repeatInterval, int repeatCount)
-{
-	auto& engine = *parameters.GetEngine();
-
-	auto function = TryGetFunctionFromVariableParameter(engine, potentiallyAFunction, typeId);
-
-	if (!function)
-	{
-		WriteError("Function parameter must be a function or function delegate");
-		return INVALID_ID;
-	}
-
-	{
-		auto context = asGetActiveContext();
-
-		auto caller = context->GetFunction(context->GetCallstackSize() - 1);
-
-		if (caller->GetModule() != function->GetModule())
-		{
-			WriteError("The given function must be part of the same script as the function that is scheduling the timer");
-			return INVALID_ID;
-		}
-	}
-
-	//This is not off by one; if there are no variadic parameters then startIndex will be equal to the parameter count
-	if (startIndex > static_cast<asUINT>(parameters.GetArgCount()))
-	{
-		WriteError("Application error: starting index must be in range");
-		return INVALID_ID;
-	}
-
-	const asUINT parameterCount = parameters.GetArgCount() - startIndex;
-
-	//Validate the parameters
-	if (function->GetParamCount() != parameterCount)
-	{
-		WriteError("Parameter count must match the target function");
-		return INVALID_ID;
-	}
-
-	//Validate repeat settings
-	//Allow 0 to execute a function every frame
-	if (repeatInterval < 0)
-	{
-		WriteError("Repeat interval must be a positive value");
-		return INVALID_ID;
-	}
-
-	if (repeatCount <= 0 && repeatCount != REPEAT_INFINITE_TIMES)
-	{
-		WriteError("Repeat count must be larger than zero or REPEAT_INFINITE_TIMES");
-		return INVALID_ID;
-	}
-
-	//Construct parameter list and convert types to match exactly the target function
-	//This is more efficient than converting on execution
-	ScriptParameters parameterList;
-
-	try
-	{
-		parameterList = CreateGenericParameterList(parameters, startIndex);
-	}
-	catch (const ScriptParameterErrorException& e)
-	{
-		WriteError((std::string{"Application error: Error creating parameter list: "} + e.what()).c_str());
-		return INVALID_ID;
-	}
-
-	return Schedule(*function, std::move(parameterList), m_CurrentTime + repeatInterval, repeatInterval, repeatCount);
-}
-
-Scheduler::TimerID Scheduler::Schedule(asIScriptFunction& function, ScriptParameters&& parameters, float executionTime, float repeatInterval, int repeatCount)
-{
-	const auto timerID = m_NextID++;
-
-	//Unlikely to happen but will occur on long running scripts
-	if (m_NextID == std::numeric_limits<TimerID>::max())
-	{
-		m_NextID = 1;
-	}
-
-	auto scheduled = std::make_unique<ScheduledFunction>(timerID,
-		ReferencePointer<asIScriptFunction>(&function), std::move(parameters), executionTime, repeatInterval, repeatCount);
-
-	if (m_ExecutingFunctions)
-	{
-		m_FunctionsToAdd.emplace_back(std::move(scheduled));
-	}
-	else
-	{
-		m_Functions.emplace_back(std::move(scheduled));
-	}
-
-	return timerID;
-}
-
 void Scheduler::WriteError(const char* message)
 {
-	auto context = asGetActiveContext();
-
-	auto& engine = *context->GetEngine();
+	const auto context = asGetActiveContext();
+	const auto engine = context->GetEngine();
 
 	LocationInfo info;
-
 	GetCallerInfo(*context, info);
 
-	engine.WriteMessage(info.section.c_str(), info.line, info.column, asMSGTYPE_ERROR, message);
+	engine->WriteMessage(info.section.c_str(), info.line, info.column, asMSGTYPE_ERROR, message);
 }
 
 void RegisterSchedulerAPI(asIScriptEngine& engine)
 {
-	const auto className = "ScriptScheduler";
+	engine.RegisterFuncdef("void ScheduledCallback()");
 
-	const size_t MaxVarArgs = 8;
+	const auto className = "ScriptScheduler";
 
 	engine.RegisterObjectType(className, 0, asOBJ_REF | asOBJ_NOCOUNT);
 
-	//Use a typedef for this to make it possible to change the underlying type to 64 bit if it's ever needed
-	engine.RegisterTypedef("TimerID", "uint32");
+	engine.RegisterObjectProperty(className, "const int REPEAT_INFINITE_TIMES", asOFFSET(Scheduler, REPEAT_INFINITE_TIMES));
 
-	RegisterVariadicMethod(engine, className, "TimerID", "SetTimeout", "?& in function, float delay", 0, MaxVarArgs, asFUNCTION(Scheduler::SetTimeout));
-	RegisterVariadicMethod(engine, className, "TimerID", "SetInterval", "?& in function, float repeatInterval, int repeatCount", 0, MaxVarArgs, asFUNCTION(Scheduler::SetInterval));
-	RegisterVariadicMethod(engine, className, "TimerID", "SetRepeating", "?& in function, float repeatInterval", 0, MaxVarArgs, asFUNCTION(Scheduler::SetRepeating));
+	engine.RegisterObjectMethod(className,
+		"ScheduledCallback@ Schedule(ScheduledCallback@ callback, float repeatInterval, int repeatCount = 1)",
+		asMETHOD(Scheduler, Schedule), asCALL_THISCALL);
 
-	engine.RegisterObjectMethod(className, "void ClearTimer(TimerID id)", asMETHOD(Scheduler, ClearTimer), asCALL_THISCALL);
+	engine.RegisterObjectMethod(className, "void ClearCallback(ScheduledCallback@ callback)", asMETHOD(Scheduler, ClearCallback), asCALL_THISCALL);
 }
 }

@@ -317,6 +317,13 @@ public:
         SetPointer(m_Object, object, transferOwnership);
     }
 
+    T* Release()
+    {
+        auto pointer = m_Object;
+        m_Object = nullptr;
+        return pointer;
+    }
+
     void Swap(ReferencePointer& other)
     {
         std::swap(m_Object, other.m_Object);

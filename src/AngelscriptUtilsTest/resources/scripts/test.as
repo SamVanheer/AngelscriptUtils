@@ -41,9 +41,14 @@ void MainFunc(MyEvent@ args)
 	Print( "hook called\n" );
 }
 
-void Func( const string& in szString )
+class ScheduledFunc
 {
-	Print( "Scheduler callback: " + szString + "\n" );
+	string szString;
+	
+	void Func()
+	{
+		Print( "Scheduler callback: " + szString + "\n" );
+	}
 }
 
 void NoArgs()
@@ -229,7 +234,9 @@ int main( const string& in szString )
 	Event<MyEvent>(@g_EventSystem).Subscribe(@MainFunc);
 	Event<MyEvent>(@g_EventSystem).Subscribe(@MyEventHandler(Foo().Func));
 	
-	Scheduler.SetTimeout( @Func, 5, "what's going on" );
+	ScheduledFunc func;
+	func.szString = "what's going on";
+	Scheduler.Schedule( ScheduledCallback(@func.Func), 5 );
 	
 	//PrintReflection();
 	

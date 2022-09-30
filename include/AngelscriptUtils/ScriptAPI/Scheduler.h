@@ -1,12 +1,10 @@
 #pragma once
 
-#include <cstdint>
 #include <memory>
 #include <vector>
 
 #include <angelscript.h>
 
-#include "AngelscriptUtils/execution/Packing.h"
 #include "AngelscriptUtils/utility/SmartPointers.h"
 
 namespace asutils
@@ -19,30 +17,18 @@ namespace asutils
 */
 class Scheduler final
 {
+public:
+	const int REPEAT_INFINITE_TIMES = -1;
+
 private:
-	static constexpr int REPEAT_INFINITE_TIMES = -1;
-
-	static constexpr int32_t INVALID_ID = 0;
-
-	enum class ScheduleType
-	{
-		Timeout,
-		Interval,
-		Repeating
-	};
-
-	using TimerID = uint32_t;
-
 	/**
-*	@brief Contains all of the information to make a scheduled call
-*/
+	*	@brief Contains all of the information to make a scheduled call
+	*/
 	struct ScheduledFunction final
 	{
-		ScheduledFunction(TimerID id,
-			ReferencePointer<asIScriptFunction>&& function, ScriptParameters&& parameters, float executionTime, float repeatInterval, int repeatCount)
-			: m_ID(id)
-			, m_Function(std::move(function))
-			, m_Parameters(std::move(parameters))
+		ScheduledFunction(
+			ReferencePointer<asIScriptFunction>&& function, float executionTime, float repeatInterval, int repeatCount)
+			: m_Function(std::move(function))
 			, m_ExecutionTime(executionTime)
 			, m_RepeatInterval(repeatInterval)
 			, m_RepeatCount(repeatCount)
@@ -52,10 +38,7 @@ private:
 		ScheduledFunction(const ScheduledFunction&) = delete;
 		ScheduledFunction& operator=(const ScheduledFunction&) = delete;
 
-		const TimerID m_ID;
-
 		const ReferencePointer<asIScriptFunction> m_Function;
-		const ScriptParameters m_Parameters;
 
 		float m_ExecutionTime;
 		const float m_RepeatInterval;
@@ -77,16 +60,7 @@ public:
 		m_CurrentTime = value;
 	}
 
-	void ClearTimer(TimerID id);
-
 	void Think(const float currentTime, asIScriptContext& context);
-
-private:
-	/**
-	*	@brief Executes the given function with the given context
-	*	@return Whether the function should be removed from the list
-	*/
-	bool ExecuteFunction(ScheduledFunction& function, asIScriptContext& context);
 
 public:
 	/**
@@ -99,32 +73,23 @@ public:
 	*/
 	void RemoveFunctionsOfModule(asIScriptModule& module);
 
-	static void SetTimeout(asIScriptGeneric* parameters);
+	asIScriptFunction* Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount);
 
-	static void SetInterval(asIScriptGeneric* parameters);
-
-	static void SetRepeating(asIScriptGeneric* parameters);
+	void ClearCallback(asIScriptFunction* callback);
 
 private:
-	void TrySetInterval(asIScriptGeneric& parameters, const ScheduleType scheduleType);
+	void ClearCallbackCore(asIScriptFunction* callback);
 
 	/**
-	*	@brief If the given object is a function, tries to schedule it with the given parameters
+	*	@brief Executes the given function with the given context
+	*	@return Whether the function should be removed from the list
 	*/
-	TimerID TrySchedule(void* potentiallyAFunction, int typeId,
-		asIScriptGeneric& parameters, asUINT startIndex, float repeatInterval, int repeatCount);
-
-	/**
-	*	@brief Schedules a given function with the given parameters and time
-	*/
-	TimerID Schedule(asIScriptFunction& function, ScriptParameters&& parameters, float executionTime, float repeatInterval, int repeatCount);
+	bool ExecuteFunction(ScheduledFunction& function, asIScriptContext& context);
 
 	static void WriteError(const char* message);
 
 private:
 	std::vector<std::unique_ptr<ScheduledFunction>> m_Functions;
-
-	TimerID m_NextID = 1;
 
 	float m_CurrentTime = 0;
 
@@ -132,7 +97,7 @@ private:
 
 	std::vector<std::unique_ptr<ScheduledFunction>> m_FunctionsToAdd;
 
-	std::vector<TimerID> m_FunctionsToRemove;
+	std::vector<ReferencePointer<asIScriptFunction>> m_FunctionsToRemove;
 };
 
 /**

@@ -219,7 +219,7 @@ public:
 			return nullptr;
 		}
 
-		const auto success = builder.BuildModule() >= 0;
+		/*const auto success =*/ builder.BuildModule() /*>= 0*/;
 
 		if (!PostBuild(*module))
 		{
@@ -479,7 +479,7 @@ int main(int, char* [])
 
 						if (result)
 						{
-							const int iTypeId = function->GetReturnTypeId();
+							/*const int iTypeId = function->GetReturnTypeId();*/
 
 							ptr = result;
 						}

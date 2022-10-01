@@ -12,9 +12,6 @@ namespace asutils
 {
 /**
 *	@brief Provides a means of scheduling functions for delayed execution
-*	The functions scheduled must be part of the same module that is scheduling the function
-*	Can be used both as a module-specific scheduler and a global scheduler
-*	It is recommended to use one scheduler for each module
 */
 class Scheduler final
 {

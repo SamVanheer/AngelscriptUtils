@@ -76,25 +76,6 @@ Scheduler::ScheduledFunctionHandle Scheduler::Schedule(asIScriptFunction* callba
 
 	ReferencePointer function{callback, true};
 
-	{
-		auto context = asGetActiveContext();
-
-		auto caller = context->GetFunction();
-
-		auto actualFunction = function.Get();
-
-		if (auto delegate = actualFunction->GetDelegateFunction(); delegate)
-		{
-			actualFunction = delegate;
-		}
-
-		if (caller->GetModule() != actualFunction->GetModule())
-		{
-			WriteError("The given function must be part of the same script as the function that is scheduling the timer");
-			return {};
-		}
-	}
-
 	if (repeatCount == 0 || repeatCount < REPEAT_INFINITE_TIMES)
 	{
 		WriteError("Repeat count must be larger than zero or REPEAT_INFINITE_TIMES");

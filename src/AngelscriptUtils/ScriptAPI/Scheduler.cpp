@@ -46,7 +46,7 @@ void Scheduler::Think(const float currentTime, asIScriptContext& context)
 	//This can include functions that were added from m_FunctionsToAdd, so perform this operation after adding those
 	for (auto& function : m_FunctionsToRemove)
 	{
-		ClearCallbackCore(function.Get());
+		ClearCallbackCore(function);
 	}
 
 	m_FunctionsToRemove.clear();
@@ -66,11 +66,11 @@ void Scheduler::RemoveFunctionsOfModule(asIScriptModule& module)
 		{ return candidate->m_Function->GetModule() == &module; }), m_Functions.end());
 }
 
-asIScriptFunction* Scheduler::Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount)
+Scheduler::ScheduledFunction* Scheduler::Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount)
 {
 	if (!callback)
 	{
-		WriteError("Null callback passed");
+		WriteError("Null callback passed to Schedule");
 		return nullptr;
 	}
 
@@ -111,30 +111,33 @@ asIScriptFunction* Scheduler::Schedule(asIScriptFunction* callback, float repeat
 	auto& list = m_ExecutingFunctions ? m_FunctionsToAdd : m_Functions;
 
 	list.push_back(std::make_unique<ScheduledFunction>(
-		ReferencePointer<asIScriptFunction>(function), m_CurrentTime + repeatInterval, repeatInterval, repeatCount));
+		std::move(function), m_CurrentTime + repeatInterval, repeatInterval, repeatCount));
 
-	// Caller gets a strong reference.
-	return function.Release();
+	return list.back().get();
 }
 
-void Scheduler::ClearCallback(asIScriptFunction* callback)
+void Scheduler::ClearCallback(ScheduledFunction* function)
 {
-	ReferencePointer<asIScriptFunction> cleanup{callback, true};
+	if (!function)
+	{
+		WriteError("Null callback passed to ClearCallback");
+		return;
+	}
 
 	if (m_ExecutingFunctions)
 	{
 		//Delay until functions have finished executing
-		m_FunctionsToRemove.emplace_back(std::move(cleanup));
+		m_FunctionsToRemove.emplace_back(function);
 		return;
 	}
 
-	ClearCallbackCore(callback);
+	ClearCallbackCore(function);
 }
 
-void Scheduler::ClearCallbackCore(asIScriptFunction* callback)
+void Scheduler::ClearCallbackCore(ScheduledFunction* function)
 {
 	if (auto it = std::find_if(m_Functions.begin(), m_Functions.end(), [&](const auto& candidate)
-		{ return candidate->m_Function.Get() == callback; }); it != m_Functions.end())
+		{ return candidate.get() == function; }); it != m_Functions.end())
 	{
 		m_Functions.erase(it);
 	}
@@ -182,6 +185,8 @@ void RegisterSchedulerAPI(asIScriptEngine& engine)
 {
 	engine.RegisterFuncdef("void ScheduledCallback()");
 
+	engine.RegisterObjectType("ScheduledFunction", 0, asOBJ_REF | asOBJ_NOCOUNT);
+
 	const auto className = "ScriptScheduler";
 
 	engine.RegisterObjectType(className, 0, asOBJ_REF | asOBJ_NOCOUNT);
@@ -189,9 +194,10 @@ void RegisterSchedulerAPI(asIScriptEngine& engine)
 	engine.RegisterObjectProperty(className, "const int REPEAT_INFINITE_TIMES", asOFFSET(Scheduler, REPEAT_INFINITE_TIMES));
 
 	engine.RegisterObjectMethod(className,
-		"ScheduledCallback@ Schedule(ScheduledCallback@ callback, float repeatInterval, int repeatCount = 1)",
+		"ScheduledFunction@ Schedule(ScheduledCallback@ callback, float repeatInterval, int repeatCount = 1)",
 		asMETHOD(Scheduler, Schedule), asCALL_THISCALL);
 
-	engine.RegisterObjectMethod(className, "void ClearCallback(ScheduledCallback@ callback)", asMETHOD(Scheduler, ClearCallback), asCALL_THISCALL);
+	engine.RegisterObjectMethod(className, "void ClearCallback(ScheduledFunction@ function)",
+		asMETHOD(Scheduler, ClearCallback), asCALL_THISCALL);
 }
 }

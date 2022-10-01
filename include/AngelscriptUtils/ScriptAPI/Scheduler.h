@@ -73,12 +73,12 @@ public:
 	*/
 	void RemoveFunctionsOfModule(asIScriptModule& module);
 
-	asIScriptFunction* Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount);
+	ScheduledFunction* Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount);
 
-	void ClearCallback(asIScriptFunction* callback);
+	void ClearCallback(ScheduledFunction* function);
 
 private:
-	void ClearCallbackCore(asIScriptFunction* callback);
+	void ClearCallbackCore(ScheduledFunction* function);
 
 	/**
 	*	@brief Executes the given function with the given context
@@ -97,7 +97,7 @@ private:
 
 	std::vector<std::unique_ptr<ScheduledFunction>> m_FunctionsToAdd;
 
-	std::vector<ReferencePointer<asIScriptFunction>> m_FunctionsToRemove;
+	std::vector<ScheduledFunction*> m_FunctionsToRemove;
 };
 
 /**

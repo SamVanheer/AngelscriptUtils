@@ -240,10 +240,28 @@ int main( const string& in szString )
 	
 	ScheduledFunction sched = Scheduler.Schedule( ScheduledCallback(@func.Func), 5 );
 	
+	if (sched)
+	{
+		Print("Scheduled function handle is valid: yes\n");
+	}
+	else
+	{
+		Print("Scheduled function handle is valid: no\n");
+	}
+	
 	Scheduler.ClearCallback(sched);
 	Scheduler.ClearCallback(sched);
 	
 	sched = ScheduledFunction();
+	
+	if (sched)
+	{
+		Print("Scheduled function handle is valid: yes\n");
+	}
+	else
+	{
+		Print("Scheduled function handle is valid: no\n");
+	}
 	
 	Scheduler.ClearCallback(sched);
 	

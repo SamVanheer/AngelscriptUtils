@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <memory>
 #include <vector>
 
@@ -17,9 +18,6 @@ namespace asutils
 */
 class Scheduler final
 {
-public:
-	const int REPEAT_INFINITE_TIMES = -1;
-
 private:
 	/**
 	*	@brief Contains all of the information to make a scheduled call
@@ -40,9 +38,22 @@ private:
 
 		const ReferencePointer<asIScriptFunction> m_Function;
 
+		// Used to avoid cases where the same memory address is used for a handle.
+		// Stale handles won't be able to remove unrelated callbacks.
+		const std::chrono::system_clock::time_point m_CreationTime{std::chrono::system_clock::now()};
+
 		float m_ExecutionTime;
 		const float m_RepeatInterval;
 		int m_RepeatCount;
+	};
+
+public:
+	const int REPEAT_INFINITE_TIMES = -1;
+
+	struct ScheduledFunctionHandle
+	{
+		ScheduledFunction* Function{};
+		std::chrono::system_clock::time_point CreationTime{};
 	};
 
 public:
@@ -73,12 +84,12 @@ public:
 	*/
 	void RemoveFunctionsOfModule(asIScriptModule& module);
 
-	ScheduledFunction* Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount);
+	ScheduledFunctionHandle Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount);
 
-	void ClearCallback(ScheduledFunction* function);
+	void ClearCallback(ScheduledFunctionHandle handle);
 
 private:
-	void ClearCallbackCore(ScheduledFunction* function);
+	void ClearCallbackCore(const ScheduledFunctionHandle& handle);
 
 	/**
 	*	@brief Executes the given function with the given context
@@ -97,7 +108,7 @@ private:
 
 	std::vector<std::unique_ptr<ScheduledFunction>> m_FunctionsToAdd;
 
-	std::vector<ScheduledFunction*> m_FunctionsToRemove;
+	std::vector<ScheduledFunctionHandle> m_FunctionsToRemove;
 };
 
 /**

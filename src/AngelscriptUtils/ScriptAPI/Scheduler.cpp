@@ -66,12 +66,12 @@ void Scheduler::RemoveFunctionsOfModule(asIScriptModule& module)
 		{ return candidate->m_Function->GetModule() == &module; }), m_Functions.end());
 }
 
-Scheduler::ScheduledFunction* Scheduler::Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount)
+Scheduler::ScheduledFunctionHandle Scheduler::Schedule(asIScriptFunction* callback, float repeatInterval, int repeatCount)
 {
 	if (!callback)
 	{
 		WriteError("Null callback passed to Schedule");
-		return nullptr;
+		return {};
 	}
 
 	ReferencePointer function{callback, true};
@@ -91,21 +91,21 @@ Scheduler::ScheduledFunction* Scheduler::Schedule(asIScriptFunction* callback, f
 		if (caller->GetModule() != actualFunction->GetModule())
 		{
 			WriteError("The given function must be part of the same script as the function that is scheduling the timer");
-			return nullptr;
+			return {};
 		}
 	}
 
 	if (repeatCount == 0 || repeatCount < REPEAT_INFINITE_TIMES)
 	{
 		WriteError("Repeat count must be larger than zero or REPEAT_INFINITE_TIMES");
-		return nullptr;
+		return {};
 	}
 
 	// Allow 0 to execute a function every frame
 	if (repeatInterval < 0)
 	{
 		WriteError("Repeat interval must be a positive value");
-		return nullptr;
+		return {};
 	}
 
 	auto& list = m_ExecutingFunctions ? m_FunctionsToAdd : m_Functions;
@@ -113,33 +113,39 @@ Scheduler::ScheduledFunction* Scheduler::Schedule(asIScriptFunction* callback, f
 	list.push_back(std::make_unique<ScheduledFunction>(
 		std::move(function), m_CurrentTime + repeatInterval, repeatInterval, repeatCount));
 
-	return list.back().get();
+	auto scheduledFunction = list.back().get();
+
+	return {scheduledFunction, scheduledFunction->m_CreationTime};
 }
 
-void Scheduler::ClearCallback(ScheduledFunction* function)
+void Scheduler::ClearCallback(ScheduledFunctionHandle handle)
 {
-	if (!function)
+	if (!handle.Function)
 	{
-		WriteError("Null callback passed to ClearCallback");
+		WriteError("Null handle passed to ClearCallback");
 		return;
 	}
 
 	if (m_ExecutingFunctions)
 	{
 		//Delay until functions have finished executing
-		m_FunctionsToRemove.emplace_back(function);
+		m_FunctionsToRemove.emplace_back(handle);
 		return;
 	}
 
-	ClearCallbackCore(function);
+	ClearCallbackCore(handle);
 }
 
-void Scheduler::ClearCallbackCore(ScheduledFunction* function)
+void Scheduler::ClearCallbackCore(const ScheduledFunctionHandle& handle)
 {
 	if (auto it = std::find_if(m_Functions.begin(), m_Functions.end(), [&](const auto& candidate)
-		{ return candidate.get() == function; }); it != m_Functions.end())
+		{ return candidate.get() == handle.Function && candidate->m_CreationTime == handle.CreationTime; }); it != m_Functions.end())
 	{
 		m_Functions.erase(it);
+	}
+	else
+	{
+		WriteError("Tried to clear callback that was already cleared");
 	}
 }
 
@@ -181,11 +187,54 @@ void Scheduler::WriteError(const char* message)
 	engine->WriteMessage(info.section.c_str(), info.line, info.column, asMSGTYPE_ERROR, message);
 }
 
+static void ConstructScheduledFunctionHandle(void* memory)
+{
+	new (memory) Scheduler::ScheduledFunctionHandle();
+}
+
+static void DestructScheduledFunctionHandle(Scheduler::ScheduledFunctionHandle* handle)
+{
+	handle->~ScheduledFunctionHandle();
+}
+
+static void CopyConstructScheduledFunctionHandle(void* memory, const Scheduler::ScheduledFunctionHandle& other)
+{
+	new (memory) Scheduler::ScheduledFunctionHandle(other);
+}
+
+static bool ScheduledFunction_opImplConv(const Scheduler::ScheduledFunctionHandle* handle)
+{
+	return handle->Function != nullptr;
+}
+
+static void RegisterScheduledFunction(asIScriptEngine& engine)
+{
+	const char* const name = "ScheduledFunction";
+
+	engine.RegisterObjectType(name, sizeof(Scheduler::ScheduledFunctionHandle), asOBJ_VALUE | asGetTypeTraits<Scheduler::ScheduledFunctionHandle>());
+
+	engine.RegisterObjectBehaviour(name, asBEHAVE_CONSTRUCT, "void f()",
+		asFUNCTION(ConstructScheduledFunctionHandle), asCALL_CDECL_OBJFIRST);
+
+	engine.RegisterObjectBehaviour(name, asBEHAVE_DESTRUCT, "void f()",
+		asFUNCTION(DestructScheduledFunctionHandle), asCALL_CDECL_OBJFIRST);
+
+	engine.RegisterObjectBehaviour(name, asBEHAVE_CONSTRUCT, "void f(const ScheduledFunction& in other)",
+		asFUNCTION(CopyConstructScheduledFunctionHandle), asCALL_CDECL_OBJFIRST);
+
+	engine.RegisterObjectMethod(name, "ScheduledFunction& opAssign(const ScheduledFunction& in other)",
+		asMETHODPR(Scheduler::ScheduledFunctionHandle, operator=, (const Scheduler::ScheduledFunctionHandle&), Scheduler::ScheduledFunctionHandle&),
+		asCALL_THISCALL);
+
+	engine.RegisterObjectMethod(name, "bool opImplConv() const",
+		asFUNCTION(ScheduledFunction_opImplConv), asCALL_CDECL_OBJFIRST);
+}
+
 void RegisterSchedulerAPI(asIScriptEngine& engine)
 {
 	engine.RegisterFuncdef("void ScheduledCallback()");
 
-	engine.RegisterObjectType("ScheduledFunction", 0, asOBJ_REF | asOBJ_NOCOUNT);
+	RegisterScheduledFunction(engine);
 
 	const auto className = "ScriptScheduler";
 
@@ -194,10 +243,10 @@ void RegisterSchedulerAPI(asIScriptEngine& engine)
 	engine.RegisterObjectProperty(className, "const int REPEAT_INFINITE_TIMES", asOFFSET(Scheduler, REPEAT_INFINITE_TIMES));
 
 	engine.RegisterObjectMethod(className,
-		"ScheduledFunction@ Schedule(ScheduledCallback@ callback, float repeatInterval, int repeatCount = 1)",
+		"ScheduledFunction Schedule(ScheduledCallback@ callback, float repeatInterval, int repeatCount = 1)",
 		asMETHOD(Scheduler, Schedule), asCALL_THISCALL);
 
-	engine.RegisterObjectMethod(className, "void ClearCallback(ScheduledFunction@ function)",
+	engine.RegisterObjectMethod(className, "void ClearCallback(ScheduledFunction function)",
 		asMETHOD(Scheduler, ClearCallback), asCALL_THISCALL);
 }
 }

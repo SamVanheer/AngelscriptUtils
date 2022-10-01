@@ -238,6 +238,15 @@ int main( const string& in szString )
 	func.szString = "what's going on";
 	Scheduler.Schedule( ScheduledCallback(@func.Func), 5 );
 	
+	ScheduledFunction sched = Scheduler.Schedule( ScheduledCallback(@func.Func), 5 );
+	
+	Scheduler.ClearCallback(sched);
+	Scheduler.ClearCallback(sched);
+	
+	sched = ScheduledFunction();
+	
+	Scheduler.ClearCallback(sched);
+	
 	//PrintReflection();
 	
 	RunReflectionTests();
